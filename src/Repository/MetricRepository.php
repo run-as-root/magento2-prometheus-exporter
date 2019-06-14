@@ -88,6 +88,18 @@ class MetricRepository implements MetricRepositoryInterface
         return $object;
     }
 
+    public function getByCode(string $code): MetricInterface
+    {
+        /** @var Metric $object */
+        $object = $this->metricFactory->create();
+        $this->metricResource->load($object, $code, 'code');
+        if (!$object->getId()) {
+            throw new NoSuchEntityException(__('Metric with code "%1" does not exist.', $code));
+        }
+
+        return $object;
+    }
+
     /**
      * @param MetricInterface $object
      *

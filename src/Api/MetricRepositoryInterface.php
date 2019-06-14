@@ -13,12 +13,12 @@ use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 interface MetricRepositoryInterface
 {
     /**
-     * @param MetricInterface $license
+     * @param MetricInterface $metric
      *
      * @return MetricInterface
      * @throws CouldNotSaveException
      */
-    public function save(MetricInterface $license): MetricInterface;
+    public function save(MetricInterface $metric): MetricInterface;
 
     /**
      * @param int $id
@@ -28,15 +28,24 @@ interface MetricRepositoryInterface
      */
     public function getById(int $id): MetricInterface;
 
+
+    /**
+     * @param string $code
+     *
+     * @return MetricInterface
+     * @throws NoSuchEntityException
+     */
+    public function getByCode(string $code): MetricInterface;
+
     public function getList(SearchCriteriaInterface $criteria): SearchResultsInterface;
 
     /**
-     * @param MetricInterface $license
+     * @param MetricInterface $metric
      *
      * @return bool
      * @throws CouldNotDeleteException
      */
-    public function delete(MetricInterface $license): bool;
+    public function delete(MetricInterface $metric): bool;
 
     /**
      * @param int $id
