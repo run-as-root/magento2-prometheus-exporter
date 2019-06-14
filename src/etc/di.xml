@@ -2,4 +2,12 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="RunAsRoot\PrometheusExporter\Api\Data\MetricInterface" type="RunAsRoot\PrometheusExporter\Model\Metric" />
     <preference for="RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface" type="RunAsRoot\PrometheusExporter\Repository\MetricRepository" />
+
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="rar_list_metrics" xsi:type="object">RunAsRoot\PrometheusExporter\Console\Command\ListMetricsCommand</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

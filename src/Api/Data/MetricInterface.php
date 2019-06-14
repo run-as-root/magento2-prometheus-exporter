@@ -10,6 +10,8 @@ namespace RunAsRoot\PrometheusExporter\Api\Data;
 
 interface MetricInterface
 {
+    public function asArray(): array;
+
     public function getId();
 
     public function getCode(): string;
