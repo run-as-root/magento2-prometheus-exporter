@@ -17,9 +17,9 @@ use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Model\MetricFactory;
 
-class OrderAmountAggregator implements MetricAggregatorInterface
+class OrderCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_orders_amount_total';
+    private const METRIC_CODE = 'magento2_orders_count_total';
 
     /**
      * @var OrderRepositoryInterface
@@ -63,16 +63,7 @@ class OrderAmountAggregator implements MetricAggregatorInterface
 
         $orderSearchResult = $this->orderRepository->getList($searchCriteria);
 
-        if ($orderSearchResult->getTotalCount() === 0) {
-            return true;
-        }
-
-        $orders = $orderSearchResult->getItems();
-
-        $grandTotal = 0.0;
-        foreach ($orders as $order) {
-            $grandTotal += $order->getGrandTotal();
-        }
+        $totalCount = $orderSearchResult->getTotalCount();
 
         try {
             $metric = $this->metricRepository->getByCode(self::METRIC_CODE);
@@ -83,7 +74,7 @@ class OrderAmountAggregator implements MetricAggregatorInterface
             $metric->setLabels('');
         }
 
-        $metric->setValue((string)$grandTotal);
+        $metric->setValue((string)$totalCount);
 
         $this->metricRepository->save($metric);
 

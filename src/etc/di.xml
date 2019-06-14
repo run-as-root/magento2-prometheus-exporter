@@ -7,6 +7,7 @@
         <arguments>
             <argument name="items" xsi:type="array">
                 <item name="OrderAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator</item>
+                <item name="OrderCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderCountAggregator</item>
             </argument>
         </arguments>
     </type>
