@@ -43,6 +43,16 @@ class OrderCountAggregator implements MetricAggregatorInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
+    public function getHelp(): string
+    {
+        return 'Magento2 Order Count by state';
+    }
+
+    public function getType(): string
+    {
+        return 'gauge';
+    }
+
     /**
      * @return bool
      * @throws CouldNotSaveException
@@ -78,5 +88,4 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
         return true;
     }
-
 }
