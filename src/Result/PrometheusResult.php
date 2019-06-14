@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * @copyright see PROJECT_LICENSE.txt
@@ -39,11 +39,13 @@ class PrometheusResult extends Raw
         $this->setContents($formatedMetrics);
 
         $response->setBody($this->contents);
+        $response->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
+        $this->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
 
         return $this;
     }
 
-    protected function collectMetrics() : string
+    protected function collectMetrics(): string
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
         $metrics        = $this->metricRepository->getList($searchCriteria);
