@@ -44,6 +44,11 @@ class OrderItemAmountAggregator implements MetricAggregatorInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
+    public function getCode(): string
+    {
+        return self::METRIC_CODE;
+    }
+
     public function getHelp(): string
     {
         return 'Magento2 Order Items Amount by state';

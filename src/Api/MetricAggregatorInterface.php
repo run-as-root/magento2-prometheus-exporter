@@ -11,6 +11,8 @@ interface MetricAggregatorInterface
 {
     public function aggregate(): bool;
 
+    public function getCode(): string;
+
     /**
      * Prometheus expects a metric description called HELP. HELP lines may contain any sequence
      * of UTF-8 characters (after the metric name), but the backslash and the line feed
