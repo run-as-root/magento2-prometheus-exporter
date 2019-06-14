@@ -134,5 +134,4 @@ class OrderCountAggregatorUnitTest extends TestCase
 
         $this->assertTrue($result);
     }
-
 }
