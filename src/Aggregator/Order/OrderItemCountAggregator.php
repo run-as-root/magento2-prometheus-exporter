@@ -11,12 +11,13 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\Order\Item as OrderItem;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
-class OrderCountAggregator implements MetricAggregatorInterface
+class OrderItemCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_orders_count_total';
+    private const METRIC_CODE = 'magento2_orders_items_count_total';
 
     /**
      * @var UpdateMetricService
@@ -45,7 +46,7 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return 'Magento2 Order Count by state';
+        return 'Magento2 Order Items Count by state';
     }
 
     public function getType(): string
@@ -71,21 +72,24 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
         $countByState = [];
         foreach ($orders as $order) {
-            $state = $order->getState();
+            foreach ($order->getItems() as $orderItem) {
+                /** @var $orderItem OrderItem */
+                $status = (string)$orderItem->getStatus();
 
-            if (!array_key_exists($state, $countByState)) {
-                $countByState[$state] = 0;
+                if (!array_key_exists($status, $countByState)) {
+                    $countByState[$status] = 0;
+                }
+                ++$countByState[$status];
             }
-
-            ++$countByState[$state];
         }
 
-        foreach ($countByState as $state => $count) {
-            $labels = ['state' => $state,];
+        foreach ($countByState as $status => $count) {
+            $labels = ['status' => $status,];
 
             $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
         }
 
         return true;
     }
+
 }
