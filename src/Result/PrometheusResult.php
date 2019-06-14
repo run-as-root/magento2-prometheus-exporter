@@ -31,8 +31,8 @@ class PrometheusResult extends Raw
         #$formatedMetrics = $this->collectMetrics();
         #$this->setContents($formatedMetrics);
         $this->setContents(<<<HEREDOC
-# TYPE GAUGE
-# HELP Super Duper Metric
+# TYPE magento2_orders_amount_total gauge
+# HELP magento2_orders_amount_total Super Duper Metric
 magento2_orders_amount_total 39.14
 HEREDOC
         );
