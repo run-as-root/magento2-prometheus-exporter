@@ -32,7 +32,11 @@ prometheus.yml under scrape_configs:
 
 ## Module functionality
 
-The module registers
+The module registers a cron job that runs every minute. The cronjob is
+responsible for aggregating the metric data. The aggregated data is
+stored in the table `run_as_root_prometheus_metrics`. The added
+controller collects the data stored in the table and renders the correct
+response for prometheus.
 
 ## Metrics
 
