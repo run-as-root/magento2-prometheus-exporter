@@ -53,7 +53,6 @@ class PrometheusResult extends Raw
 
         $formatedMetrics = '';
         foreach ($metrics as $metric) {
-
         }
 
         return $formatedMetrics;
