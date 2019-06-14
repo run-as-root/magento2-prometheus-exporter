@@ -10,16 +10,18 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
-use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
-use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
-use RunAsRoot\PrometheusExporter\Model\MetricFactory;
+use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
 class OrderCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento2_orders_count_total';
+
+    /**
+     * @var UpdateMetricService
+     */
+    private $updateMetricService;
 
     /**
      * @var OrderRepositoryInterface
@@ -31,26 +33,14 @@ class OrderCountAggregator implements MetricAggregatorInterface
      */
     private $searchCriteriaBuilder;
 
-    /**
-     * @var MetricRepositoryInterface
-     */
-    private $metricRepository;
-
-    /**
-     * @var MetricFactory
-     */
-    private $metricFactory;
-
     public function __construct(
-        MetricRepositoryInterface $metricRepository,
-        MetricFactory $metricFactory,
+        UpdateMetricService $updateMetricService,
         OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
+        $this->updateMetricService = $updateMetricService;
         $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->metricRepository = $metricRepository;
-        $this->metricFactory = $metricFactory;
     }
 
     /**
@@ -65,18 +55,7 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
         $totalCount = $orderSearchResult->getTotalCount();
 
-        try {
-            $metric = $this->metricRepository->getByCode(self::METRIC_CODE);
-        } catch (NoSuchEntityException $e) {
-            /** @var MetricInterface $metric */
-            $metric = $this->metricFactory->create();
-            $metric->setCode(self::METRIC_CODE);
-            $metric->setLabels('');
-        }
-
-        $metric->setValue((string)$totalCount);
-
-        $this->metricRepository->save($metric);
+        $this->updateMetricService->update(self::METRIC_CODE, (string)$totalCount);
 
         return true;
     }
