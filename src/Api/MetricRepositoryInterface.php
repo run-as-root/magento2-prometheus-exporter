@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Api;
@@ -15,34 +16,37 @@ interface MetricRepositoryInterface
     /**
      * @param MetricInterface $metric
      *
-     * @return MetricInterface
      * @throws CouldNotSaveException
+     *
+     * @return MetricInterface
      */
     public function save(MetricInterface $metric): MetricInterface;
 
     /**
      * @param int $id
      *
-     * @return MetricInterface
      * @throws NoSuchEntityException
+     *
+     * @return MetricInterface
      */
     public function getById(int $id): MetricInterface;
-
 
     /**
      * @param string $code
      *
-     * @return MetricInterface
      * @throws NoSuchEntityException
+     *
+     * @return MetricInterface
      */
     public function getByCode(string $code): MetricInterface;
 
     /**
      * @param string $code
-     * @param array $labels
+     * @param array  $labels
+     *
+     * @throws NoSuchEntityException
      *
      * @return MetricInterface
-     * @throws NoSuchEntityException
      */
     public function getByCodeAndLabels(string $code, array $labels): MetricInterface;
 
@@ -51,16 +55,18 @@ interface MetricRepositoryInterface
     /**
      * @param MetricInterface $metric
      *
-     * @return bool
      * @throws CouldNotDeleteException
+     *
+     * @return bool
      */
     public function delete(MetricInterface $metric): bool;
 
     /**
      * @param int $id
      *
-     * @return bool
      * @throws CouldNotDeleteException
+     *
+     * @return bool
      */
     public function deleteById(int $id): bool;
 }

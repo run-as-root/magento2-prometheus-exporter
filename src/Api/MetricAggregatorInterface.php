@@ -17,6 +17,7 @@ interface MetricAggregatorInterface
      * characters have to be escaped as \\ and \n, respectively.
      *
      * @see https://prometheus.io/docs/instrumenting/exposition_formats/
+     *
      * @return string
      */
     public function getHelp() : string;
@@ -24,9 +25,10 @@ interface MetricAggregatorInterface
     /**
      * Prometheus expects a metric type to be set on each metric.
      * Type can only be one of the following:
-     * gauge, counter, summary, histogram, untyped
+     * gauge, counter, summary, histogram, untyped.
      *
      * @see https://prometheus.io/docs/concepts/metric_types/
+     *
      * @return string
      */
     public function getType() : string;
