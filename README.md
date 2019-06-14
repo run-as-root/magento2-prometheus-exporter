@@ -1,1 +1,1 @@
-# magento2-prometheus-exporter
+# Magento 2 Prometheus Exporter
