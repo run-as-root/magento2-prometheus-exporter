@@ -37,7 +37,7 @@ class UpdateMetricService
     public function update(string $code, string $value, array $labels = []): bool
     {
         try {
-            $metric = $this->metricRepository->getByCode($code);
+            $metric = $this->metricRepository->getByCodeAndLabels($code, $labels);
         } catch (NoSuchEntityException $e) {
             /** @var MetricInterface $metric */
             $metric = $this->metricFactory->create();

@@ -17,6 +17,7 @@ use RunAsRoot\PrometheusExporter\Model\MetricFactory;
 use RunAsRoot\PrometheusExporter\Model\ResourceModel\MetricCollection;
 use RunAsRoot\PrometheusExporter\Model\ResourceModel\MetricCollectionFactory;
 use RunAsRoot\PrometheusExporter\Model\ResourceModel\MetricResource;
+use RuntimeException;
 
 class MetricRepository implements MetricRepositoryInterface
 {
@@ -96,6 +97,34 @@ class MetricRepository implements MetricRepositoryInterface
         if (!$object->getId()) {
             throw new NoSuchEntityException(__('Metric with code "%1" does not exist.', $code));
         }
+
+        return $object;
+    }
+
+    public function getByCodeAndLabels(string $code, array $labels): MetricInterface
+    {
+        $labelsJson = json_encode($labels);
+
+        /** @var MetricCollection $collection */
+        $collection = $this->collectionFactory->create();
+        $collection->addFieldToFilter('code', $code);
+        $collection->addFieldToFilter('labels', $labelsJson);
+
+        $collection->load();
+
+        if ($collection->count() === 0) {
+            throw new NoSuchEntityException(
+                __('Metric with code "%1" and labels "%s" does not exist.', $code, $labelsJson)
+            );
+        }
+        if ($collection->count() > 1) {
+            throw new RuntimeException(
+                sprintf('Found more than one metric for code="%s" and labels="%s"', $code, $labelsJson)
+            );
+        }
+
+        /** @var MetricInterface $object */
+        $object = $collection->getFirstItem();
 
         return $object;
     }

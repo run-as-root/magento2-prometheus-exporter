@@ -59,12 +59,22 @@ class OrderAmountAggregator implements MetricAggregatorInterface
 
         $orders = $orderSearchResult->getItems();
 
-        $grandTotal = 0.0;
+        $grandTotals = [];
         foreach ($orders as $order) {
-            $grandTotal += $order->getGrandTotal();
+            $state = $order->getState();
+
+            if (!array_key_exists($state, $grandTotals)) {
+                $grandTotals[$state] = 0.0;
+            }
+
+            $grandTotals[$state] += $order->getGrandTotal();
         }
 
-        $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal);
+        foreach ($grandTotals as $state => $grandTotal) {
+            $labels = ['state' => $state,];
+
+            $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
+        }
 
         return true;
     }

@@ -37,6 +37,15 @@ interface MetricRepositoryInterface
      */
     public function getByCode(string $code): MetricInterface;
 
+    /**
+     * @param string $code
+     * @param array $labels
+     *
+     * @return MetricInterface
+     * @throws NoSuchEntityException
+     */
+    public function getByCodeAndLabels(string $code, array $labels): MetricInterface;
+
     public function getList(SearchCriteriaInterface $criteria): SearchResultsInterface;
 
     /**

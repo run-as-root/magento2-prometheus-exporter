@@ -53,9 +53,28 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
         $orderSearchResult = $this->orderRepository->getList($searchCriteria);
 
-        $totalCount = $orderSearchResult->getTotalCount();
+        if ($orderSearchResult->getTotalCount() === 0) {
+            return true;
+        }
 
-        $this->updateMetricService->update(self::METRIC_CODE, (string)$totalCount);
+        $orders = $orderSearchResult->getItems();
+
+        $countByState = [];
+        foreach ($orders as $order) {
+            $state = $order->getState();
+
+            if (!array_key_exists($state, $countByState)) {
+                $countByState[$state] = 0;
+            }
+
+            ++$countByState[$state];
+        }
+
+        foreach ($countByState as $state => $count) {
+            $labels = ['state' => $state,];
+
+            $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
+        }
 
         return true;
     }
