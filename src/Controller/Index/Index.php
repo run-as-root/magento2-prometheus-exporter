@@ -1,25 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * @copyright see PROJECT_LICENSE.txt
+ *
+ * @see PROJECT_LICENSE.txt
+ */
+
 namespace RunAsRoot\PrometheusExporter\Controller\Index;
 
-use \Magento\Framework\Controller\Result\RawFactory;
 use \Magento\Framework\App\Action\Context;
+use RunAsRoot\PrometheusExporter\Result\PrometheusResult;
+use RunAsRoot\PrometheusExporter\Result\PrometheusResultFactory;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
-    private $rawFactory;
+    private $prometheusResultFactory;
 
     public function __construct(
         Context $context,
-        RawFactory $rawFactory
+        PrometheusResultFactory $prometheusResultFactory
     ) {
         parent::__construct($context);
 
-        $this->rawFactory = $rawFactory;
+        $this->prometheusResultFactory = $prometheusResultFactory;
     }
 
     public function execute()
     {
-        return $this->rawFactory->create()->setContents('asdasd');
+        return $this->prometheusResultFactory->create();
     }
 }
