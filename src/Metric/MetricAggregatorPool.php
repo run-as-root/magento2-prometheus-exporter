@@ -18,7 +18,7 @@ class MetricAggregatorPool
      */
     private $items;
 
-    public function __construct(array $items)
+    public function __construct(array $items = [])
     {
         $this->items = $items;
     }
@@ -29,5 +29,16 @@ class MetricAggregatorPool
     public function getItems(): array
     {
         return $this->items;
+    }
+
+    public function getByCode(string $code): ?MetricAggregatorInterface
+    {
+        foreach ($this->items as $aggregator) {
+            if ($aggregator->getCode() === $code) {
+                return $aggregator;
+            }
+        }
+
+        return null;
     }
 }
