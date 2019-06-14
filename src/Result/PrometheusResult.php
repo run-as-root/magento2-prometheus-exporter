@@ -27,18 +27,19 @@ class PrometheusResult extends Raw
 
     protected function render(HttpResponseInterface $response)
     {
-        $this->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
-
+        parent::render($response);
         #$formatedMetrics = $this->collectMetrics();
         #$this->setContents($formatedMetrics);
-        $this->setContents(
-            <<<HEREDOC
+        $this->setContents(<<<HEREDOC
 # TYPE GAUGE
 # HELP Super Duper Metric
 magento2_orders_amount_total 39.14
 HEREDOC
         );
-        parent::render($response);
+
+        $response->setBody($this->contents);
+        $response->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
+        $this->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
 
         return $this;
     }
