@@ -44,7 +44,6 @@ class CmsPageCountAggregatorUnitTest extends TestCase
             $this->cmsRepository,
             $this->searchCriteriaBuilder
         );
-
     }
 
     /**
