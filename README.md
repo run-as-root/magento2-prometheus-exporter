@@ -12,6 +12,7 @@ Install the Module via composer by running:
 
 ```
 composer require run-as-root/magento2-prometheus-exporter
+php bin/magento setup:upgrade
 ```
 
 ## Prometheus Configuration
@@ -28,6 +29,14 @@ prometheus.yml under scrape_configs:
   - targets: 
     - your-magento-url
 ```
+
+## Module functionality
+
+The module registers a cron job that runs every minute. The cronjob is
+responsible for aggregating the metric data. The aggregated data is
+stored in the table `run_as_root_prometheus_metrics`. The added
+controller collects the data stored in the table and renders the correct
+response for prometheus.
 
 ## Metrics
 
