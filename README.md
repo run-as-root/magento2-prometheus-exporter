@@ -12,6 +12,7 @@ Install the Module via composer by running:
 
 ```
 composer require run-as-root/magento2-prometheus-exporter
+php bin/magento setup:upgrade
 ```
 
 ## Prometheus Configuration
@@ -28,6 +29,10 @@ prometheus.yml under scrape_configs:
   - targets: 
     - your-magento-url
 ```
+
+## Module functionality
+
+The module registers
 
 ## Metrics
 
