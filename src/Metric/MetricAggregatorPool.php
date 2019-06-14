@@ -30,4 +30,15 @@ class MetricAggregatorPool
     {
         return $this->items;
     }
+
+    public function getByCode(string $code): ?MetricAggregatorInterface
+    {
+        foreach ($this->items as $aggregator) {
+            if ($aggregator->getCode() === $code) {
+                return $aggregator;
+            }
+        }
+
+        return null;
+    }
 }
