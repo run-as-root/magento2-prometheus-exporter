@@ -88,5 +88,4 @@ class OrderAmountAggregator implements MetricAggregatorInterface
 
         return true;
     }
-
 }

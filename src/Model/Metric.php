@@ -67,5 +67,4 @@ class Metric extends AbstractModel implements MetricInterface
     {
         $this->setData('value', $value);
     }
-
 }
