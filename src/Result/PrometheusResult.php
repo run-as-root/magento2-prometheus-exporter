@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * @copyright see PROJECT_LICENSE.txt
@@ -10,8 +10,8 @@ declare(strict_types = 1);
 namespace RunAsRoot\PrometheusExporter\Result;
 
 use Magento\Framework\App\Response\HttpInterface as HttpResponseInterface;
-use \Magento\Framework\Controller\Result\Raw;
-use \RunAsRoot\PrometheusExporter\Repository\MetricRepository;
+use Magento\Framework\Controller\Result\Raw;
+use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
 
 class PrometheusResult extends Raw
 {
@@ -27,22 +27,23 @@ class PrometheusResult extends Raw
 
     protected function render(HttpResponseInterface $response)
     {
-        parent::render($response);
+        $this->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
 
         #$formatedMetrics = $this->collectMetrics();
         #$this->setContents($formatedMetrics);
-        $this->setContents(<<<HEREDOC
+        $this->setContents(
+            <<<HEREDOC
 # TYPE GAUGE
 # HELP Super Duper Metric
 magento2_orders_amount_total 39.14
 HEREDOC
         );
-        $response->setBody($this->contents);
+        parent::render($response);
 
         return $this;
     }
 
-    protected function collectMetrics() : string
+    protected function collectMetrics(): string
     {
 
         #$metrics = $this->metricRepository->getList();
