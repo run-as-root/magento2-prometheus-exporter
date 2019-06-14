@@ -18,9 +18,9 @@ interface MetricInterface
 
     public function setCode(string $code): void;
 
-    public function getLabels(): string;
+    public function getLabels(): array;
 
-    public function setLabels(string $labels): void;
+    public function setLabels(array $labels): void;
 
     public function getValue(): string;
 
