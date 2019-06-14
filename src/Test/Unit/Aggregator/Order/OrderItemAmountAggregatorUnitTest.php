@@ -145,5 +145,4 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
 
         $this->assertTrue($result);
     }
-
 }
