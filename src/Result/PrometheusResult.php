@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 /**
  * @copyright see PROJECT_LICENSE.txt
+ *
  * @see PROJECT_LICENSE.txt
  */
 
 namespace RunAsRoot\PrometheusExporter\Result;
 
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Response\HttpInterface as HttpResponseInterface;
-use \Magento\Framework\Controller\Result\Raw;
-use \RunAsRoot\PrometheusExporter\Repository\MetricRepository;
-use \Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Controller\Result\Raw;
+use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
 
 class PrometheusResult extends Raw
 {
@@ -28,7 +29,7 @@ class PrometheusResult extends Raw
 
     public function __construct(MetricRepository $metricRepository, SearchCriteriaBuilder $searchCriteriaBuilder)
     {
-        $this->metricRepository      = $metricRepository;
+        $this->metricRepository = $metricRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
@@ -48,11 +49,10 @@ class PrometheusResult extends Raw
     protected function collectMetrics(): string
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
-        $metrics        = $this->metricRepository->getList($searchCriteria);
+        $metrics = $this->metricRepository->getList($searchCriteria);
 
         $formatedMetrics = '';
         foreach ($metrics as $metric) {
-
         }
 
         return $formatedMetrics;

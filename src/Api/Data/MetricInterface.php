@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @copyright see PROJECT_LICENSE.txt
@@ -25,5 +26,4 @@ interface MetricInterface
     public function getValue(): string;
 
     public function setValue(string $value): void;
-
 }

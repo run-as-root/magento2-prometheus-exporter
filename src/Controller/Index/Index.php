@@ -10,8 +10,7 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Controller\Index;
 
-use \Magento\Framework\App\Action\Context;
-use RunAsRoot\PrometheusExporter\Result\PrometheusResult;
+use Magento\Framework\App\Action\Context;
 use RunAsRoot\PrometheusExporter\Result\PrometheusResultFactory;
 
 class Index extends \Magento\Framework\App\Action\Action

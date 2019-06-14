@@ -1,9 +1,10 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * @copyright see PROJECT_LICENSE.txt
+ *
  * @see PROJECT_LICENSE.txt
  */
 
@@ -25,11 +26,11 @@ class Config
 
     public function isCustomerMetricsEnabled() : bool
     {
-        return (bool)$this->config->getValue('metric_configuration/metric/customer');
+        return (bool) $this->config->getValue('metric_configuration/metric/customer');
     }
 
     public function isOrdersMetricsEnabled() : bool
     {
-        return (bool)$this->config->getValue('metric_configuration/metric/order');
+        return (bool) $this->config->getValue('metric_configuration/metric/order');
     }
 }

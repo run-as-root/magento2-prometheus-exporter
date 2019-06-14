@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Repository;
@@ -56,13 +57,14 @@ class MetricRepository implements MetricRepositoryInterface
     /**
      * @param MetricInterface $object
      *
-     * @return MetricInterface
      * @throws CouldNotSaveException
+     *
+     * @return MetricInterface
      */
     public function save(MetricInterface $object): MetricInterface
     {
         try {
-            /** @var Metric $object */
+            /* @var Metric $object */
             $this->metricResource->save($object);
         } catch (\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
@@ -74,8 +76,9 @@ class MetricRepository implements MetricRepositoryInterface
     /**
      * @param int $id
      *
-     * @return MetricInterface
      * @throws NoSuchEntityException
+     *
+     * @return MetricInterface
      */
     public function getById(int $id): MetricInterface
     {
@@ -132,13 +135,14 @@ class MetricRepository implements MetricRepositoryInterface
     /**
      * @param MetricInterface $object
      *
-     * @return bool
      * @throws CouldNotDeleteException
+     *
+     * @return bool
      */
     public function delete(MetricInterface $object): bool
     {
         try {
-            /** @var Metric $object */
+            /* @var Metric $object */
             $this->metricResource->delete($object);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
@@ -150,9 +154,10 @@ class MetricRepository implements MetricRepositoryInterface
     /**
      * @param int $id
      *
-     * @return bool
      * @throws CouldNotDeleteException
      * @throws NoSuchEntityException
+     *
+     * @return bool
      */
     public function deleteById(int $id): bool
     {
