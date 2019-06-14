@@ -1,0 +1,27 @@
+{
+    "name": "run-as-root/magento2-prometheus-exporter",
+    "description": "Magento2 Prometheus Exporter",
+    "type": "magento2-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Lambauer",
+            "email": "david@run-as-root.sh"
+        },
+        {
+            "name": "Matthias Walter",
+            "email": "matthias.walter@mwltr.de"
+        }
+    ],
+    "require": {
+        "php": "~7.2.0"
+    },
+    "autoload": {
+        "files": [
+            "src/registration.php"
+        ],
+        "psr-4": {
+            "RunAsRoot\\PrometheusExporter\\": "src"
+        }
+    }
+}
