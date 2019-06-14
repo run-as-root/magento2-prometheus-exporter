@@ -10,8 +10,9 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Result;
 
 use Magento\Framework\App\Response\HttpInterface as HttpResponseInterface;
-use Magento\Framework\Controller\Result\Raw;
-use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
+use \Magento\Framework\Controller\Result\Raw;
+use \RunAsRoot\PrometheusExporter\Repository\MetricRepository;
+use \Magento\Framework\Api\SearchCriteriaBuilder;
 
 class PrometheusResult extends Raw
 {
@@ -20,22 +21,22 @@ class PrometheusResult extends Raw
      */
     private $metricRepository;
 
-    public function __construct(MetricRepository $metricRepository)
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    private $searchCriteriaBuilder;
+
+    public function __construct(MetricRepository $metricRepository, SearchCriteriaBuilder $searchCriteriaBuilder)
     {
-        $this->metricRepository = $metricRepository;
+        $this->metricRepository      = $metricRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     protected function render(HttpResponseInterface $response)
     {
         parent::render($response);
-        #$formatedMetrics = $this->collectMetrics();
-        #$this->setContents($formatedMetrics);
-        $this->setContents(<<<HEREDOC
-# TYPE magento2_orders_amount_total gauge
-# HELP magento2_orders_amount_total Super Duper Metric
-magento2_orders_amount_total 39.14
-HEREDOC
-        );
+        $formatedMetrics = $this->collectMetrics();
+        $this->setContents($formatedMetrics);
 
         $response->setBody($this->contents);
         $response->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
@@ -46,8 +47,8 @@ HEREDOC
 
     protected function collectMetrics(): string
     {
-
-        #$metrics = $this->metricRepository->getList();
+        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $metrics        = $this->metricRepository->getList($searchCriteria);
 
         $formatedMetrics = '';
         foreach ($metrics as $metric) {
