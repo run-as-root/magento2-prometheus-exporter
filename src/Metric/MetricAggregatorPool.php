@@ -18,7 +18,7 @@ class MetricAggregatorPool
      */
     private $items;
 
-    public function __construct(array $items)
+    public function __construct(array $items = [])
     {
         $this->items = $items;
     }
