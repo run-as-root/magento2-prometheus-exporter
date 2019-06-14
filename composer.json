@@ -2,7 +2,7 @@
     "name": "run-as-root/magento2-prometheus-exporter",
     "description": "Magento2 Prometheus Exporter",
     "type": "magento2-module",
-    "version": "1.0.0"
+    "version": "1.0.1",
     "license": "MIT",
     "authors": [
         {
