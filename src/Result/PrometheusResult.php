@@ -13,12 +13,14 @@ namespace RunAsRoot\PrometheusExporter\Result;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Response\HttpInterface as HttpResponseInterface;
 use Magento\Framework\Controller\Result\Raw;
-use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
+use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
+use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
+use RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool;
 
 class PrometheusResult extends Raw
 {
     /**
-     * @var MetricRepository
+     * @var MetricRepositoryInterface
      */
     private $metricRepository;
 
@@ -27,10 +29,19 @@ class PrometheusResult extends Raw
      */
     private $searchCriteriaBuilder;
 
-    public function __construct(MetricRepository $metricRepository, SearchCriteriaBuilder $searchCriteriaBuilder)
-    {
+    /**
+     * @var MetricAggregatorPool
+     */
+    private $metricAggregatorPool;
+
+    public function __construct(
+        MetricAggregatorPool $metricAggregatorPool,
+        MetricRepositoryInterface $metricRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder
+    ) {
         $this->metricRepository = $metricRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->metricAggregatorPool = $metricAggregatorPool;
     }
 
     protected function render(HttpResponseInterface $response)
@@ -46,15 +57,41 @@ class PrometheusResult extends Raw
         return $this;
     }
 
-    protected function collectMetrics(): string
+    protected function collectMetrics()
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
-        $metrics = $this->metricRepository->getList($searchCriteria);
+        $searchResults = $this->metricRepository->getList($searchCriteria);
 
-        $formatedMetrics = '';
+        /** @var MetricInterface[] $metrics */
+        $metrics = $searchResults->getItems();
+
+        $output = '';
         foreach ($metrics as $metric) {
+            $code = $metric->getCode();
+
+            $metricAggregator = $this->metricAggregatorPool->getByCode($code);
+
+            if ($metricAggregator === null) {
+                // @todo log missing metric aggregator or code mismatch
+                continue;
+            }
+
+            $help = $metricAggregator->getHelp();
+            $type = $metricAggregator->getType();
+            $value = $metric->getValue();
+
+            $labels = $metric->getLabels();
+            $label = '';
+            foreach ($labels as $labelName => $labelValue) {
+                $label .= sprintf('%s="%s",', $labelName, $labelValue);
+            }
+            $label = trim($label, ',');
+
+            $output .= "# HELP $code $help" . "\n";
+            $output .= "# TYPE $code $type" . "\n";
+            $output .= sprintf('%s{%s} %s', $code, $label, $value) . "\n";
         }
 
-        return $formatedMetrics;
+        return $output;
     }
 }

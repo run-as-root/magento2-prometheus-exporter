@@ -7,17 +7,17 @@ declare(strict_types=1);
  * @see PROJECT_LICENSE.txt
  */
 
-namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
+namespace RunAsRoot\PrometheusExporter\Aggregator\Cms;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Sales\Api\OrderRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
+use Magento\Cms\Api\PageRepositoryInterface;
 
-class OrderCountAggregator implements MetricAggregatorInterface
+class CmsPagesCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_orders_count_total';
+    private const METRIC_CODE = 'magento2_cms_page_count_total';
 
     /**
      * @var UpdateMetricService
@@ -25,9 +25,9 @@ class OrderCountAggregator implements MetricAggregatorInterface
     private $updateMetricService;
 
     /**
-     * @var OrderRepositoryInterface
+     * @var PageRepositoryInterface
      */
-    private $orderRepository;
+    private $cmsRepository;
 
     /**
      * @var SearchCriteriaBuilder
@@ -36,11 +36,11 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
     public function __construct(
         UpdateMetricService $updateMetricService,
-        OrderRepositoryInterface $orderRepository,
+        PageRepositoryInterface $cmsRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->updateMetricService = $updateMetricService;
-        $this->orderRepository = $orderRepository;
+        $this->cmsRepository = $cmsRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
@@ -51,7 +51,7 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return 'Magento2 Order Count by state';
+        return 'Magento 2 CMS Page Count';
     }
 
     public function getType(): string
@@ -60,38 +60,15 @@ class OrderCountAggregator implements MetricAggregatorInterface
     }
 
     /**
-     * @throws CouldNotSaveException
-     *
      * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function aggregate(): bool
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
 
-        $orderSearchResult = $this->orderRepository->getList($searchCriteria);
-
-        if ($orderSearchResult->getTotalCount() === 0) {
-            return true;
-        }
-
-        $orders = $orderSearchResult->getItems();
-
-        $countByState = [];
-        foreach ($orders as $order) {
-            $state = $order->getState();
-
-            if (!array_key_exists($state, $countByState)) {
-                $countByState[$state] = 0;
-            }
-
-            $countByState[$state]++;
-        }
-
-        foreach ($countByState as $state => $count) {
-            $labels = ['state' => $state];
-
-            $this->updateMetricService->update(self::METRIC_CODE, (string) $count, $labels);
-        }
+        $cmsSearchResult = $this->cmsRepository->getList($searchCriteria);
+        $this->updateMetricService->update(self::METRIC_CODE, (string)$cmsSearchResult->getTotalCount());
 
         return true;
     }
