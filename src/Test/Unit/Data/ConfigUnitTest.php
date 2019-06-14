@@ -7,7 +7,6 @@
 
 namespace RunAsRoot\PrometheusExporter\Test\Unit\Data;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Data\Config;
 use Magento\Framework\App\Config\ScopeConfigInterface;
