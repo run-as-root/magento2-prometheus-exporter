@@ -5,8 +5,10 @@
  * @see PROJECT_LICENSE.txt
  */
 
-namespace RunAsRoot\PrometheusExporter\Test\Unit\Service\UpdateMetricServiceUnitTest;
+namespace RunAsRoot\PrometheusExporter\Test\Unit\Service;
 
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
@@ -37,7 +39,7 @@ class UpdateMetricServiceUnitTest extends TestCase
         $this->sut = new UpdateMetricService($this->metricRepository, $this->metricFactory);
     }
 
-    public function testItShouldUpdateMetric(): void
+    public function testItShouldUpdateExistingMetric(): void
     {
         $code = 'some-code';
         $value = 'some-value';
@@ -48,10 +50,59 @@ class UpdateMetricServiceUnitTest extends TestCase
         $metric->expects($this->once())->method('setValue')->with($value);
         $metric->expects($this->once())->method('setLabels')->with($labels);
 
+        $this->metricFactory->expects($this->never())->method('create');
+
         $this->metricRepository->expects($this->once())->method('getByCodeAndLabels')
                                ->with($code, $labels)->willReturn($metric);
         $this->metricRepository->expects($this->once())->method('save')->with($metric);
 
-        $this->sut->update($code, $value, $labels);
+        $result = $this->sut->update($code, $value, $labels);
+
+        $this->assertTrue($result);
+    }
+
+    public function testItShouldUpdateCreateNewMetric(): void
+    {
+        $code = 'some-code';
+        $value = 'some-value';
+        $labels = [];
+
+        $metric = $this->createMock(MetricInterface::class);
+        $metric->expects($this->once())->method('setCode')->with($code);
+        $metric->expects($this->once())->method('setValue')->with($value);
+        $metric->expects($this->once())->method('setLabels')->with($labels);
+
+        $this->metricFactory->expects($this->once())->method('create')->willReturn($metric);
+
+        $this->metricRepository->expects($this->once())->method('getByCodeAndLabels')
+                               ->with($code, $labels)->willThrowException(new NoSuchEntityException());
+        $this->metricRepository->expects($this->once())->method('save')->with($metric);
+
+        $result = $this->sut->update($code, $value, $labels);
+
+        $this->assertTrue($result);
+    }
+
+    public function testItShouldCatchExceptionOnSaveAndReturnFalse(): void
+    {
+        $code = 'some-code';
+        $value = 'some-value';
+        $labels = [];
+
+        $metric = $this->createMock(MetricInterface::class);
+        $metric->expects($this->once())->method('setCode')->with($code);
+        $metric->expects($this->once())->method('setValue')->with($value);
+        $metric->expects($this->once())->method('setLabels')->with($labels);
+
+        $this->metricFactory->expects($this->once())->method('create')->willReturn($metric);
+
+        $this->metricRepository->expects($this->once())->method('getByCodeAndLabels')
+                               ->with($code, $labels)->willThrowException(new NoSuchEntityException());
+        $this->metricRepository->expects($this->once())->method('save')
+                               ->with($metric)->willThrowException(new CouldNotSaveException(__('')));
+
+        $result = $this->sut->update($code, $value, $labels);
+
+        $this->assertFalse($result);
     }
 }
