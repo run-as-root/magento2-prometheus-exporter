@@ -15,3 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prometheus example configuration
 - Basic Test Coverage
 - StyleCi Integration
+
+## [1.0.1] - 2019-06-14
+## Changed
+- Fixed composer.json
