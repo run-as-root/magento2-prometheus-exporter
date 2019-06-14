@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @copyright see PROJECT_LICENSE.txt
@@ -28,12 +29,12 @@ class Metric extends AbstractModel implements MetricInterface
 
     public function asArray(): array
     {
-        return (array)$this->toArray();
+        return (array) $this->toArray();
     }
 
     public function getCode(): string
     {
-        return (string)$this->getData('code');
+        return (string) $this->getData('code');
     }
 
     public function setCode(string $code): void
@@ -60,12 +61,11 @@ class Metric extends AbstractModel implements MetricInterface
 
     public function getValue(): string
     {
-        return (string)$this->getData('value');
+        return (string) $this->getData('value');
     }
 
     public function setValue(string $value): void
     {
         $this->setData('value', $value);
     }
-
 }

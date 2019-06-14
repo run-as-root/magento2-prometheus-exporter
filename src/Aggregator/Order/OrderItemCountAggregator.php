@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @copyright see PROJECT_LICENSE.txt
@@ -60,8 +61,9 @@ class OrderItemCountAggregator implements MetricAggregatorInterface
     }
 
     /**
-     * @return bool
      * @throws CouldNotSaveException
+     *
+     * @return bool
      */
     public function aggregate(): bool
     {
@@ -79,22 +81,21 @@ class OrderItemCountAggregator implements MetricAggregatorInterface
         foreach ($orders as $order) {
             foreach ($order->getItems() as $orderItem) {
                 /** @var $orderItem OrderItem */
-                $status = (string)$orderItem->getStatus();
+                $status = (string) $orderItem->getStatus();
 
                 if (!array_key_exists($status, $countByState)) {
                     $countByState[$status] = 0;
                 }
-                ++$countByState[$status];
+                $countByState[$status]++;
             }
         }
 
         foreach ($countByState as $status => $count) {
-            $labels = ['status' => $status,];
+            $labels = ['status' => $status];
 
-            $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
+            $this->updateMetricService->update(self::METRIC_CODE, (string) $count, $labels);
         }
 
         return true;
     }
-
 }

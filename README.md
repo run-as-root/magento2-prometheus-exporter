@@ -2,6 +2,7 @@
 
 ![Branch stable](https://img.shields.io/badge/stable%20branch-master-blue.svg)
 ![Branch Develop](https://img.shields.io/badge/dev%20branch-develop-blue.svg)
+![](https://github.styleci.io/repos/191891355/shield)
 
 This Magento 2 Module exposes a new route under /metrics with Magento 2 specific metrics in the format of [prometheus](https://prometheus.io).
 The different metrics are grouped into modules and can be enabled/disabled via the Magento Backend.

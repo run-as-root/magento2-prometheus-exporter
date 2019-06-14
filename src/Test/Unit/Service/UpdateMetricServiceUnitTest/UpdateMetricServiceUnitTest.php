@@ -54,5 +54,4 @@ class UpdateMetricServiceUnitTest extends TestCase
 
         $this->sut->update($code, $value, $labels);
     }
-
 }

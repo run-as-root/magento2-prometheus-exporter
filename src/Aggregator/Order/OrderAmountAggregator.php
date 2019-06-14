@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * @copyright see PROJECT_LICENSE.txt
@@ -59,8 +60,9 @@ class OrderAmountAggregator implements MetricAggregatorInterface
     }
 
     /**
-     * @return bool
      * @throws CouldNotSaveException
+     *
+     * @return bool
      */
     public function aggregate(): bool
     {
@@ -86,12 +88,11 @@ class OrderAmountAggregator implements MetricAggregatorInterface
         }
 
         foreach ($grandTotals as $state => $grandTotal) {
-            $labels = ['state' => $state,];
+            $labels = ['state' => $state];
 
-            $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
+            $this->updateMetricService->update(self::METRIC_CODE, (string) $grandTotal, $labels);
         }
 
         return true;
     }
-
 }
