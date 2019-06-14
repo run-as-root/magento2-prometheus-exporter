@@ -37,7 +37,6 @@ class CmsBlockCountAggregatorUnitTest extends TestCase
             $cmsRepository,
             $searchCriteriaBuilder
         );
-
     }
 
     /**
