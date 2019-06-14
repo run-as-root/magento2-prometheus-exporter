@@ -3,6 +3,14 @@
     <preference for="RunAsRoot\PrometheusExporter\Api\Data\MetricInterface" type="RunAsRoot\PrometheusExporter\Model\Metric" />
     <preference for="RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface" type="RunAsRoot\PrometheusExporter\Repository\MetricRepository" />
 
+    <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
+        <arguments>
+            <argument name="items" xsi:type="array">
+                <item name="OrderAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator</item>
+            </argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
