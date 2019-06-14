@@ -10,3 +10,7 @@ Install the Module via composer by running:
 ```
 composer require run-as-root/magento2-prometheus-exporter
 ```
+
+## Contribution
+
+If you have something to contribute, weither it's a feature, a feature request, an issue or something else, feel free to. There are no contribution guidelines
