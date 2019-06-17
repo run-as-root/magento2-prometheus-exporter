@@ -65,7 +65,7 @@ tests:unit:
     # static analysis
     - mkdir -p build/output/phpstan build/output/phpmd build/output/phpcpd build/output/phpcs build/output/pdepend
     - php build/tools/bin/phpmetrics --report-html=build/output/phpmetrics src
-    - php build/tools/bin/phpmd src html cleancode,codesize,controversial,design,naming,unusedcode --exclude=Test > build/output/phpmd/phpmd.html
+    - php build/tools/bin/phpmd src html cleancode,codesize,controversial,design,naming,unusedcode --exclude=Test > build/output/phpmd/phpmd.html || true
     - php build/tools/bin/phpcpd --regexps-exclude="#.*Test.*#" --log-pmd=build/output/phpcpd/phpcpd.xml src
     - php build/tools/bin/pdepend --overview-pyramid=build/output/pdepend/overview-pyramid.svg --jdepend-chart=build/output/pdepend/jdepend-chart.svg src
   artifacts:
