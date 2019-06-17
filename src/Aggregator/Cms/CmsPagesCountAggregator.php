@@ -66,10 +66,8 @@ class CmsPagesCountAggregator implements MetricAggregatorInterface
     public function aggregate(): bool
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
-
         $cmsSearchResult = $this->cmsRepository->getList($searchCriteria);
-        $this->updateMetricService->update(self::METRIC_CODE, (string)$cmsSearchResult->getTotalCount());
 
-        return true;
+        return $this->updateMetricService->update(self::METRIC_CODE, (string)$cmsSearchResult->getTotalCount());
     }
 }
