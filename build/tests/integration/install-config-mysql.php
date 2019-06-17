@@ -5,10 +5,10 @@
  */
 
 return [
-    'db-host' => '$DB_HOST',
-    'db-user' => '$DB_USER',
-    'db-password' => '$DB_PASSWORD',
-    'db-name' => '$DB_NAME',
+    'db-host' => 'mysql',
+    'db-user' => 'root',
+    'db-password' => 'root',
+    'db-name' => 'db01_tests',
     'db-prefix' => '',
     'backend-frontname' => 'backend',
     'admin-user' => \Magento\TestFramework\Bootstrap::ADMIN_NAME,
