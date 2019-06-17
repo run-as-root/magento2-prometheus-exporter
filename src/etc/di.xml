@@ -19,6 +19,14 @@
         </arguments>
     </type>
 
+    <type name="RunAsRoot\PrometheusExporter\Service\UpdateMetricService">
+        <arguments>
+            <argument name="logger" xsi:type="object">RunAsRoot\PrometheusExporter\Logger\MetricLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="RunAsRoot\PrometheusExporter\Logger\MetricLogger" shared="true" />
+
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
