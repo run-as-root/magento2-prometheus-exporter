@@ -6,10 +6,15 @@
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
+                <!-- Order Aggregator -->
                 <item name="OrderAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator</item>
                 <item name="OrderCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderCountAggregator</item>
                 <item name="OrderItemAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator</item>
                 <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
+
+                <!-- CMS Aggregator -->
+                <item name="CmsBlocksCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlocksCountAggregator</item>
+                <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>
             </argument>
         </arguments>
     </type>
