@@ -11,6 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Controller\Index\Index;
 use Magento\Framework\App\Action\Context;
+use RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool;
 use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use RunAsRoot\PrometheusExporter\Result\PrometheusResult;
@@ -27,12 +28,21 @@ class IndexUnitTest extends TestCase
     {
         parent::setUp();
 
+        /** @var MetricRepository | MockObject $metricRepositoryMock */
         $metricRepositoryMock = $this->createMock(MetricRepository::class);
-        $searchResultBuilder = $this->createMock(SearchCriteriaBuilder::class);
-        $prometheusResult = new PrometheusResult($metricRepositoryMock, $searchResultBuilder);
 
-        /** @var Context|\PHPUnit_Framework_MockObject_MockObject $scopeConfigMock */
+        /** @var SearchCriteriaBuilder | MockObject $searchResultBuilder */
+        $searchResultBuilder = $this->createMock(SearchCriteriaBuilder::class);
+
+        /** @var MetricAggregatorPool | MockObject $metricAggregatorPoolMock */
+        $metricAggregatorPoolMock = $this->createMock(MetricAggregatorPool::class);
+
+        $prometheusResult = new PrometheusResult($metricAggregatorPoolMock, $metricRepositoryMock, $searchResultBuilder);
+
+        /** @var Context| MockObject $contextMock */
         $contextMock = $this->createMock(Context::class);
+
+        /** @var PrometheusResultFactory | MockObject $prometheusResultFactory */
         $prometheusResultFactory = $this->createMock(PrometheusResultFactory::class);
         $prometheusResultFactory->method('create')->willReturn($prometheusResult);
 

@@ -8,6 +8,7 @@
 namespace RunAsRoot\PrometheusExporter\Test\Unit\Aggregator\Cms;
 
 use Magento\Cms\Api\BlockRepositoryInterface;
+use Magento\Cms\Api\Data\BlockSearchResultsInterface;
 use Magento\Framework\Api\SearchCriteria;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -33,9 +34,12 @@ class CmsBlockCountAggregatorUnitTest extends TestCase
         $updateMetricService = $this->getMockBuilder(UpdateMetricService::class)->disableOriginalConstructor()->getMock();
         $updateMetricService->method('update')->willReturn(true);
 
+        $searchResultInterface = $this->getMockBuilder(BlockSearchResultsInterface::class)->getMockForAbstractClass();
+        $searchResultInterface->expects($this->once())->method('getTotalCount')->willReturn('10');
+
         /** @var BlockRepositoryInterface | MockObject $cmsRepository */
         $cmsRepository = $this->getMockBuilder(BlockRepositoryInterface::class)->getMockForAbstractClass();
-        $cmsRepository->method('getList')->willReturn('10');
+        $cmsRepository->method('getList')->willReturn($searchResultInterface);
 
         /** @var SearchCriteriaBuilder | MockObject $searchCriteriaBuilder */
         $searchCriteriaBuilder = $this->getMockBuilder(SearchCriteriaBuilder::class)->disableOriginalConstructor()->getMock();
@@ -48,9 +52,6 @@ class CmsBlockCountAggregatorUnitTest extends TestCase
         );
     }
 
-    /**
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
     public function testExecuteReturnPrometheusResult(): void
     {
         $this->assertTrue($this->sut->aggregate());
