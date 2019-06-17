@@ -7,6 +7,7 @@
 
 namespace RunAsRoot\PrometheusExporter\Test\Unit\Aggregator\Cms;
 
+use Magento\Cms\Api\Data\PageSearchResultsInterface;
 use Magento\Cms\Api\PageRepositoryInterface;
 use Magento\Framework\Api\SearchCriteria;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -14,7 +15,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
-use const Magento\Framework\Api\SearchCriteria;
 
 class CmsPageCountAggregatorUnitTest extends TestCase
 {
@@ -32,15 +32,18 @@ class CmsPageCountAggregatorUnitTest extends TestCase
 
         /** @var UpdateMetricService | MockObject $updateMetricService */
         $updateMetricService = $this->createMock(UpdateMetricService::class);
-        $updateMetricService->method('update')->willReturn(true);
+        $updateMetricService->expects($this->once())->method('update')->willReturn(true);
+
+        $searchResultInterface = $this->getMockBuilder(PageSearchResultsInterface::class)->getMockForAbstractClass();
+        $searchResultInterface->expects($this->once())->method('getTotalCount')->willReturn('10');
 
         /** @var PageRepositoryInterface | MockObject $cmsRepository */
         $cmsRepository = $this->createMock(PageRepositoryInterface::class);
-        $cmsRepository->method('getList')->willReturn('10');
+        $cmsRepository->method('getList')->willReturn($searchResultInterface);
 
         /** @var SearchCriteriaBuilder |MockObject $searchCriteriaBuilder */
         $searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
-        $searchCriteriaBuilder->method('create')->willReturn($searchCriteria);
+        $searchCriteriaBuilder->expects($this->once())->method('create')->willReturn($searchCriteria);
 
         $this->sut = new CmsPagesCountAggregator(
             $updateMetricService,
