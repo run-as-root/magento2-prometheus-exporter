@@ -11,8 +11,10 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Item as OrderItem;
+use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -35,14 +37,21 @@ class OrderItemAmountAggregator implements MetricAggregatorInterface
      */
     private $searchCriteriaBuilder;
 
+    /**
+     * @var StoreRepositoryInterface
+     */
+    private $storeRepository;
+
     public function __construct(
         UpdateMetricService $updateMetricService,
         OrderRepositoryInterface $orderRepository,
+        StoreRepositoryInterface $storeRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->updateMetricService = $updateMetricService;
         $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->storeRepository = $storeRepository;
     }
 
     public function getCode(): string
@@ -61,9 +70,9 @@ class OrderItemAmountAggregator implements MetricAggregatorInterface
     }
 
     /**
+     * @return bool
      * @throws CouldNotSaveException
      *
-     * @return bool
      */
     public function aggregate(): bool
     {
@@ -77,23 +86,37 @@ class OrderItemAmountAggregator implements MetricAggregatorInterface
 
         $orders = $orderSearchResult->getItems();
 
-        $grandTotals = [];
+        $grandTotalsByStore = [];
         foreach ($orders as $order) {
+            $storeId = $order->getStoreId();
+            try {
+                $store = $this->storeRepository->getById($storeId);
+                $storeCode = $store->getCode();
+            } catch (NoSuchEntityException $e) {
+                $storeCode = $storeId;
+            }
+
+            if (!array_key_exists($storeCode, $grandTotalsByStore)) {
+                $grandTotalsByStore[$storeCode] = [];
+            }
+
             foreach ($order->getItems() as $orderItem) {
                 /** @var $orderItem OrderItem */
-                $status = (string) $orderItem->getStatus();
+                $status = (string)$orderItem->getStatus();
 
-                if (!array_key_exists($status, $grandTotals)) {
-                    $grandTotals[$status] = 0.0;
+                if (!array_key_exists($status, $grandTotalsByStore[$storeCode])) {
+                    $grandTotalsByStore[$storeCode][$status] = 0.0;
                 }
-                $grandTotals[$status] += $orderItem->getRowTotalInclTax();
+                $grandTotalsByStore[$storeCode][$status] += $orderItem->getRowTotalInclTax();
             }
         }
 
-        foreach ($grandTotals as $status => $grandTotal) {
-            $labels = ['status' => $status];
+        foreach ($grandTotalsByStore as $storeCode => $grandTotals) {
+            foreach ($grandTotals as $status => $grandTotal) {
+                $labels = ['status' => $status, 'store_code' => $storeCode];
 
-            $this->updateMetricService->update(self::METRIC_CODE, (string) $grandTotal, $labels);
+                $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
+            }
         }
 
         return true;
