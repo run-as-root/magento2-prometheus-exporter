@@ -99,8 +99,7 @@ tests:integration:
     - cp build/tests/integration/install-config-mysql.php www/dev/tests/integration/etc/install-config-mysql.php
     - cp www/dev/tests/integration/etc/config-global.php.dist www/dev/tests/integration/etc/config-global.php
     # run tests
-    - cd www/dev/tests/integration
-    - php ../../../vendor/bin/phpunit --debug -c ../../../../phpunit-integration.xml.dist --log-junit ../../../../build/output/phpunit-integration/junit.xml --coverage-clover ../../../../build/output/phpunit-integration/clover.xml --coverage-html ../../../../build/output/phpunit-integration/coverage-html --coverage-text
+    - cd www/dev/tests/integration && php ../../../vendor/bin/phpunit --debug -c ../../../../phpunit-integration.xml.dist --log-junit ../../../../build/output/phpunit-integration/junit.xml --coverage-clover ../../../../build/output/phpunit-integration/clover.xml --coverage-html ../../../../build/output/phpunit-integration/coverage-html --coverage-text
   artifacts:
     paths:
       - build/output/
