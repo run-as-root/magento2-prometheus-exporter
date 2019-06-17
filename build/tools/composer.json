@@ -10,8 +10,7 @@
         "phpro/grumphp": "^0.14.0",
         "magento-ecg/coding-standard": ">=3.0",
         "squizlabs/php_codesniffer": "3.*",
-        "sensiolabs/security-checker": "^4.1",
-        "mwltr/lib-mwltr-robo-build": "^1.0"
+        "sensiolabs/security-checker": "^4.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

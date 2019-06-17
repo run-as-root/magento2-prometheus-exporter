@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6425b8a1acbc1cef4c671d5fb4e5db04",
+    "content-hash": "4a7a06799e4ca7a5b0491c21da85ab44",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -1438,41 +1438,6 @@
                 "psr-3"
             ],
             "time": "2018-11-05T09:00:11+00:00"
-        },
-        {
-            "name": "mwltr/lib-mwltr-robo-build",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "git@gitlab.com:mwltr/dev-setup/lib-mwltr-robo-build.git",
-                "reference": "10f2e3a76f258577ad90b630a844158b68ff9f8f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/mwltr%2Fdev-setup%2Flib-mwltr-robo-build/repository/archive.zip?sha=10f2e3a76f258577ad90b630a844158b68ff9f8f",
-                "reference": "10f2e3a76f258577ad90b630a844158b68ff9f8f",
-                "shasum": ""
-            },
-            "require": {
-                "consolidation/robo": "^1.0.8"
-            },
-            "type": "robo-tasks",
-            "autoload": {
-                "psr-4": {
-                    "Mwltr\\Robo\\Build\\": "src"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Matthias Walter",
-                    "email": "matthias.walter@mwltr.de"
-                }
-            ],
-            "description": "shared robo tasks for php projects",
-            "time": "2018-10-07T10:11:41+00:00"
         },
         {
             "name": "mwltr/robo-magento2",
