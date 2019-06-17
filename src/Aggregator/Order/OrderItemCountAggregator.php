@@ -88,7 +88,6 @@ class OrderItemCountAggregator implements MetricAggregatorInterface
 
         $countByStore = [];
         foreach ($orders as $order) {
-            $state = $order->getState();
             $storeId = $order->getStoreId();
 
             try {
