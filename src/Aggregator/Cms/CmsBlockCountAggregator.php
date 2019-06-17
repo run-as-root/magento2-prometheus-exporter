@@ -16,7 +16,7 @@ use Magento\Cms\Api\BlockRepositoryInterface;
 
 class CmsBlocksCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_cms_block_count_total';
+    private const METRIC_CODE = 'magento_cms_block_count_total';
 
     /**
      * @var UpdateMetricService

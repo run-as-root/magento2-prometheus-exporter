@@ -48,8 +48,8 @@ The following metrics will be collected:
 | magento_orders_count_total | status | gauge | All Magento Orders |
 | magento_orders_amount_total | status | gauge | Total amount of all Magento Orders |
 | magento_order_items_count_total | status | gauge | Total count of orderitems |
-| magento2_cms_block_count_total | | gauge | Total count of available cms blocks |
-| magento2_cms_page_count_total | | gauge | Total count of available cms pages |
+| magento_cms_block_count_total | | gauge | Total count of available cms blocks |
+| magento_cms_page_count_total | | gauge | Total count of available cms pages |
 
 ## Contribution
 
