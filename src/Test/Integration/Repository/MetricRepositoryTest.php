@@ -93,16 +93,25 @@ class MetricRepositoryTest extends IntegrationTestAbstract
                 'value' => '47.11',
                 'labels' => ['labelOne' => 'one'],
             ],
+            [
+                'code' => 'test_integration_metric_2',
+                'value' => '9999.99',
+                'labels' => ['labelOne' => 'two'],
+            ],
         ];
 
         foreach ($metrics as $metric) {
             $this->createMetric($metric['code'], $metric['value'], $metric['labels']);
         }
 
+        sleep(1); // wait a second so repository getList will return something
+
         /** @var SearchCriteria $searchCriteria */
-        $searchCriteria = $this->objectManager->get(SearchCriteria::class);
+        $searchCriteria = $this->objectManager->create(SearchCriteria::class);
 
         $searchResults = $this->sut->getList($searchCriteria);
+
+        $this->assertGreaterThanOrEqual(2, $searchResults->getTotalCount());
 
         /** @var $items MetricInterface[] */
         $items = $searchResults->getItems();
@@ -111,10 +120,11 @@ class MetricRepositoryTest extends IntegrationTestAbstract
             $isMetricInResult = false;
             $metricCode = $metric['code'];
             foreach ($items as $item) {
-                $isMetricInResult = $item->getCode() === $metricCode;
-                if ($isMetricInResult === true) {
-                    break;
+                if ($item->getCode() !== $metricCode) {
+                    continue;
                 }
+
+                $isMetricInResult = true;
             }
             $this->assertTrue($isMetricInResult, "metric $metricCode was not returned by the repository");
         }
@@ -123,7 +133,7 @@ class MetricRepositoryTest extends IntegrationTestAbstract
     private function createMetric(string $code, string $value, array $labels = []): Metric
     {
         /** @var Metric $metric */
-        $metric = $this->objectManager->get(Metric::class);
+        $metric = $this->objectManager->create(Metric::class);
 
         $metric->setCode($code);
         $metric->setValue($value);

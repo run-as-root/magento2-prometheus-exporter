@@ -11,7 +11,9 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -34,14 +36,21 @@ class OrderAmountAggregator implements MetricAggregatorInterface
      */
     private $searchCriteriaBuilder;
 
+    /**
+     * @var StoreRepositoryInterface
+     */
+    private $storeRepository;
+
     public function __construct(
         UpdateMetricService $updateMetricService,
         OrderRepositoryInterface $orderRepository,
+        StoreRepositoryInterface $storeRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->updateMetricService = $updateMetricService;
         $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->storeRepository = $storeRepository;
     }
 
     public function getCode(): string
@@ -60,9 +69,9 @@ class OrderAmountAggregator implements MetricAggregatorInterface
     }
 
     /**
+     * @return bool
      * @throws CouldNotSaveException
      *
-     * @return bool
      */
     public function aggregate(): bool
     {
@@ -76,21 +85,35 @@ class OrderAmountAggregator implements MetricAggregatorInterface
 
         $orders = $orderSearchResult->getItems();
 
-        $grandTotals = [];
+        $grandTotalsByStore = [];
         foreach ($orders as $order) {
             $state = $order->getState();
+            $storeId = $order->getStoreId();
 
-            if (!array_key_exists($state, $grandTotals)) {
-                $grandTotals[$state] = 0.0;
+            try {
+                $store = $this->storeRepository->getById($storeId);
+                $storeCode = $store->getCode();
+            } catch (NoSuchEntityException $e) {
+                $storeCode = $storeId;
             }
 
-            $grandTotals[$state] += $order->getGrandTotal();
+            if (!array_key_exists($storeCode, $grandTotalsByStore)) {
+                $grandTotalsByStore[$storeCode] = [];
+            }
+
+            if (!array_key_exists($state, $grandTotalsByStore[$storeCode])) {
+                $grandTotalsByStore[$storeCode][$state] = 0.0;
+            }
+
+            $grandTotalsByStore[$storeCode][$state] += $order->getGrandTotal();
         }
 
-        foreach ($grandTotals as $state => $grandTotal) {
-            $labels = ['state' => $state];
+        foreach ($grandTotalsByStore as $storeCode => $grandTotals) {
+            foreach ($grandTotals as $state => $grandTotal) {
+                $labels = ['state' => $state, 'store_code' => $storeCode];
 
-            $this->updateMetricService->update(self::METRIC_CODE, (string) $grandTotal, $labels);
+                $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
+            }
         }
 
         return true;

@@ -11,7 +11,9 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -34,14 +36,21 @@ class OrderCountAggregator implements MetricAggregatorInterface
      */
     private $searchCriteriaBuilder;
 
+    /**
+     * @var StoreRepositoryInterface
+     */
+    private $storeRepository;
+
     public function __construct(
         UpdateMetricService $updateMetricService,
         OrderRepositoryInterface $orderRepository,
+        StoreRepositoryInterface $storeRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->updateMetricService = $updateMetricService;
         $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->storeRepository = $storeRepository;
     }
 
     public function getCode(): string
@@ -60,9 +69,9 @@ class OrderCountAggregator implements MetricAggregatorInterface
     }
 
     /**
+     * @return bool
      * @throws CouldNotSaveException
      *
-     * @return bool
      */
     public function aggregate(): bool
     {
@@ -76,21 +85,35 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
         $orders = $orderSearchResult->getItems();
 
-        $countByState = [];
+        $countByStore = [];
         foreach ($orders as $order) {
             $state = $order->getState();
+            $storeId = $order->getStoreId();
 
-            if (!array_key_exists($state, $countByState)) {
-                $countByState[$state] = 0;
+            try {
+                $store = $this->storeRepository->getById($storeId);
+                $storeCode = $store->getCode();
+            } catch (NoSuchEntityException $e) {
+                $storeCode = $storeId;
             }
 
-            $countByState[$state]++;
+            if (!array_key_exists($storeCode, $countByStore)) {
+                $countByStore[$storeCode] = [];
+            }
+
+            if (!array_key_exists($state, $countByStore)) {
+                $countByStore[$storeCode][$state] = 0;
+            }
+
+            $countByStore[$storeCode][$state]++;
         }
 
-        foreach ($countByState as $state => $count) {
-            $labels = ['state' => $state];
+        foreach ($countByStore as $storeCode => $countByState) {
+            foreach ($countByState as $state => $count) {
+                $labels = ['state' => $state, 'store_code' => $storeCode];
 
-            $this->updateMetricService->update(self::METRIC_CODE, (string) $count, $labels);
+                $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
+            }
         }
 
         return true;
