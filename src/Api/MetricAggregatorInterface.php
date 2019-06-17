@@ -9,8 +9,24 @@ namespace RunAsRoot\PrometheusExporter\Api;
 
 interface MetricAggregatorInterface
 {
+    /**
+     * The aggregate function is responsible for collecting data and update the metric records. You can just
+     * use the \RunAsRoot\PrometheusExporter\Service\UpdateMetricService to update a new
+     * metric record in the database.
+     *
+     * @return bool
+     */
     public function aggregate(): bool;
 
+    /**
+     * The metric code is the name of the specific metric.
+     * Have a look at the link below to find detailed
+     * information about naming conventions.
+     *
+     * @see https://prometheus.io/docs/practices/naming/
+     *
+     * @return string
+     */
     public function getCode(): string;
 
     /**

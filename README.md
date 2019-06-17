@@ -51,6 +51,30 @@ The following metrics will be collected:
 | magento_cms_block_count_total | | gauge | Total count of available cms blocks |
 | magento_cms_page_count_total | | gauge | Total count of available cms pages |
 
+## Add you own Metric
+
+To add a new metric, you need to implement the `\RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface`. The metric 
+aggregator object is responsible for collecting the necessary information for the specific metric from magento and then
+add a new metric record. New records can be easily added via `\RunAsRoot\PrometheusExporter\Service\UpdateMetricService`.
+
+In addition to the implementation of the MetricAggregatorInterface, you have to add your specific Aggregator to the 
+`MetricAggregatorPool` defined in the `di.xml`. For example:
+
+```xml
+<type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
+        <arguments>
+            <argument name="items" xsi:type="array">
+                <item name="OrderAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator</item>
+                <item name="OrderCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderCountAggregator</item>
+                <item name="OrderItemAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator</item>
+                <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
+            </argument>
+        </arguments>
+    </type>
+``` 
+
+ 
+
 ## Contribution
 
 If you have something to contribute, weither it's a feature, a feature request, an issue or something else, feel free to. There are no contribution guidelines.
