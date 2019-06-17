@@ -94,8 +94,8 @@ tests:integration:
     # prepare dbs
     - mysqladmin --host=$APP_DB_HOST --user=$APP_DB_USER --password=$APP_DB_PASS create $APP_DB1_NAME
     - mysqladmin --host=$APP_DB_HOST --user=$APP_DB_USER --password=$APP_DB_PASS create $APP_DB2_NAME
-    - php bin/magento setup:install --db-host=$APP_DB_HOST --db-name=$APP_DB1_NAME --db-password=$APP_DB_PASS --db-user=$APP_DB_USER --admin-email=admin@mwltr.de --admin-firstname=Admin --admin-lastname=Admin --admin-password=admin123 --admin-user=admin --backend-frontname=admin --base-url=http://rar.m2-prometheus.test --currency=EUR --language=en_US --session-save=files --timezone=Europe/Berlin --use-rewrites=1
-    - php bin/magento setup:upgrade
+    - php www/bin/magento setup:install --db-host=$APP_DB_HOST --db-name=$APP_DB1_NAME --db-password=$APP_DB_PASS --db-user=$APP_DB_USER --admin-email=admin@mwltr.de --admin-firstname=Admin --admin-lastname=Admin --admin-password=admin123 --admin-user=admin --backend-frontname=admin --base-url=http://rar.m2-prometheus.test --currency=EUR --language=en_US --session-save=files --timezone=Europe/Berlin --use-rewrites=1
+    - php www/bin/magento setup:upgrade
     - cp build/tests/integration/install-config-mysql.php www/dev/tests/integration/etc/install-config-mysql.php
     - cp www/dev/tests/integration/etc/config-global.php.dist www/dev/tests/integration/etc/config-global.php
     # run tests
