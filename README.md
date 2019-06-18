@@ -51,11 +51,12 @@ The following metrics will be collected:
 
 | Metric | Labels | TYPE | Help | 
 | --- | --- | --- | --- |
-| magento_orders_count_total | status | gauge | All Magento Orders |
-| magento_orders_amount_total | status | gauge | Total amount of all Magento Orders |
-| magento_order_items_count_total | status | gauge | Total count of orderitems |
-| magento_cms_block_count_total | | gauge | Total count of available cms blocks |
-| magento_cms_page_count_total | | gauge | Total count of available cms pages |
+| magento_orders_count_total | status, store_code | gauge | All Magento Orders |
+| magento_orders_amount_total | status, store_code | gauge | Total amount of all Magento Orders |
+| magento_order_items_count_total | status, store_code | gauge | Total count of orderitems |
+| magento_cms_block_count_total | store_code | gauge | Total count of available cms blocks |
+| magento_cms_page_count_total | store_code | gauge | Total count of available cms pages |
+| magento2_customer_count_total | store_code | gauge | Total count of available customer |
 
 ## Add you own Metric
 
