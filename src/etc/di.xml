@@ -13,7 +13,7 @@
                 <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
 
                 <!-- CMS Aggregator -->
-                <item name="CmsBlocksCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlocksCountAggregator</item>
+                <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
                 <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>
             </argument>
         </arguments>

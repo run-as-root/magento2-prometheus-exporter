@@ -12,16 +12,10 @@
                 <label>Enable/Disable Metric</label>
                 <comment>In case you only want to enable a specific set of data, this is where you can enable/disable the exposure of the different data groups to prometheus.</comment>
 
-                <field id="customer" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
-                    <label>Customer Metrics</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>enable or disable the exposure of customer specific data to prometheus.</comment>
-                </field>
-
-                <field id="order" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
-                    <label>Order Metrics</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>enable or disable the exposure of order specific data to prometheus.</comment>
+                <field id="metric_status" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="multiselect">
+                    <label>Metric Status</label>
+                    <source_model>RunAsRoot\PrometheusExporter\Model\SourceModel\Metrics</source_model>
+                    <comment>enable or disable the exposure of specific metrics to prometheus.</comment>
                 </field>
             </group>
         </section>
