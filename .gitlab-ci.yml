@@ -62,6 +62,7 @@ tests:unit:
     - rm -Rf www && ln -s /application www
     # run tests
     - php www/vendor/bin/phpunit -c phpunit.xml.dist --debug --log-junit build/output/phpunit/junit.xml --coverage-clover build/output/phpunit/clover.xml --coverage-html build/output/phpunit/coverage-html --coverage-text --colors=never
+    - bash <(curl -s https://codecov.io/bash)
     # static analysis
     - mkdir -p build/output/phpstan build/output/phpmd build/output/phpcpd build/output/phpcs build/output/pdepend
     - php build/tools/bin/phpmetrics --report-html=build/output/phpmetrics src
