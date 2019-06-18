@@ -18,6 +18,10 @@ composer require run-as-root/magento2-prometheus-exporter
 php bin/magento setup:upgrade
 ```
 
+## Module Configuration
+
+The modules system configuration is located under `Stores -> Configuration -> Prometheus -> Metric Configuration`. You can enable or disable specific metrics by using the multiselect.
+
 ## Prometheus Configuration
 
 After installing the Magento Module, your Prometheus needs to get pointed to your Magento Metrics endpoint. To do so, add the following lines to your
