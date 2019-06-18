@@ -78,7 +78,7 @@ class PrometheusResult extends Raw
         $addedMetaData = [];
 
         foreach ($metrics as $metric) {
-            if(!in_array($metric->getCode(), $enabledMetrics, true)) {
+            if (!in_array($metric->getCode(), $enabledMetrics, true)) {
                 continue;
             }
 
