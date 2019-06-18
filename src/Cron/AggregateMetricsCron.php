@@ -35,7 +35,7 @@ class AggregateMetricsCron
     {
         $enabledMetrics = $this->config->getMetricsStatus();
         foreach ($this->metricAggregatorPool->getItems() as $metricAggregator) {
-            if(in_array($metricAggregator->getCode(), $enabledMetrics, true)) {
+            if (in_array($metricAggregator->getCode(), $enabledMetrics, true)) {
                 $metricAggregator->aggregate();
             }
         }
