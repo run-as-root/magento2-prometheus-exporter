@@ -14,9 +14,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class Config
 {
-    /**
-     * @var StoreConfigInterface
-     */
     private $config;
 
     public function __construct(ScopeConfigInterface $config)
@@ -24,13 +21,8 @@ class Config
         $this->config = $config;
     }
 
-    public function isCustomerMetricsEnabled() : bool
+    public function getMetricsStatus() : array
     {
-        return (bool) $this->config->getValue('metric_configuration/metric/customer');
-    }
-
-    public function isOrdersMetricsEnabled() : bool
-    {
-        return (bool) $this->config->getValue('metric_configuration/metric/order');
+        return explode(',', $this->config->getValue('metric_configuration/metric/metric_status'));
     }
 }

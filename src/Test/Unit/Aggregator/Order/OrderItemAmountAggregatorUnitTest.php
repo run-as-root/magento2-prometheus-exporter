@@ -13,6 +13,8 @@ use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Item as OrderItem;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Api\StoreRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator;
@@ -34,27 +36,34 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
     /** @var SearchCriteriaBuilder|MockObject */
     private $searchCriteriaBuilder;
 
+    /** @var StoreRepositoryInterface|MockObject */
+    private $storeRepository;
+
     protected function setUp()
     {
         parent::setUp();
 
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->storeRepository = $this->createMock(StoreRepositoryInterface::class);
         $this->searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
 
         $this->sut = new OrderItemAmountAggregator(
             $this->updateMetricService,
             $this->orderRepository,
+            $this->storeRepository,
             $this->searchCriteriaBuilder
         );
     }
 
     public function testItShouldUpdateExistingMetric(): void
     {
+        $storeId = 1;
+        $storeCode = 'default';
         $totalCount = 1;
         $grandTotal = 47.11;
         $status = __('Shipped');
-        $labels = ['status' => $status,];
+        $labels = ['status' => $status, 'store_code' => $storeCode];
 
         $searchCriteria = $this->createMock(SearchCriteriaInterface::class);
         $this->searchCriteriaBuilder->expects($this->once())->method('create')->willReturn($searchCriteria);
@@ -65,6 +74,7 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
 
         $order = $this->createMock(Order::class);
         $order->expects($this->once())->method('getItems')->willReturn([$orderItem]);
+        $order->expects($this->once())->method('getStoreId')->willReturn($storeId);
 
         $searchResult = $this->createMock(SearchResult::class);
         $searchResult->expects($this->once())->method('getTotalCount')->willReturn($totalCount);
@@ -72,6 +82,11 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
 
         $this->orderRepository->expects($this->once())->method('getList')->with($searchCriteria)
                               ->willReturn($searchResult);
+
+        $store = $this->createMock(StoreInterface::class);
+        $store->expects($this->once())->method('getCode')->willReturn($storeCode);
+
+        $this->storeRepository->expects($this->once())->method('getById')->with($storeId)->willReturn($store);
 
         $this->updateMetricService->expects($this->once())->method('update')
                                   ->with($this->sut->getCode(), $grandTotal, $labels);
@@ -83,13 +98,15 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
 
     public function testItShouldUpdateExistingMetricByState(): void
     {
+        $storeId = 1;
+        $storeCode = 'default';
         $totalCount = 2;
         $stateOne = __('Shipped');
         $stateTwo = __('Refunded');
         $grandTotalOne = 47.11;
         $grandTotalTwo = 88.11;
-        $labelsOne = ['status' => $stateOne,];
-        $labelsTwo = ['status' => $stateTwo,];
+        $labelsOne = ['status' => $stateOne, 'store_code' => $storeCode];
+        $labelsTwo = ['status' => $stateTwo, 'store_code' => $storeCode];
 
         $searchCriteria = $this->createMock(SearchCriteriaInterface::class);
         $this->searchCriteriaBuilder->expects($this->once())->method('create')->willReturn($searchCriteria);
@@ -104,6 +121,7 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
 
         $order = $this->createMock(Order::class);
         $order->expects($this->once())->method('getItems')->willReturn([$orderItemOne, $orderItemTwo]);
+        $order->expects($this->once())->method('getStoreId')->willReturn($storeId);
 
         $orders = [$order];
 
@@ -113,6 +131,11 @@ class OrderItemAmountAggregatorUnitTest extends TestCase
 
         $this->orderRepository->expects($this->once())->method('getList')->with($searchCriteria)
                               ->willReturn($searchResult);
+
+        $store = $this->createMock(StoreInterface::class);
+        $store->expects($this->once())->method('getCode')->willReturn($storeCode);
+
+        $this->storeRepository->expects($this->once())->method('getById')->with($storeId)->willReturn($store);
 
         $this->updateMetricService->expects($this->exactly(2))->method('update')
                                   ->withConsecutive(

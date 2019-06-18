@@ -1,7 +1,6 @@
 <?php
 /**
  * @copyright see PROJECT_LICENSE.txt
- *
  * @see PROJECT_LICENSE.txt
  */
 
@@ -24,20 +23,21 @@ class ConfigUnitTest extends TestCase
 
         /** @var ScopeConfigInterface|\PHPUnit_Framework_MockObject_MockObject $scopeConfigMock */
         $scopeConfigMock = $this->createMock(ScopeConfigInterface::class);
-        $scopeConfigMock->method('getValue')->willReturn('1');
+        $scopeConfigMock->method('getValue')
+            ->willReturn('magento2_orders_count_total,magento2_orders_items_amount_total,magento2_orders_items_count_total,magento_cms_page_count_total');
 
         $this->sut = new Config($scopeConfigMock);
     }
 
-    public function testConfigShouldBeTrue(): void
+    public function testConfigShouldBeTrue() : void
     {
-        $actual = $this->sut->isCustomerMetricsEnabled();
-        $expected = true;
-
-        $this->assertEquals($expected, $actual);
-
-        $actual = $this->sut->isOrdersMetricsEnabled();
-        $expected = true;
+        $actual   = $this->sut->getMetricsStatus();
+        $expected = [
+            'magento2_orders_count_total',
+            'magento2_orders_items_amount_total',
+            'magento2_orders_items_count_total',
+            'magento_cms_page_count_total',
+        ];
 
         $this->assertEquals($expected, $actual);
     }

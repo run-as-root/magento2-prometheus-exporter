@@ -13,6 +13,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
+use RunAsRoot\PrometheusExporter\Logger\MetricLogger;
 use RunAsRoot\PrometheusExporter\Model\MetricFactory;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -29,14 +30,18 @@ class UpdateMetricServiceUnitTest extends TestCase
     /** @var MetricFactory|MockObject */
     private $metricFactory;
 
+    /** @var MetricLogger|MockObject */
+    private $logger;
+
     protected function setUp()
     {
         parent::setUp();
 
         $this->metricRepository = $this->createMock(MetricRepositoryInterface::class);
         $this->metricFactory = $this->createMock(MetricFactory::class);
+        $this->logger = $this->createMock(MetricLogger::class);
 
-        $this->sut = new UpdateMetricService($this->metricRepository, $this->metricFactory);
+        $this->sut = new UpdateMetricService($this->metricRepository, $this->metricFactory, $this->logger);
     }
 
     public function testItShouldUpdateExistingMetric(): void
@@ -96,10 +101,14 @@ class UpdateMetricServiceUnitTest extends TestCase
 
         $this->metricFactory->expects($this->once())->method('create')->willReturn($metric);
 
+        $e = new CouldNotSaveException(__('this is the message'));
+
         $this->metricRepository->expects($this->once())->method('getByCodeAndLabels')
                                ->with($code, $labels)->willThrowException(new NoSuchEntityException());
         $this->metricRepository->expects($this->once())->method('save')
-                               ->with($metric)->willThrowException(new CouldNotSaveException(__('')));
+                               ->with($metric)->willThrowException($e);
+
+        $this->logger->expects($this->once())->method('error')->with($e->getMessage());
 
         $result = $this->sut->update($code, $value, $labels);
 

@@ -11,6 +11,7 @@ namespace RunAsRoot\PrometheusExporter\Service;
 
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Model\MetricFactory;
@@ -27,12 +28,19 @@ class UpdateMetricService
      */
     private $metricFactory;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     public function __construct(
         MetricRepositoryInterface $metricRepository,
-        MetricFactory $metricFactory
+        MetricFactory $metricFactory,
+        LoggerInterface $logger
     ) {
         $this->metricRepository = $metricRepository;
         $this->metricFactory = $metricFactory;
+        $this->logger = $logger;
     }
 
     public function update(string $code, string $value, array $labels = []): bool
@@ -51,7 +59,8 @@ class UpdateMetricService
         try {
             $this->metricRepository->save($metric);
         } catch (CouldNotSaveException $e) {
-            // @todo log exception
+            $this->logger->error($e->getMessage());
+
             return false;
         }
 

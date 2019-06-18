@@ -17,7 +17,7 @@ use Magento\Cms\Api\PageRepositoryInterface;
 
 class CmsPagesCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_cms_page_count_total';
+    private const METRIC_CODE = 'magento_cms_page_count_total';
 
     /**
      * @var UpdateMetricService
@@ -66,10 +66,8 @@ class CmsPagesCountAggregator implements MetricAggregatorInterface
     public function aggregate(): bool
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
-
         $cmsSearchResult = $this->cmsRepository->getList($searchCriteria);
-        $this->updateMetricService->update(self::METRIC_CODE, (string)$cmsSearchResult->getTotalCount());
 
-        return true;
+        return $this->updateMetricService->update(self::METRIC_CODE, (string)$cmsSearchResult->getTotalCount());
     }
 }

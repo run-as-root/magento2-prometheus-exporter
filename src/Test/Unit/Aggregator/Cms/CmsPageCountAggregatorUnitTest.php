@@ -7,7 +7,9 @@
 
 namespace RunAsRoot\PrometheusExporter\Test\Unit\Aggregator\Cms;
 
+use Magento\Cms\Api\Data\PageSearchResultsInterface;
 use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\Framework\Api\SearchCriteria;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -21,28 +23,32 @@ class CmsPageCountAggregatorUnitTest extends TestCase
      */
     private $sut;
 
-    /** @var UpdateMetricService|MockObject */
-    private $updateMetricService;
-
-    /** @var PageRepositoryInterface|MockObject */
-    private $cmsRepository;
-
-    /** @var SearchCriteriaBuilder|MockObject */
-    private $searchCriteriaBuilder;
-
-
     protected function setUp()
     {
         parent::setUp();
 
-        $this->updateMetricService = $this->createMock(UpdateMetricService::class);
-        $this->cmsRepository = $this->createMock(PageRepositoryInterface::class);
-        $this->searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
+        /** @var SearchCriteria | MockObject $searchCriteria */
+        $searchCriteria = $this->getMockBuilder(SearchCriteria::class)->disableOriginalConstructor()->getMock();
+
+        /** @var UpdateMetricService | MockObject $updateMetricService */
+        $updateMetricService = $this->createMock(UpdateMetricService::class);
+        $updateMetricService->expects($this->once())->method('update')->willReturn(true);
+
+        $searchResultInterface = $this->getMockBuilder(PageSearchResultsInterface::class)->getMockForAbstractClass();
+        $searchResultInterface->expects($this->once())->method('getTotalCount')->willReturn('10');
+
+        /** @var PageRepositoryInterface | MockObject $cmsRepository */
+        $cmsRepository = $this->createMock(PageRepositoryInterface::class);
+        $cmsRepository->method('getList')->willReturn($searchResultInterface);
+
+        /** @var SearchCriteriaBuilder |MockObject $searchCriteriaBuilder */
+        $searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
+        $searchCriteriaBuilder->expects($this->once())->method('create')->willReturn($searchCriteria);
 
         $this->sut = new CmsPagesCountAggregator(
-            $this->updateMetricService,
-            $this->cmsRepository,
-            $this->searchCriteriaBuilder
+            $updateMetricService,
+            $cmsRepository,
+            $searchCriteriaBuilder
         );
     }
 

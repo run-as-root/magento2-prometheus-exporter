@@ -17,9 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - StyleCi Integration
 
 ## [1.0.1] - 2019-06-14
-## Changed
+### Changed
 - Fixed composer.json
 
 ## [1.0.2] - 2019-06-14
-## Removed
+### Removed
 - Removed version from composer.json
+
+## [1.1.0] - 2019-06.18
+### Added
+- CodeCov
+- Customer Aggregator
+- Additional Unit Tests
+- Config wil be evaluated
+- Updated Readme
+
+### Changed
+- Fixed Metric Format
+- Configuration is now Multiselect

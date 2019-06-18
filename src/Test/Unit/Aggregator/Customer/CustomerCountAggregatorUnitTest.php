@@ -7,30 +7,30 @@
 
 namespace RunAsRoot\PrometheusExporter\Test\Unit\Aggregator\Order;
 
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Api\Search\SearchResult;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Model\Order;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use RunAsRoot\PrometheusExporter\Aggregator\Order\OrderCountAggregator;
+use RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerCountAggregator;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
-class OrderCountAggregatorUnitTest extends TestCase
+class CustomerCountAggregatorUnitTest extends TestCase
 {
     /**
-     * @var OrderCountAggregator
+     * @var CustomerCountAggregator
      */
     private $sut;
 
     /** @var UpdateMetricService|MockObject */
     private $updateMetricService;
 
-    /** @var OrderRepositoryInterface|MockObject */
-    private $orderRepository;
+    /** @var CustomerRepositoryInterface|MockObject */
+    private $customerRepository;
 
     /** @var SearchCriteriaBuilder|MockObject */
     private $searchCriteriaBuilder;
@@ -43,13 +43,13 @@ class OrderCountAggregatorUnitTest extends TestCase
         parent::setUp();
 
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
-        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->customerRepository = $this->createMock(CustomerRepositoryInterface::class);
         $this->storeRepository = $this->createMock(StoreRepositoryInterface::class);
         $this->searchCriteriaBuilder = $this->createMock(SearchCriteriaBuilder::class);
 
-        $this->sut = new OrderCountAggregator(
+        $this->sut = new CustomerCountAggregator(
             $this->updateMetricService,
-            $this->orderRepository,
+            $this->customerRepository,
             $this->storeRepository,
             $this->searchCriteriaBuilder
         );
@@ -61,22 +61,20 @@ class OrderCountAggregatorUnitTest extends TestCase
         $storeCode = 'default';
         $totalCount = 1;
         $count = 1;
-        $state = 'processing';
-        $labels = ['state' => $state, 'store_code' => $storeCode];
+        $labels = ['store_code' => $storeCode];
 
         $searchCriteria = $this->createMock(SearchCriteriaInterface::class);
         $this->searchCriteriaBuilder->expects($this->once())->method('create')->willReturn($searchCriteria);
 
-        $order = $this->createMock(Order::class);
-        $order->expects($this->once())->method('getState')->willReturn($state);
-        $order->expects($this->once())->method('getStoreId')->willReturn($storeId);
+        $customer = $this->createMock(CustomerInterface::class);
+        $customer->expects($this->once())->method('getStoreId')->willReturn($storeId);
 
         $searchResult = $this->createMock(SearchResult::class);
         $searchResult->expects($this->once())->method('getTotalCount')->willReturn($totalCount);
-        $searchResult->expects($this->once())->method('getItems')->willReturn([$order]);
+        $searchResult->expects($this->once())->method('getItems')->willReturn([$customer]);
 
-        $this->orderRepository->expects($this->once())->method('getList')->with($searchCriteria)
-                              ->willReturn($searchResult);
+        $this->customerRepository->expects($this->once())->method('getList')->with($searchCriteria)
+                                 ->willReturn($searchResult);
 
         $store = $this->createMock(StoreInterface::class);
         $store->expects($this->once())->method('getCode')->willReturn($storeCode);
@@ -91,46 +89,50 @@ class OrderCountAggregatorUnitTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testItShouldUpdateExistingMetricByState(): void
+    public function testItShouldUpdateExistingMetricByStore(): void
     {
         $storeId = 1;
-        $storeCode = 'default';
+        $storeIdTwo = 2;
+        $storeCode = 'de';
+        $storeCodeTwo = 'en';
         $totalCount = 2;
-        $countProcessing = 1;
-        $countPending = 1;
-        $stateOne = 'processing';
-        $stateTwo = 'pending';
-        $labelsOne = ['state' => $stateOne, 'store_code' => $storeCode];
-        $labelsTwo = ['state' => $stateTwo, 'store_code' => $storeCode];
+        $countOne = 1;
+        $countTwo = 1;
+        $labelsOne = ['store_code' => $storeCode];
+        $labelsTwo = ['store_code' => $storeCodeTwo];
 
         $searchCriteria = $this->createMock(SearchCriteriaInterface::class);
         $this->searchCriteriaBuilder->expects($this->once())->method('create')->willReturn($searchCriteria);
 
-        $order = $this->createMock(Order::class);
-        $order->expects($this->once())->method('getState')->willReturn($stateOne);
-        $order->expects($this->once())->method('getStoreId')->willReturn($storeId);
-        $orderTwo = $this->createMock(Order::class);
-        $orderTwo->expects($this->once())->method('getState')->willReturn($stateTwo);
-        $orderTwo->expects($this->once())->method('getStoreId')->willReturn($storeId);
+        $customer = $this->createMock(CustomerInterface::class);
+        $customer->expects($this->once())->method('getStoreId')->willReturn($storeId);
 
-        $orders = [$order, $orderTwo];
+        $customerTwo = $this->createMock(CustomerInterface::class);
+        $customerTwo->expects($this->once())->method('getStoreId')->willReturn($storeIdTwo);
+
+        $items = [$customer, $customerTwo];
 
         $searchResult = $this->createMock(SearchResult::class);
         $searchResult->expects($this->once())->method('getTotalCount')->willReturn($totalCount);
-        $searchResult->expects($this->once())->method('getItems')->willReturn($orders);
+        $searchResult->expects($this->once())->method('getItems')->willReturn($items);
 
-        $this->orderRepository->expects($this->once())->method('getList')->with($searchCriteria)
-                              ->willReturn($searchResult);
+        $this->customerRepository->expects($this->once())->method('getList')->with($searchCriteria)
+                                 ->willReturn($searchResult);
 
         $store = $this->createMock(StoreInterface::class);
-        $store->expects($this->exactly(2))->method('getCode')->willReturn($storeCode);
+        $store->expects($this->once())->method('getCode')->willReturn($storeCode);
 
-        $this->storeRepository->expects($this->exactly(2))->method('getById')->with($storeId)->willReturn($store);
+        $storeTwo = $this->createMock(StoreInterface::class);
+        $storeTwo->expects($this->once())->method('getCode')->willReturn($storeCodeTwo);
+
+        $this->storeRepository->expects($this->exactly(2))->method('getById')
+                              ->withConsecutive([$storeId], [$storeIdTwo])
+                              ->willReturnOnConsecutiveCalls($store, $storeTwo);
 
         $this->updateMetricService->expects($this->exactly(2))->method('update')
                                   ->withConsecutive(
-                                      [$this->sut->getCode(), $countProcessing, $labelsOne],
-                                      [$this->sut->getCode(), $countPending, $labelsTwo]
+                                      [$this->sut->getCode(), $countOne, $labelsOne],
+                                      [$this->sut->getCode(), $countTwo, $labelsTwo]
                                   );
 
         $result = $this->sut->aggregate();
@@ -149,8 +151,8 @@ class OrderCountAggregatorUnitTest extends TestCase
         $searchResult->expects($this->once())->method('getTotalCount')->willReturn($totalCount);
         $searchResult->expects($this->never())->method('getItems');
 
-        $this->orderRepository->expects($this->once())->method('getList')->with($searchCriteria)
-                              ->willReturn($searchResult);
+        $this->customerRepository->expects($this->once())->method('getList')->with($searchCriteria)
+                                 ->willReturn($searchResult);
 
         $this->updateMetricService->expects($this->never())->method('update');
 
