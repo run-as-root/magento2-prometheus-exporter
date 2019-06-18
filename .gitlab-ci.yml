@@ -64,11 +64,9 @@ tests:unit:
     - php www/vendor/bin/phpunit -c phpunit.xml.dist --debug --log-junit build/output/phpunit/junit.xml --coverage-clover build/output/phpunit/clover.xml --coverage-html build/output/phpunit/coverage-html --coverage-text --colors=never
     # static analysis
     - mkdir -p build/output/phpstan build/output/phpmd build/output/phpcpd build/output/phpcs build/output/pdepend
-    - php build/tools/bin/phpstan  analyse -c phpstan.neon --no-progress -l max --error-format=table src | tee build/output/phpstan/phpstan.table.txt
     - php build/tools/bin/phpmetrics --report-html=build/output/phpmetrics src
-    - php build/tools/bin/phpmd src html cleancode,codesize,controversial,design,naming,unusedcode --exclude=Test > build/output/phpmd/phpmd.html
+    - php build/tools/bin/phpmd src html cleancode,codesize,controversial,design,naming,unusedcode --exclude=Test > build/output/phpmd/phpmd.html || true
     - php build/tools/bin/phpcpd --regexps-exclude="#.*Test.*#" --log-pmd=build/output/phpcpd/phpcpd.xml src
-    - php build/tools/bin/phpcs --standard=build/tools/vendor/magento-ecg/coding-standard/EcgM2/ --report-full --report-source src | tee build/output/phpcs/phpcs.txt
     - php build/tools/bin/pdepend --overview-pyramid=build/output/pdepend/overview-pyramid.svg --jdepend-chart=build/output/pdepend/jdepend-chart.svg src
   artifacts:
     paths:

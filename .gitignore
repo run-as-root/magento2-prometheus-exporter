@@ -41,6 +41,7 @@
 /var/package/*
 !/var/package/*.xml
 
+composer.lock
 
 /vendor/
 
