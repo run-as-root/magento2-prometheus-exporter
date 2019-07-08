@@ -9,6 +9,7 @@ namespace RunAsRoot\PrometheusExporter\Test\Unit\Data;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Data\Config;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use RunAsRoot\PrometheusExporter\Model\SourceModel\Metrics;
 
 class ConfigUnitTest extends TestCase
 {
@@ -26,12 +27,41 @@ class ConfigUnitTest extends TestCase
         $scopeConfigMock->method('getValue')
             ->willReturn('magento2_orders_count_total,magento2_orders_items_amount_total,magento2_orders_items_count_total,magento_cms_page_count_total');
 
-        $this->sut = new Config($scopeConfigMock);
+        $metricsSource = $this->createMetricsSourceMock();
+
+        $this->sut = new Config($scopeConfigMock, $metricsSource);
+    }
+
+    private function createMetricsSourceMock()
+    {
+        $mock = $this->createMock(Metrics::class);
+
+        $mock->method('toOptionArray')->willReturn([
+            ['label' => 'magento2_orders_count_total', 'value' => 'magento2_orders_count_total'],
+            ['label' => 'magento2_orders_items_amount_total', 'value' => 'magento2_orders_items_amount_total'],
+            ['label' => 'magento2_orders_items_count_total', 'value' => 'magento2_orders_items_count_total'],
+            ['label' => 'magento_cms_page_count_total', 'value' => 'magento_cms_page_count_total']
+        ]);
+
+        return $mock;
     }
 
     public function testConfigShouldBeTrue() : void
     {
         $actual   = $this->sut->getMetricsStatus();
+        $expected = [
+            'magento2_orders_count_total',
+            'magento2_orders_items_amount_total',
+            'magento2_orders_items_count_total',
+            'magento_cms_page_count_total',
+        ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testGetDefaultMetricsShouldReturnSourceValues() : void
+    {
+        $actual = $this->sut->getDefaultMetrics();
         $expected = [
             'magento2_orders_count_total',
             'magento2_orders_items_amount_total',
