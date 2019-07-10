@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Removed version from composer.json
 
-## [1.1.0] - 2019-06.18
+## [1.1.0] - 2019-06-18
 ### Added
 - CodeCov
 - Customer Aggregator
@@ -35,3 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Fixed Metric Format
 - Configuration is now Multiselect
+
+## [1.2.0] - 2019-07-10
+### Changed
+- Interpret all metric aggregators as enabled when config value is NULL
