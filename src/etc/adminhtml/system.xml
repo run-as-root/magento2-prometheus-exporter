@@ -1,13 +1,15 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <tab id="run_as_root" sortOrder="999" translate="label">
-            <label>Prometheus</label>
+            <label>run_as_root</label>
         </tab>
+
         <section id="metric_configuration" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
-            <label>Metric Configuration</label>
+            <label>Prometheus Metric Configuration</label>
             <tab>run_as_root</tab>
             <resource>RunAsRoot_PrometheusExporter::config_runasroot_prometheusexporter</resource>
+
             <group id="metric" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
                 <label>Enable/Disable Metric</label>
                 <comment>In case you only want to enable a specific set of data, this is where you can enable/disable the exposure of the different data groups to prometheus.</comment>

@@ -22,24 +22,9 @@ use RuntimeException;
 
 class MetricRepository implements MetricRepositoryInterface
 {
-    /**
-     * @var MetricFactory
-     */
-    protected $metricFactory;
-
-    /**
-     * @var MetricResource
-     */
+    private $metricFactory;
     private $metricResource;
-
-    /**
-     * @var MetricCollectionFactory
-     */
     private $collectionFactory;
-
-    /**
-     * @var SearchResultsInterfaceFactory
-     */
     private $searchResultsFactory;
 
     public function __construct(
@@ -64,7 +49,6 @@ class MetricRepository implements MetricRepositoryInterface
     public function save(MetricInterface $object): MetricInterface
     {
         try {
-            /* @var Metric $object */
             $this->metricResource->save($object);
         } catch (\Exception $e) {
             throw new CouldNotSaveException(__($e->getMessage()));
@@ -85,6 +69,7 @@ class MetricRepository implements MetricRepositoryInterface
         /** @var Metric $object */
         $object = $this->metricFactory->create();
         $this->metricResource->load($object, $id);
+
         if (!$object->getId()) {
             throw new NoSuchEntityException(__('Metric with id "%1" does not exist.', $id));
         }
@@ -97,6 +82,7 @@ class MetricRepository implements MetricRepositoryInterface
         /** @var Metric $object */
         $object = $this->metricFactory->create();
         $this->metricResource->load($object, $code, 'code');
+
         if (!$object->getId()) {
             throw new NoSuchEntityException(__('Metric with code "%1" does not exist.', $code));
         }
@@ -120,6 +106,7 @@ class MetricRepository implements MetricRepositoryInterface
                 __('Metric with code "%1" and labels "%s" does not exist.', $code, $labelsJson)
             );
         }
+
         if ($collection->count() > 1) {
             throw new RuntimeException(
                 sprintf('Found more than one metric for code="%s" and labels="%s"', $code, $labelsJson)
@@ -142,7 +129,6 @@ class MetricRepository implements MetricRepositoryInterface
     public function delete(MetricInterface $object): bool
     {
         try {
-            /* @var Metric $object */
             $this->metricResource->delete($object);
         } catch (\Exception $exception) {
             throw new CouldNotDeleteException(__($exception->getMessage()));
@@ -170,30 +156,39 @@ class MetricRepository implements MetricRepositoryInterface
     {
         /** @var MetricCollection $collection */
         $collection = $this->collectionFactory->create();
+
         foreach ($criteria->getFilterGroups() as $filterGroup) {
             $fields = [];
             $conditions = [];
+
             foreach ($filterGroup->getFilters() as $filter) {
                 $condition = $filter->getConditionType() ?: 'eq';
                 $fields[] = $filter->getField();
-                $conditions[] = [$condition => $filter->getValue()];
+                $conditions[] = [ $condition => $filter->getValue() ];
             }
-            if ($fields) {
-                $collection->addFieldToFilter($fields, $conditions);
+
+            if (!$fields) {
+                continue;
             }
+
+            $collection->addFieldToFilter($fields, $conditions);
         }
+
         $sortOrders = $criteria->getSortOrders();
+
         if ($sortOrders) {
             /** @var SortOrder $sortOrder */
             foreach ($sortOrders as $sortOrder) {
-                $direction = ($sortOrder->getDirection() === SortOrder::SORT_ASC) ? 'ASC' : 'DESC';
+                $direction = $sortOrder->getDirection() === SortOrder::SORT_ASC ? 'ASC' : 'DESC';
                 $collection->addOrder($sortOrder->getField(), $direction);
             }
         }
+
         $collection->setCurPage($criteria->getCurrentPage());
         $collection->setPageSize($criteria->getPageSize());
 
         $objects = [];
+
         foreach ($collection as $objectModel) {
             $objects[] = $objectModel;
         }

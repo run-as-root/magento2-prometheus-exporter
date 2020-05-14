@@ -1,10 +1,6 @@
 <?php
 
-declare(strict_types = 1);
-/**
- * @copyright see PROJECT_LICENSE.txt
- * @see PROJECT_LICENSE.txt
- */
+declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Model\SourceModel;
 
@@ -20,7 +16,7 @@ class Metrics implements OptionSourceInterface
         $this->aggregatorPool = $aggregatorPool;
     }
 
-    public function toOptionArray() : array
+    public function toOptionArray(): array
     {
         $pool    = $this->aggregatorPool->getItems();
         $options = [];

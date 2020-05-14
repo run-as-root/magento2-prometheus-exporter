@@ -1,44 +1,24 @@
 <?php
 
 declare(strict_types=1);
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
+use function array_key_exists;
 
 class OrderAmountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_orders_amount_total';
+    private const METRIC_CODE = 'magento_orders_amount_total';
 
-    /**
-     * @var UpdateMetricService
-     */
     private $updateMetricService;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
     private $orderRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
     private $searchCriteriaBuilder;
-
-    /**
-     * @var StoreRepositoryInterface
-     */
     private $storeRepository;
 
     public function __construct(
@@ -68,11 +48,6 @@ class OrderAmountAggregator implements MetricAggregatorInterface
         return 'gauge';
     }
 
-    /**
-     * @return bool
-     * @throws CouldNotSaveException
-     *
-     */
     public function aggregate(): bool
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
@@ -86,13 +61,13 @@ class OrderAmountAggregator implements MetricAggregatorInterface
         $orders = $orderSearchResult->getItems();
 
         $grandTotalsByStore = [];
+
         foreach ($orders as $order) {
             $state = $order->getState();
             $storeId = $order->getStoreId();
 
             try {
-                $store = $this->storeRepository->getById($storeId);
-                $storeCode = $store->getCode();
+                $storeCode = $this->storeRepository->getById($storeId)->getCode();
             } catch (NoSuchEntityException $e) {
                 $storeCode = $storeId;
             }
@@ -110,7 +85,7 @@ class OrderAmountAggregator implements MetricAggregatorInterface
 
         foreach ($grandTotalsByStore as $storeCode => $grandTotals) {
             foreach ($grandTotals as $state => $grandTotal) {
-                $labels = ['state' => $state, 'store_code' => $storeCode];
+                $labels = [ 'state' => $state, 'store_code' => $storeCode ];
 
                 $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
             }

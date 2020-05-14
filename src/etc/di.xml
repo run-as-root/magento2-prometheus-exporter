@@ -6,11 +6,21 @@
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
+                <!-- CronJob Aggregator -->
+                <item name="CronJobCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\CronJob\CronJobCountAggregator</item>
+                <item name="BrokenCronJobCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\CronJob\BrokenCronJobCountAggregator</item>
+
+                <!-- Product Aggregator -->
+                <item name="ProductCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Product\ProductCountAggregator</item>
+
                 <!-- Order Aggregator -->
                 <item name="OrderAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator</item>
                 <item name="OrderCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderCountAggregator</item>
                 <item name="OrderItemAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator</item>
                 <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
+
+                <!-- Index Aggregator -->
+                <item name="IndexerBacklogCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator</item>
 
                 <!-- CMS Aggregator -->
                 <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
@@ -27,10 +37,17 @@
 
     <type name="RunAsRoot\PrometheusExporter\Logger\MetricLogger" shared="true" />
 
+    <type name="RunAsRoot\PrometheusExporter\Logger\MetricsLogHandler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="rar_list_metrics" xsi:type="object">RunAsRoot\PrometheusExporter\Console\Command\ListMetricsCommand</item>
+                <item name="run_as_root_list_metrics" xsi:type="object">RunAsRoot\PrometheusExporter\Console\Command\ListMetricsCommand</item>
+                <item name="run_as_root_collect_metrics" xsi:type="object">RunAsRoot\PrometheusExporter\Console\Command\CollectMetricsCommand</item>
             </argument>
         </arguments>
     </type>

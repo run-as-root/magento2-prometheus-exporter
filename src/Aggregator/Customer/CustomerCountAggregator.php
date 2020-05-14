@@ -1,10 +1,6 @@
 <?php
+
 declare(strict_types=1);
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Customer;
 
@@ -15,29 +11,15 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
+use function array_key_exists;
 
 class CustomerCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento2_customer_count_total';
 
-    /**
-     * @var UpdateMetricService
-     */
     private $updateMetricService;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
     private $searchCriteriaBuilder;
-
-    /**
-     * @var StoreRepositoryInterface
-     */
     private $storeRepository;
-
-    /**
-     * @var CustomerRepositoryInterface
-     */
     private $customerRepository;
 
     public function __construct(
@@ -83,6 +65,7 @@ class CustomerCountAggregator implements MetricAggregatorInterface
         $customers = $searchResult->getItems();
 
         $countByStore = [];
+
         foreach ($customers as $customer) {
             $storeId = $customer->getStoreId();
 
@@ -101,7 +84,7 @@ class CustomerCountAggregator implements MetricAggregatorInterface
         }
 
         foreach ($countByStore as $storeCode => $count) {
-            $labels = ['store_code' => $storeCode];
+            $labels = [ 'store_code' => $storeCode ];
 
             $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
         }

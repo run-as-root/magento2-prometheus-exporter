@@ -1,10 +1,15 @@
 {
-    "name": "run-as-root/magento2-prometheus-exporter",
+    "name": "run_as_root/magento2-prometheus-exporter",
     "description": "Magento2 Prometheus Exporter",
     "type": "magento2-module",
     "license": "MIT",
     "homepage": "https://github.com/run-as-root/magento2-prometheus-exporter",
-    "keywords": ["magento", "magento2", "magento2-module", "php7.2"],
+    "readme": "./README.md",
+    "support": {
+        "email": "info@run-as-root.sh",
+        "source": "https://github.com/run-as-root/magento2-prometheus-exporter"
+    },
+    "keywords": ["magento", "magento2", "magento2-module"],
     "authors": [
         {
             "name": "David Lambauer",
@@ -12,18 +17,27 @@
         },
         {
             "name": "Matthias Walter",
-            "email": "matthias.walter@mwltr.de"
+            "email": "matthias@run-as-root.sh"
         }
     ],
     "require": {
-        "php": "~7.2.0"
+        "php": "~7.2.0",
+        "symfony/console": "*",
+        "psr/log": "*",
+        "magento/module-store": "*",
+        "magento/module-indexer": "*",
+        "magento/zendframework1": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
     },
     "autoload": {
         "files": [
-            "src/registration.php"
+            "registration.php"
         ],
         "psr-4": {
-            "RunAsRoot\\PrometheusExporter\\": "src"
+            "RunAsRoot\\PrometheusExporter\\": "src/",
+            "RunAsRoot\\PrometheusExporter\\Test\\": "Test/"
         }
     }
 }

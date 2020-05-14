@@ -2,27 +2,15 @@
 
 declare(strict_types=1);
 
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
-
 namespace RunAsRoot\PrometheusExporter\Cron;
 
 use RunAsRoot\PrometheusExporter\Data\Config;
 use RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool;
+use function in_array;
 
 class AggregateMetricsCron
 {
-    /**
-     * @var MetricAggregatorPool
-     */
     private $metricAggregatorPool;
-
-    /**
-     * @var Config
-     */
     private $config;
 
     public function __construct(MetricAggregatorPool $metricAggregatorPool, Config $config)
@@ -34,10 +22,13 @@ class AggregateMetricsCron
     public function execute(): void
     {
         $enabledMetrics = $this->config->getMetricsStatus();
+
         foreach ($this->metricAggregatorPool->getItems() as $metricAggregator) {
-            if (in_array($metricAggregator->getCode(), $enabledMetrics, true)) {
-                $metricAggregator->aggregate();
+            if (!in_array($metricAggregator->getCode(), $enabledMetrics, true)) {
+                continue;
             }
+
+            $metricAggregator->aggregate();
         }
     }
 }

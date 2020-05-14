@@ -2,12 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
-
 namespace RunAsRoot\PrometheusExporter\Data;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -15,6 +9,8 @@ use RunAsRoot\PrometheusExporter\Model\SourceModel\Metrics as MetricsSource;
 
 class Config
 {
+    private const CONFIG_PATH_METRICS_ENABLED = 'metric_configuration/metric/metric_status';
+
     private $config;
     private $metricsSource;
 
@@ -24,20 +20,18 @@ class Config
         $this->metricsSource = $metricsSource;
     }
 
-    public function getMetricsStatus() : array
+    public function getMetricsStatus(): array
     {
-        $metrics = $this->config->getValue('metric_configuration/metric/metric_status');
+        $metrics = $this->config->getValue(self::CONFIG_PATH_METRICS_ENABLED);
 
-        if ($metrics !== null) {
-            $metrics = explode(',', $metrics);
-        } else {
-            $metrics = $this->getDefaultMetrics();
+        if ($metrics === null) {
+            return $this->getDefaultMetrics();
         }
 
-        return $metrics;
+        return explode(',', $metrics);
     }
 
-    public function getDefaultMetrics() : array
+    public function getDefaultMetrics(): array
     {
         return array_column($this->metricsSource->toOptionArray(), 'value');
     }

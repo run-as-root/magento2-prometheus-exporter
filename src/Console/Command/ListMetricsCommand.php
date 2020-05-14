@@ -1,11 +1,6 @@
 <?php
 
 declare(strict_types=1);
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
 
 namespace RunAsRoot\PrometheusExporter\Console\Command;
 
@@ -19,17 +14,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ListMetricsCommand extends Command
 {
-    private const COMMAND_NAME = 'rar_prometheus:metric:list';
+    private const COMMAND_NAME = 'run_as_root:metric:list';
     private const COMMAND_DESCRIPTION = 'Check Project Status at Eurotext. Will update project status in Magento.';
 
-    /**
-     * @var MetricRepositoryInterface
-     */
     private $metricRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
     private $searchCriteriaBuilder;
 
     public function __construct(
@@ -66,7 +54,8 @@ class ListMetricsCommand extends Command
         $metrics = $searchResults->getItems();
 
         $table = new ConsoleTableHelper($output);
-        $table->setHeaders(['id', 'code', 'labels', 'value']);
+        $table->setHeaders([ 'id', 'code', 'labels', 'value' ]);
+
         foreach ($metrics as $metric) {
             $table->addRow($metric->asArray());
         }

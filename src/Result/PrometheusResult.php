@@ -2,12 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
-
 namespace RunAsRoot\PrometheusExporter\Result;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -17,27 +11,13 @@ use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Data\Config;
 use RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool;
+use function in_array;
 
 class PrometheusResult extends Raw
 {
-    /**
-     * @var MetricRepositoryInterface
-     */
     private $metricRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
     private $searchCriteriaBuilder;
-
-    /**
-     * @var MetricAggregatorPool
-     */
     private $metricAggregatorPool;
-
-    /**
-     * @var \RunAsRoot\PrometheusExporter\Data\Config
-     */
     private $config;
 
     public function __construct(
@@ -46,10 +26,10 @@ class PrometheusResult extends Raw
         SearchCriteriaBuilder $searchCriteriaBuilder,
         Config $config
     ) {
-        $this->metricRepository = $metricRepository;
+        $this->metricRepository      = $metricRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->metricAggregatorPool = $metricAggregatorPool;
-        $this->config = $config;
+        $this->metricAggregatorPool  = $metricAggregatorPool;
+        $this->config                = $config;
     }
 
     protected function render(HttpResponseInterface $response)
@@ -65,17 +45,16 @@ class PrometheusResult extends Raw
         return $this;
     }
 
-    protected function collectMetrics() : string
+    protected function collectMetrics(): string
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
-        $searchResults = $this->metricRepository->getList($searchCriteria);
 
         /** @var MetricInterface[] $metrics */
-        $metrics = $searchResults->getItems();
+        $metrics = $this->metricRepository->getList($searchCriteria)->getItems();
 
-        $output = '';
+        $output         = '';
         $enabledMetrics = $this->config->getMetricsStatus();
-        $addedMetaData = [];
+        $addedMetaData  = [];
 
         foreach ($metrics as $metric) {
             if (!in_array($metric->getCode(), $enabledMetrics, true)) {
@@ -91,26 +70,30 @@ class PrometheusResult extends Raw
                 continue;
             }
 
-            $help = $metricAggregator->getHelp();
-            $type = $metricAggregator->getType();
+            $help  = $metricAggregator->getHelp();
+            $type  = $metricAggregator->getType();
             $value = $metric->getValue();
 
             $labels = $metric->getLabels();
-            $label = '';
+            $label  = '';
+
             foreach ($labels as $labelName => $labelValue) {
                 $label .= sprintf('%s="%s",', $labelName, $labelValue);
             }
+
             $label = trim($label, ',');
 
-            $help    = "# HELP $code $help" . "\n";
+            $help = "# HELP $code $help\n";
+
             if (!in_array($help, $addedMetaData, true)) {
-                $output .= $help;
+                $output          .= $help;
                 $addedMetaData[] = $help;
             }
 
-            $type    = "# TYPE $code $type" . "\n";
+            $type = "# TYPE $code $type\n";
+
             if (!in_array($type, $addedMetaData, true)) {
-                $output .= $type;
+                $output          .= $type;
                 $addedMetaData[] = $type;
             }
 

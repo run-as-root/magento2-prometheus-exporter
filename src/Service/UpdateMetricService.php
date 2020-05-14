@@ -1,11 +1,6 @@
 <?php
 
 declare(strict_types=1);
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
 
 namespace RunAsRoot\PrometheusExporter\Service;
 
@@ -18,19 +13,8 @@ use RunAsRoot\PrometheusExporter\Model\MetricFactory;
 
 class UpdateMetricService
 {
-    /**
-     * @var MetricRepositoryInterface
-     */
     private $metricRepository;
-
-    /**
-     * @var MetricFactory
-     */
     private $metricFactory;
-
-    /**
-     * @var LoggerInterface
-     */
     private $logger;
 
     public function __construct(

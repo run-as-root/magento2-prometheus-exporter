@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
-    <group id="default">
+    <group id="run_as_root_prometheus_metrics_aggregator">
         <job name="rar_prometheus_aggregate_metrics" instance="RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>

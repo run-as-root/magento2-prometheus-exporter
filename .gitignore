@@ -4,6 +4,7 @@
 
 /app/etc/local.xml
 
+.idea
 /media/*
 !/media/.htaccess
 

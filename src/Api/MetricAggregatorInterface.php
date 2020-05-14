@@ -1,9 +1,6 @@
 <?php
-/**
- * @copyright see PROJECT_LICENSE.txt
- *
- * @see PROJECT_LICENSE.txt
- */
+
+declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Api;
 
@@ -38,7 +35,7 @@ interface MetricAggregatorInterface
      *
      * @return string
      */
-    public function getHelp() : string;
+    public function getHelp(): string;
 
     /**
      * Prometheus expects a metric type to be set on each metric.
@@ -49,5 +46,5 @@ interface MetricAggregatorInterface
      *
      * @return string
      */
-    public function getType() : string;
+    public function getType(): string;
 }
