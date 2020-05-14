@@ -42,7 +42,6 @@ prepare:
   stage: prepare
   <<: *composer_cache
   script:
-    - $COMPOSER_BIN install --prefer-dist
     - $COMPOSER_BIN install --prefer-dist --working-dir=build/tools
 
 tests:unit:
