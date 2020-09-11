@@ -32,10 +32,7 @@ class BrokenCronJobCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return <<<'TAG'
-Magento 2 CronJob Broken Count. 
-Broken CronJobs occur when when status is pending but execution_time is set.
-TAG;
+        return 'Magento 2 CronJob Broken Count. Broken CronJobs occur when when status is pending but execution_time is set.';
     }
 
     public function getType(): string

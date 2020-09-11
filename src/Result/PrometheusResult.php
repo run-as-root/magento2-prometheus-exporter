@@ -35,6 +35,7 @@ class PrometheusResult extends Raw
     protected function render(HttpResponseInterface $response)
     {
         parent::render($response);
+
         $formattedMetrics = $this->collectMetrics();
         $this->setContents($formattedMetrics);
 

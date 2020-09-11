@@ -1,0 +1,34 @@
+<?php
+/**
+ * Read before blame: Having a global function declared in here is pretty bad practice. This style was basically copied
+ * from the core (VAT Validation) and adjusted to my needs. If you feel deeply offended, feel free to contribute and
+ * make it pretty. 😈😏
+ */
+/** @var \RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\TokenGenerator $block */
+?>
+<script>
+    require(['prototype'], function(){
+
+//<![CDATA[
+    function generateToken() {
+        let field = $('<?= $block::getFieldId()?>');
+        console.log('Field', field);
+        new Ajax.Request('<?= $block->escapeJs($block->escapeUrl($block->getAjaxUrl())) ?>', {
+            onSuccess: function(response) {
+                response = response.responseText.evalJSON();
+                field.value = response.token;
+            }
+        });
+    }
+
+    window.generateToken = generateToken;
+//]]>
+
+    });
+</script>
+<div class="actions actions-generate-token">
+    <button onclick="javascript:generateToken(); return false;" class="action-generate-token" type="button" id="<?= /* @noEscape */ $block->getHtmlId() ?>">
+        <span><?= $block->escapeHtml($block->getButtonLabel()) ?></span>
+    </button>
+</div>
+

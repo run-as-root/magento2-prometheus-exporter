@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Console\Command;
 
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
-use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Table as ConsoleTableHelper;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CollectMetricsCommand extends Command
@@ -31,12 +28,14 @@ class CollectMetricsCommand extends Command
     {
         $this->setName(self::COMMAND_NAME);
         $this->setDescription(self::COMMAND_DESCRIPTION);
+        $this->addOption('only', 'o', InputOption::VALUE_OPTIONAL, 'Run a specific metric by name. Run run_as_root:metrics:list to get a list of all available metrics. Metric has to be enabled in the System Config.');
 
         parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->aggregateMetricsCron->execute();
+        $onlyOption = $input->getOption('only');
+        $output->write($this->aggregateMetricsCron->executeOnly($onlyOption), true);
     }
 }

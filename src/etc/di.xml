@@ -2,6 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="RunAsRoot\PrometheusExporter\Api\Data\MetricInterface" type="RunAsRoot\PrometheusExporter\Model\Metric" />
     <preference for="RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface" type="RunAsRoot\PrometheusExporter\Repository\MetricRepository" />
+    <preference for="RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface" type="RunAsRoot\PrometheusExporter\Service\UpdateMetricService"/>
 
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
@@ -9,6 +10,9 @@
                 <!-- CronJob Aggregator -->
                 <item name="CronJobCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\CronJob\CronJobCountAggregator</item>
                 <item name="BrokenCronJobCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\CronJob\BrokenCronJobCountAggregator</item>
+
+                <!-- Module Aggregator -->
+                <item name="ModuleCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Module\ModuleCountAggregator</item>
 
                 <!-- Product Aggregator -->
                 <item name="ProductCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Product\ProductCountAggregator</item>
@@ -25,11 +29,24 @@
                 <!-- CMS Aggregator -->
                 <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
                 <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>
+
+                <!-- Customer Aggregator -->
+                <item name="CustomerCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerCountAggregator</item>
+                <item name="CustomerGroupCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerGroupCountAggregator</item>
+
+                <!-- EAV Aggregator -->
+
             </argument>
         </arguments>
     </type>
 
     <type name="RunAsRoot\PrometheusExporter\Service\UpdateMetricService">
+        <arguments>
+            <argument name="logger" xsi:type="object">RunAsRoot\PrometheusExporter\Logger\MetricLogger</argument>
+        </arguments>
+    </type>
+
+    <type name="RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator">
         <arguments>
             <argument name="logger" xsi:type="object">RunAsRoot\PrometheusExporter\Logger\MetricLogger</argument>
         </arguments>

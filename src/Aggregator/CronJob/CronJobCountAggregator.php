@@ -8,6 +8,7 @@ use Magento\Cron\Model\ResourceModel\Schedule\Collection;
 use Magento\Cron\Model\ResourceModel\Schedule\CollectionFactory;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
+use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 use Zend_Db_Statement_Exception;
 
 class CronJobCountAggregator implements MetricAggregatorInterface
@@ -18,7 +19,7 @@ class CronJobCountAggregator implements MetricAggregatorInterface
     private $cronCollectionFactory;
 
     public function __construct(
-        UpdateMetricService $updateMetricService,
+        UpdateMetricServiceInterface $updateMetricService,
         CollectionFactory $cronCollectionFactory
     ) {
         $this->updateMetricService   = $updateMetricService;

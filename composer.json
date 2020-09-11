@@ -21,9 +21,9 @@
         }
     ],
     "require": {
-        "php": "~7.2.0|~7.3.0",
         "symfony/console": "*",
         "psr/log": "*",
+        "monolog/monolog": "*",
         "magento/module-store": "*",
         "magento/module-indexer": "*",
         "magento/zendframework1": "*"

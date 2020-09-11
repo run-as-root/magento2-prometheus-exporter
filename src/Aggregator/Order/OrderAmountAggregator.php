@@ -10,6 +10,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
+use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 use function array_key_exists;
 
 class OrderAmountAggregator implements MetricAggregatorInterface
@@ -22,7 +23,7 @@ class OrderAmountAggregator implements MetricAggregatorInterface
     private $storeRepository;
 
     public function __construct(
-        UpdateMetricService $updateMetricService,
+        UpdateMetricServiceInterface $updateMetricService,
         OrderRepositoryInterface $orderRepository,
         StoreRepositoryInterface $storeRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder

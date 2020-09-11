@@ -6,22 +6,40 @@ namespace RunAsRoot\PrometheusExporter\Controller\Index;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
-use RunAsRoot\PrometheusExporter\Result\PrometheusResult;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Controller\ResultInterface;
+use RunAsRoot\PrometheusExporter\Data\Config;
 use RunAsRoot\PrometheusExporter\Result\PrometheusResultFactory;
 
 class Index extends Action
 {
     private $prometheusResultFactory;
+    private $config;
 
-    public function __construct(Context $context, PrometheusResultFactory $prometheusResultFactory)
-    {
+    public function __construct(
+        Context $context,
+        PrometheusResultFactory $prometheusResultFactory,
+        Config $config
+    ) {
         parent::__construct($context);
 
         $this->prometheusResultFactory = $prometheusResultFactory;
+        $this->config = $config;
     }
 
-    public function execute(): PrometheusResult
+    public function execute(): ResultInterface
     {
+        $token = $this->config->getToken();
+        $authorizationHeader = $this->getRequest()->getHeader('Authorization');
+
+        if ($token !== $authorizationHeader) {
+            /** @var \Magento\Framework\Controller\Result\Raw $response */
+            $response = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $response->setContents('You are not allowed to see these metrics.');
+
+            return $response;
+        }
+
         return $this->prometheusResultFactory->create();
     }
 }

@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Product;
 
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\ResourceConnection;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -14,17 +13,12 @@ class ProductCountAggregator implements MetricAggregatorInterface
     private const METRIC_CODE = 'magento_products_count_total';
 
     private $updateMetricService;
-    private $productRepository;
-    private $searchCriteriaBuilder;
+    private $connection;
 
-    public function __construct(
-        UpdateMetricService $updateMetricService,
-        ProductRepositoryInterface $productRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
-    ) {
+    public function __construct(UpdateMetricService $updateMetricService, ResourceConnection $connection)
+    {
         $this->updateMetricService = $updateMetricService;
-        $this->productRepository = $productRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->connection = $connection;
     }
 
     public function getCode(): string
@@ -44,9 +38,9 @@ class ProductCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $productSearchResult = $this->productRepository->getList($searchCriteria);
+        $select       = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity;';
+        $productCount = $this->connection->getConnection()->fetchOne($select);
 
-        return $this->updateMetricService->update(self::METRIC_CODE, (string)$productSearchResult->getTotalCount());
+        return $this->updateMetricService->update(self::METRIC_CODE, $productCount);
     }
 }
