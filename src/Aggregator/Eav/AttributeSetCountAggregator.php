@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RunAsRoot\PrometheusExporter\Aggregator\Index;
+namespace RunAsRoot\PrometheusExporter\Aggregator\Eav;
 
 use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
