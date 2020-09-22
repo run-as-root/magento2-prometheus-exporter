@@ -11,7 +11,7 @@ use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Model\MetricFactory;
 
-class UpdateMetricService
+class UpdateMetricService implements UpdateMetricServiceInterface
 {
     private $metricRepository;
     private $metricFactory;

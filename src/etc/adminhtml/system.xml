@@ -20,6 +20,22 @@
                     <comment>enable or disable the exposure of specific metrics to prometheus.</comment>
                 </field>
             </group>
+
+            <group id="security" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+                <label>Security Settings for the Prometheus Scrape Config</label>
+                <comment>This section contains security related configurations. We recommend using the Bearer Token in your Prometheus Scrape Config.</comment>
+
+                <field id="token" showInWebsite="1" showInStore="1" showInDefault="1" type="text">
+                    <label>Token</label>
+                    <frontend_model>RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\DisabledText</frontend_model>
+                </field>
+
+                <field id="generate_auth_token" translate="button_label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <button_label>Generate</button_label>
+                    <comment>Click 'Generate' to generate a random auth token, that you can use for your scrape config.</comment>
+                    <frontend_model>RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\TokenGenerator</frontend_model>
+                </field>
+            </group>
         </section>
     </system>
 </config>
