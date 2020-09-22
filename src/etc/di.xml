@@ -1,21 +1,33 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="RunAsRoot\PrometheusExporter\Api\Data\MetricInterface" type="RunAsRoot\PrometheusExporter\Model\Metric" />
-    <preference for="RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface" type="RunAsRoot\PrometheusExporter\Repository\MetricRepository" />
+    <preference for="RunAsRoot\PrometheusExporter\Api\Data\MetricInterface" type="RunAsRoot\PrometheusExporter\Model\Metric"/>
+    <preference for="RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface" type="RunAsRoot\PrometheusExporter\Repository\MetricRepository"/>
     <preference for="RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface" type="RunAsRoot\PrometheusExporter\Service\UpdateMetricService"/>
 
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
+                <!-- CMS Aggregator -->
+                <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
+                <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>
+
                 <!-- CronJob Aggregator -->
                 <item name="CronJobCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\CronJob\CronJobCountAggregator</item>
                 <item name="BrokenCronJobCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\CronJob\BrokenCronJobCountAggregator</item>
 
+                <!-- Customer Aggregator -->
+                <item name="CustomerAddressesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerAddressesCountAggregator</item>
+                <item name="CustomerCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerCountAggregator</item>
+                <item name="CustomerGroupCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerGroupCountAggregator</item>
+
+                <!-- EAV Aggregator -->
+                <item name="AttributeCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Eav\AttributeCountAggregator</item>
+
+                <!-- Index Aggregator -->
+                <item name="IndexerBacklogCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator</item>
+
                 <!-- Module Aggregator -->
                 <item name="ModuleCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Module\ModuleCountAggregator</item>
-
-                <!-- Product Aggregator -->
-                <item name="ProductCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Product\ProductCountAggregator</item>
 
                 <!-- Order Aggregator -->
                 <item name="OrderAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator</item>
@@ -23,19 +35,20 @@
                 <item name="OrderItemAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator</item>
                 <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
 
-                <!-- Index Aggregator -->
-                <item name="IndexerBacklogCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator</item>
+                <!-- Payment Aggregator -->
+                <item name="ActivePaymentMethodsCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Payment\ActivePaymentMethodsCountAggregator</item>
 
-                <!-- CMS Aggregator -->
-                <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
-                <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>
+                <!-- Product Aggregator -->
+                <item name="ProductCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Product\ProductCountAggregator</item>
 
-                <!-- Customer Aggregator -->
-                <item name="CustomerCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerCountAggregator</item>
-                <item name="CustomerGroupCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Customer\CustomerGroupCountAggregator</item>
+                <!-- Shipping Aggregator -->
+                <item name="ActiveShippingMethodsCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Shipping\ActiveShippingMethodsCountAggregator</item>
 
-                <!-- EAV Aggregator -->
+                <!-- Store Aggregator -->
+                <item name="StoreCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Store\StoreCountAggregator</item>
 
+                <!-- User Aggregator -->
+                <item name="AdminUserCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\User\AdminUserCountAggregator</item>
             </argument>
         </arguments>
     </type>
@@ -52,7 +65,7 @@
         </arguments>
     </type>
 
-    <type name="RunAsRoot\PrometheusExporter\Logger\MetricLogger" shared="true" />
+    <type name="RunAsRoot\PrometheusExporter\Logger\MetricLogger" shared="true"/>
 
     <type name="RunAsRoot\PrometheusExporter\Logger\MetricsLogHandler">
         <arguments>

@@ -25,7 +25,7 @@ class AggregateMetricsCron
         $this->metricRepository = $metricRepository;
     }
 
-    public function execute(string $onlySpecificMetric = ''): void
+    public function execute(): void
     {
         $enabledMetrics = $this->config->getMetricsStatus();
 
