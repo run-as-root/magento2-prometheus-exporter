@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Controller\Index;
 
+use Laminas\Http\Response;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\Response\Http;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use RunAsRoot\PrometheusExporter\Data\Config;
@@ -33,11 +35,12 @@ class Index extends Action
         $authorizationHeader = $this->getRequest()->getHeader('Authorization');
 
         if ($token !== $authorizationHeader) {
-            /** @var \Magento\Framework\Controller\Result\Raw $response */
-            $response = $this->resultFactory->create(ResultFactory::TYPE_RAW);
-            $response->setContents('You are not allowed to see these metrics.');
+            /** @var \Magento\Framework\Controller\Result\Raw $result */
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHttpResponseCode(Http::STATUS_CODE_401);
+            $result->setContents('You are not allowed to see these metrics.');
 
-            return $response;
+            return $result;
         }
 
         return $this->prometheusResultFactory->create();
