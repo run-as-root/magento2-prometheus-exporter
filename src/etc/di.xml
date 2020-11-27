@@ -81,4 +81,18 @@
             </argument>
         </arguments>
     </type>
+
+
+    <type name="RunAsRoot\PrometheusExporter\Console\Command\ListMetricsCommand">
+        <arguments>
+            <argument name="metricRepository" xsi:type="object">RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="RunAsRoot\PrometheusExporter\Console\Command\CollectMetricsCommand">
+        <arguments>
+            <argument name="aggregateMetricsCron" xsi:type="object">RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron\Proxy</argument>
+        </arguments>
+    </type>
+
 </config>
