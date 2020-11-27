@@ -13,7 +13,7 @@ abstract class IntegrationTestAbstract extends TestCase
     /** @var ObjectManagerInterface */
     protected $objectManager;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
