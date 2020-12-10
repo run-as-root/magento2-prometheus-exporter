@@ -29,7 +29,7 @@ class Index extends Action
 
     public function execute(): ResultInterface
     {
-        $token = $this->config->getToken();
+        $token = sprintf('Bearer %s', $this->config->getToken());
         $authorizationHeader = $this->getRequest()->getHeader('Authorization');
 
         if ($token !== $authorizationHeader) {
