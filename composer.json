@@ -1,6 +1,7 @@
 {
     "name": "run_as_root/magento2-prometheus-exporter",
     "description": "Magento2 Prometheus Exporter",
+    "version": "1.3.0",
     "type": "magento2-module",
     "license": "MIT",
     "homepage": "https://github.com/run-as-root/magento2-prometheus-exporter",
@@ -9,7 +10,11 @@
         "email": "info@run-as-root.sh",
         "source": "https://github.com/run-as-root/magento2-prometheus-exporter"
     },
-    "keywords": ["magento", "magento2", "magento2-module"],
+    "keywords": [
+        "magento",
+        "magento2",
+        "magento2-module"
+    ],
     "authors": [
         {
             "name": "David Lambauer",
