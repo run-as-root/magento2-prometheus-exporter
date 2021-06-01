@@ -76,7 +76,7 @@ class OrderCountAggregator implements MetricAggregatorInterface
                 $countByStore[$storeCode] = [];
             }
 
-            if (!array_key_exists($state, $countByStore)) {
+            if (!array_key_exists($state, $countByStore[$storeCode])) {
                 $countByStore[$storeCode][$state] = 0;
             }
 
