@@ -30,8 +30,7 @@ class OrderAmountAggregator implements MetricAggregatorInterface
         SearchCriteriaBuilder $searchCriteriaBuilder,
         StoreRepositoryInterface $storeRepository,
         UpdateMetricServiceInterface $updateMetricService
-    )
-    {
+    ) {
         $this->metricRepository = $metricRepository;
         $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
