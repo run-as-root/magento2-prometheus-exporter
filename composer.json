@@ -42,6 +42,7 @@
         ],
         "psr-4": {
             "RunAsRoot\\PrometheusExporter\\": "src/",
+            "RunAsRoot\\NewRelicApi\\": "lib/",
             "RunAsRoot\\PrometheusExporter\\Test\\": "Test/"
         }
     }

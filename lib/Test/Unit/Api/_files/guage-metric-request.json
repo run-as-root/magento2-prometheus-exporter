@@ -1,0 +1,16 @@
+[
+    {
+        "metrics": [
+            {
+                "value":15,
+                "type":"guage",
+                "name":"temperature",
+                "timestamp":1630557133,
+                "attributes":{
+                    "city":"Poland",
+                    "state":"Oregon"
+                }
+            }
+        ]
+    }
+]
