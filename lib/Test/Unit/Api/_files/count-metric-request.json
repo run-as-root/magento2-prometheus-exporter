@@ -1,0 +1,17 @@
+[
+    {
+        "metrics": [
+            {
+                "interval.ms": 10000,
+                "value": 15,
+                "type": "count",
+                "name": "cache.miss",
+                "timestamp": 1630557133,
+                "attributes": {
+                    "status": true,
+                    "cache.name": "mycache"
+                }
+            }
+        ]
+    }
+]

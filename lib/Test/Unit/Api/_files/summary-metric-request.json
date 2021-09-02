@@ -1,0 +1,23 @@
+[
+    {
+        "metrics": [
+            {
+                "interval.ms":10000,
+                "value":{
+                    "count":23,
+                    "sum":0.0046158,
+                    "min":0.0005358,
+                    "max":0.0018549
+                },
+                "type":"summary",
+                "name":"service.response.duration",
+                "timestamp":1630557133,
+                "attributes":{
+                    "host.name":"app.name",
+                    "state":"foo",
+                    "status":true
+                }
+            }
+        ]
+    }
+]
