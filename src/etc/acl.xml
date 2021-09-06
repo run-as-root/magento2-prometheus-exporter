@@ -7,6 +7,7 @@
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
                             <resource id="RunAsRoot_PrometheusExporter::config_runasroot_prometheusexporter" title="metric_configuration"/>
+                            <resource id="RunAsRoot_PrometheusExporter::config_runasroot_newrelic" title="newrelic_metric_configuration"/>
                         </resource>
                     </resource>
                 </resource>

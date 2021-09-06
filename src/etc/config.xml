@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <newrelic_configuration>
+            <metric>
+                <api_url>https://metric-api.newrelic.com/metric</api_url>
+            </metric>
+            <cron>
+                <cron_interval>*/2 * * * *</cron_interval>
+            </cron>
+        </newrelic_configuration>
+    </default>
+</config>
