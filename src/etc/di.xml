@@ -65,6 +65,12 @@
         </arguments>
     </type>
 
+    <type name="RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron">
+        <arguments>
+            <argument name="logger" xsi:type="object">RunAsRoot\PrometheusExporter\Logger\MetricLogger</argument>
+        </arguments>
+    </type>
+
     <type name="RunAsRoot\PrometheusExporter\Logger\MetricLogger" shared="true"/>
 
     <type name="RunAsRoot\PrometheusExporter\Logger\MetricsLogHandler">
