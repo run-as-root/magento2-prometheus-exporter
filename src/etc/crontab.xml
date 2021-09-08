@@ -4,5 +4,8 @@
         <job name="rar_prometheus_aggregate_metrics" instance="RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron" method="execute">
             <schedule>* * * * *</schedule>
         </job>
+        <job name="send_newrelic_metrics" instance="RunAsRoot\PrometheusExporter\Cron\SendNewRelicMetricsCron" method="execute">
+            <config_path>newrelic_configuration/cron/cron_interval</config_path>
+        </job>
     </group>
 </config>
