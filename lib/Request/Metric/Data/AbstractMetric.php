@@ -9,7 +9,7 @@ namespace RunAsRoot\NewRelicApi\Request\Metric\Data;
 
 abstract class AbstractMetric implements MetricInterface
 {
-    private const DEFAULT_TYPE = 'guage';
+    private const DEFAULT_TYPE = 'gauge';
 
     private string $name;
     private int $timestamp;
