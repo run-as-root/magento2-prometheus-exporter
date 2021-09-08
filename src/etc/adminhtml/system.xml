@@ -58,6 +58,10 @@
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <comment>Generated under Insights in Manage data -> API Keys -> Insert Keys</comment>
                 </field>
+                <field id="debug_enabled" showInWebsite="1" showInStore="1" showInDefault="1" sortOrder="15" type="select">
+                    <label>Enable Debug Logs</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="metric_status" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="multiselect">
                     <label>New Relic Metric Status</label>
                     <source_model>RunAsRoot\PrometheusExporter\Model\SourceModel\Metrics</source_model>
