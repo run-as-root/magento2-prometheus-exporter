@@ -37,5 +37,53 @@
                 </field>
             </group>
         </section>
+        <section id="newrelic_configuration" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+            <label>NewRelic Metric Configuration</label>
+            <tab>run_as_root</tab>
+            <resource>RunAsRoot_PrometheusExporter::config_runasroot_newrelic</resource>
+
+            <group id="metric" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label">
+                <label>Enable/Disable NewRelic Metric</label>
+
+                <field id="newrelic_metric_enabled" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="5" translate="label" type="select">
+                    <label>Enabled New Relic Metric</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_url" showInWebsite="1" showInStore="1" showInDefault="1" sortOrder="10" type="text" canRestore="1">
+                    <label>Metric API Url</label>
+                    <frontend_model>RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\DisabledText</frontend_model>
+                </field>
+                <field id="api_key" showInWebsite="1" showInStore="1" showInDefault="1" sortOrder="15" type="obscure">
+                    <label>Insight API Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment>Generated under Insights in Manage data -> API Keys -> Insert Keys</comment>
+                </field>
+                <field id="debug_enabled" showInWebsite="1" showInStore="1" showInDefault="1" sortOrder="15" type="select">
+                    <label>Enable Debug Logs</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="metric_status" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="multiselect">
+                    <label>New Relic Metric Status</label>
+                    <source_model>RunAsRoot\PrometheusExporter\Model\SourceModel\Metrics</source_model>
+                    <comment>enable or disable the exposure of specific metrics to newrelic.</comment>
+                </field>
+            </group>
+
+            <group id="cron" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="15" translate="label">
+                <label>Cron Settings</label>
+
+                <field id="cron_enabled" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="5" translate="label" type="select">
+                    <label>Enabled New Relic Metric Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="cron_interval" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Cron Interval</label>
+                    <depends>
+                        <field id="cron_enabled">1</field>
+                    </depends>
+                </field>
+                <comment>Specify Time Interval to send metrics to the New Relic</comment>
+            </group>
+        </section>
     </system>
 </config>
