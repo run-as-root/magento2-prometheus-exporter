@@ -3,7 +3,7 @@
         "metrics": [
             {
                 "value":15,
-                "type":"guage",
+                "type":"gauge",
                 "name":"temperature",
                 "timestamp":1630557133,
                 "attributes":{

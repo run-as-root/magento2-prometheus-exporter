@@ -10,9 +10,9 @@ namespace RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes;
 
 use RunAsRoot\NewRelicApi\Request\Metric\Data\AbstractMetric;
 
-class GuageMetric extends AbstractMetric
+class GaugeMetric extends AbstractMetric
 {
-    private const METRIC_TYPE = 'guage';
+    private const METRIC_TYPE = 'gauge';
 
     private float $value;
 
