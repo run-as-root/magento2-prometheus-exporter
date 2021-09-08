@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Cron;
 
 use Magento\Framework\Exception\NoSuchEntityException;
+use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
 use function in_array;
@@ -17,12 +18,19 @@ class AggregateMetricsCron
     private $metricAggregatorPool;
     private $config;
     private $metricRepository;
+    private LoggerInterface $logger;
 
-    public function __construct(MetricAggregatorPool $metricAggregatorPool, Config $config, MetricRepositoryInterface $metricRepository)
+    public function __construct(
+        MetricAggregatorPool $metricAggregatorPool,
+        Config $config,
+        MetricRepositoryInterface $metricRepository,
+        LoggerInterface $logger
+    )
     {
         $this->metricAggregatorPool = $metricAggregatorPool;
         $this->config = $config;
         $this->metricRepository = $metricRepository;
+        $this->logger = $logger;
     }
 
     public function execute(): void
@@ -34,7 +42,13 @@ class AggregateMetricsCron
                 continue;
             }
 
-            $metricAggregator->aggregate();
+            try {
+                $metricAggregator->aggregate();
+            } catch (\Exception $e) {
+                $msg = sprintf('AggregateMetricsCron: Unable to process jobCode:%s ',$metricAggregator->getCode());
+                $this->logger->error($msg . $e->getMessage());
+                continue;
+            }
         }
     }
 

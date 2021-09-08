@@ -30,7 +30,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use RunAsRoot\NewRelicApi\Api\Metric\MetricV1Api;
 use RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes\CountMetric;
-use RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes\GuageMetric;
+use RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes\GaugeMetric;
 use RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes\SummaryMetric;
 use RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes\Value\SummaryMetricValue;
 use RunAsRoot\NewRelicApi\Request\Metric\MetricPostRequest;
@@ -74,12 +74,12 @@ class MetricV1ApiTest extends TestCase
         $this->api = new MetricV1Api(null, $this->client);
     }
 
-    public function testGuageMetricRequestObject(): void
+    public function testGaugeMetricRequestObject(): void
     {
         $serializer = $this->getJsonSerializer();
-        $requestObject = $this->getGuageMetricRequestObject();
+        $requestObject = $this->getGaugeMetricRequestObject();
 
-        $requestJsonFileOrig = file_get_contents(__DIR__ . '/_files/guage-metric-request.json');
+        $requestJsonFileOrig = file_get_contents(__DIR__ . '/_files/gauge-metric-request.json');
         $requestJsonFile = preg_replace('/\s+/', '', $requestJsonFileOrig);
 
         $jsonFromRequestObject = $serializer->serialize(
@@ -131,13 +131,13 @@ class MetricV1ApiTest extends TestCase
     public function testMetricOnSuccess(): void
     {
         $responseBody = file_get_contents(__DIR__ . '/_files/metric-request.json');
-        $guageMetricRequest = $this->getGuageMetricRequestObject();
+        $gaugeMetricRequest = $this->getGaugeMetricRequestObject();
         $httpResponse = new Response(200, [], $responseBody);
 
         $this->client->expects($this->once())->method('send')->willReturn($httpResponse);
 
         /** @var MetricPostResponse $response */
-        $response = $this->api->post($guageMetricRequest);
+        $response = $this->api->post($gaugeMetricRequest);
 
         $this->assertEquals(self::METRIC_RESPONSE_REQUEST_ID, $response->getRequestId());
     }
@@ -147,8 +147,8 @@ class MetricV1ApiTest extends TestCase
      */
     public function testExceptionOnResponseDeserialization(): void
     {
-        $responseBody = file_get_contents(__DIR__ . '/_files/guage-metric-request.json');
-        $guageMetricRequest = $this->getGuageMetricRequestObject();
+        $responseBody = file_get_contents(__DIR__ . '/_files/gauge-metric-request.json');
+        $gaugeMetricRequest = $this->getGaugeMetricRequestObject();
         $httpResponse = new Response(200, [], $responseBody);
 
         // SERIALIZER
@@ -162,7 +162,7 @@ class MetricV1ApiTest extends TestCase
 
         $this->expectException(DeserializationFailedException::class);
         $this->expectExceptionMessage('Error during deserialization');
-        $api->post($guageMetricRequest);
+        $api->post($gaugeMetricRequest);
     }
 
     /**
@@ -171,14 +171,14 @@ class MetricV1ApiTest extends TestCase
     public function testExceptionOnDeserializationError(): void
     {
         $brokenResponse = new Response(200, [], '[asdf]');
-        $guageMetricRequest = $this->getGuageMetricRequestObject();
+        $gaugeMetricRequest = $this->getGaugeMetricRequestObject();
 
         $this->client->expects($this->once())->method('send')->willReturn($brokenResponse);
 
         $this->expectException(DeserializationFailedException::class);
         $this->expectExceptionMessage('Error during deserialization');
 
-        $this->api->post($guageMetricRequest);
+        $this->api->post($gaugeMetricRequest);
     }
 
     /**
@@ -192,15 +192,15 @@ class MetricV1ApiTest extends TestCase
             new TransferException()
         );
 
-        $guageMetricRequest = $this->getGuageMetricRequestObject();
-        $this->api->post($guageMetricRequest);
+        $gaugeMetricRequest = $this->getGaugeMetricRequestObject();
+        $this->api->post($gaugeMetricRequest);
     }
 
-    private function getGuageMetricRequestObject(): MetricPostRequest
+    private function getGaugeMetricRequestObject(): MetricPostRequest
     {
         $request = new MetricPostRequest();
 
-        $metricObject = new GuageMetric();
+        $metricObject = new GaugeMetric();
         $metricObject->setName('temperature');
         $metricObject->setValue(15);
         $metricObject->setTimestamp(1630557133);
