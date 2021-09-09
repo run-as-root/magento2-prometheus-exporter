@@ -14,6 +14,7 @@ class NewRelicConfig
     private const CONFIG_PATH_NEWRELIC_API_URL = 'newrelic_configuration/metric/api_url';
     private const CONFIG_PATH_NEWRELIC_API_KEY = 'newrelic_configuration/metric/api_key';
     private const CONFIG_PATH_NEWRELIC_METRIC_STATUS = 'newrelic_configuration/metric/metric_status';
+    private const CONFIG_PATH_NEWRELIC_INSTANCE_NAME = 'newrelic_configuration/metric/instance_name';
     private const CONFIG_PATH_NEWRELIC_DEBUG_ENABLED = 'newrelic_configuration/metric/debug_enabled';
     private const CONFIG_PATH_NEWRELIC_CRON_ENABLED = 'newrelic_configuration/cron/cron_enabled';
 
@@ -50,6 +51,11 @@ class NewRelicConfig
         }
 
         return explode(',', $metrics);
+    }
+
+    public function getInstanceName(?string $scopeCode = null): string
+    {
+        return $this->config->getValue(self::CONFIG_PATH_NEWRELIC_INSTANCE_NAME, ScopeInterface::SCOPE_STORE, $scopeCode);
     }
 
     public function isDebugEnabled(?string $scopeCode = null): bool
