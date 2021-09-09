@@ -5,6 +5,7 @@
         <newrelic_configuration>
             <metric>
                 <api_url>https://metric-api.newrelic.com/metric</api_url>
+                <instance_name>default</instance_name>
             </metric>
             <cron>
                 <cron_interval>*/2 * * * *</cron_interval>

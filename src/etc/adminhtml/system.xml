@@ -58,6 +58,11 @@
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <comment>Generated under Insights in Manage data -> API Keys -> Insert Keys</comment>
                 </field>
+                <field id="instance_name" showInWebsite="1" showInStore="1" showInDefault="1" sortOrder="15" type="text" canRestore="1">
+                    <label>Metric Instance Name</label>
+                    <comment>Specify instance name for every metric</comment>
+                    <validate>required-entry</validate>
+                </field>
                 <field id="debug_enabled" showInWebsite="1" showInStore="1" showInDefault="1" sortOrder="15" type="select">
                     <label>Enable Debug Logs</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
