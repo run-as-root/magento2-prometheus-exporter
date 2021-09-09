@@ -6,9 +6,19 @@ namespace RunAsRoot\PrometheusExporter\Mapper\PostMetricRequest;
 use RunAsRoot\NewRelicApi\Request\Metric\Data\MetricTypes\GaugeMetric;
 use RunAsRoot\NewRelicApi\Request\Metric\MetricPostRequest;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
+use RunAsRoot\PrometheusExporter\Data\NewRelicConfig;
 
 class PostMetricRequestMapper
 {
+    private const INSTANCE_NAME = 'instanceName';
+
+    private NewRelicConfig $newRelicConfig;
+
+    public function __construct(NewRelicConfig $newRelicConfig)
+    {
+        $this->newRelicConfig = $newRelicConfig;
+    }
+
     /**
      * @param MetricInterface[] $metrics
      */
@@ -17,6 +27,7 @@ class PostMetricRequestMapper
         $metricPostRequest = new MetricPostRequest();
 
         foreach ($metrics as $metric) {
+
             $gaugeMetric = new GaugeMetric();
             $gaugeMetric->setName($metric->getCode());
             $gaugeMetric->setValue((float)$metric->getValue());
@@ -24,6 +35,7 @@ class PostMetricRequestMapper
             $gaugeMetric->setAttributes(
                 !empty($metric->getLabels()) ? $metric->getLabels() : null
             );
+            $gaugeMetric->addAttribute(self::INSTANCE_NAME, $this->newRelicConfig->getInstanceName());
 
             $metricPostRequest->addMetric($gaugeMetric);
         }
