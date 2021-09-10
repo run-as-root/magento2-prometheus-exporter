@@ -3,6 +3,7 @@
     <preference for="RunAsRoot\PrometheusExporter\Api\Data\MetricInterface" type="RunAsRoot\PrometheusExporter\Model\Metric"/>
     <preference for="RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface" type="RunAsRoot\PrometheusExporter\Repository\MetricRepository"/>
     <preference for="RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface" type="RunAsRoot\PrometheusExporter\Service\UpdateMetricService"/>
+    <preference for="RunAsRoot\PrometheusExporter\NewRelicApi\Metric\MetricNewRelicApiInterface" type="RunAsRoot\PrometheusExporter\NewRelicApi\Metric\MetricNewRelicApiProxy"/>
 
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
