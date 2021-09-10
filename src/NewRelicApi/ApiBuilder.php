@@ -26,11 +26,11 @@ class ApiBuilder
      *
      * @throws \RuntimeException
      */
-    public function build(string $class, ?int $storeId): AbstractV1Api
+    public function build(string $class, ?string $scopeCode): AbstractV1Api
     {
-        $host = $this->newRelicConfig->getApiUrl($storeId);
-        $authKey = $this->newRelicConfig->getApiKey($storeId);
-        $debuggingEnabled = $this->newRelicConfig->isDebugEnabled($storeId);
+        $host = $this->newRelicConfig->getApiUrl($scopeCode);
+        $authKey = $this->newRelicConfig->getApiKey($scopeCode);
+        $debuggingEnabled = $this->newRelicConfig->isDebugEnabled($scopeCode);
 
         $config = new NewRelicClientConfiguration();
         $config->setServiceUrl($host);
