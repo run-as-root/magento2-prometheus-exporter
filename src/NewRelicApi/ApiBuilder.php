@@ -30,10 +30,12 @@ class ApiBuilder
     {
         $host = $this->newRelicConfig->getApiUrl($storeId);
         $authKey = $this->newRelicConfig->getApiKey($storeId);
+        $debuggingEnabled = $this->newRelicConfig->isDebugEnabled($storeId);
 
         $config = new NewRelicClientConfiguration();
         $config->setServiceUrl($host);
         $config->setApiKey($authKey);
+        $config->setIsDebugAllowed($debuggingEnabled);
 
         $logger = $this->newRelicConfig->isDebugEnabled() ?
             $this->objectManager->get(MetricLogger::class)
