@@ -7,5 +7,4 @@ use Exception;
 
 class PostMetricException extends Exception
 {
-
 }

@@ -27,7 +27,6 @@ class PostMetricRequestMapper
         $metricPostRequest = new MetricPostRequest();
 
         foreach ($metrics as $metric) {
-
             $gaugeMetric = new GaugeMetric();
             $gaugeMetric->setName($metric->getCode());
             $gaugeMetric->setValue((float)$metric->getValue());

@@ -54,5 +54,4 @@ class SummaryMetricValue
     {
         $this->max = $max;
     }
-
 }

@@ -25,8 +25,8 @@ class MetricNewRelicApiProxy implements MetricNewRelicApiInterface
      * @param MetricInterface[] $metrics
      * @throws ApiException
      */
-    public function post(array $metrics): MetricPostResponse {
-
+    public function post(array $metrics): MetricPostResponse
+    {
         $api = $this->apiBuilder->build(MetricV1Api::class, null);
 
         /** @var MetricNewRelicApi $metricNewRelicApi */

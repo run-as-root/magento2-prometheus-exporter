@@ -25,8 +25,7 @@ class SendNewRelicMetricsCron
         SearchCriteriaBuilder $searchCriteriaBuilder,
         MetricNewRelicApiInterface $metricNewRelicApi,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->newRelicConfig = $newRelicConfig;
         $this->metricRepository = $metricRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;

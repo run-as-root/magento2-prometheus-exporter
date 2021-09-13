@@ -25,8 +25,7 @@ class AggregateMetricsCron
         Config $config,
         MetricRepositoryInterface $metricRepository,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->metricAggregatorPool = $metricAggregatorPool;
         $this->config = $config;
         $this->metricRepository = $metricRepository;
@@ -45,7 +44,7 @@ class AggregateMetricsCron
             try {
                 $metricAggregator->aggregate();
             } catch (\Exception $e) {
-                $msg = sprintf('AggregateMetricsCron: Unable to process jobCode:%s ',$metricAggregator->getCode());
+                $msg = sprintf('AggregateMetricsCron: Unable to process jobCode:%s ', $metricAggregator->getCode());
                 $this->logger->error($msg . $e->getMessage());
                 continue;
             }
