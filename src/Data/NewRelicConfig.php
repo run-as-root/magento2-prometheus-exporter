@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Data;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\ScopeInterface;
 use RunAsRoot\PrometheusExporter\Model\SourceModel\Metrics as MetricsSource;
 
@@ -18,13 +19,18 @@ class NewRelicConfig
     private const CONFIG_PATH_NEWRELIC_DEBUG_ENABLED = 'newrelic_configuration/metric/debug_enabled';
     private const CONFIG_PATH_NEWRELIC_CRON_ENABLED = 'newrelic_configuration/cron/cron_enabled';
 
-    private $config;
-    private $metricsSource;
+    private ScopeConfigInterface $config;
+    private MetricsSource $metricsSource;
+    private EncryptorInterface $encryptor;
 
-    public function __construct(ScopeConfigInterface $config, MetricsSource $metricsSource)
-    {
+    public function __construct(
+        ScopeConfigInterface $config,
+        MetricsSource $metricsSource,
+        EncryptorInterface $encryptor
+    ) {
         $this->config = $config;
         $this->metricsSource = $metricsSource;
+        $this->encryptor = $encryptor;
     }
 
     public function isEnabled(?string $scopeCode = null): bool
@@ -39,7 +45,8 @@ class NewRelicConfig
 
     public function getApiKey(?string $scopeCode = null): string
     {
-        return $this->config->getValue(self::CONFIG_PATH_NEWRELIC_API_KEY, ScopeInterface::SCOPE_STORE, $scopeCode);
+        $encryptedValue = $this->config->getValue(self::CONFIG_PATH_NEWRELIC_API_KEY, ScopeInterface::SCOPE_STORE, $scopeCode);
+        return $this->encryptor->decrypt($encryptedValue);
     }
 
     public function getMetricsStatus(?string $scopeCode = null): array
