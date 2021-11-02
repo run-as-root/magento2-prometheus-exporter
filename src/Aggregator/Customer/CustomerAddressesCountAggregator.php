@@ -42,7 +42,6 @@ class CustomerAddressesCountAggregator implements MetricAggregatorInterface
 
         $query = 'SELECT ' . 'COUNT(customer_address_entity.`entity_id`) AS "Total" FROM customer_entity' .
             ' INNER JOIN customer_address_entity ON customer_address_entity.`parent_id`=customer_entity.`entity_id`' .
-            ' WHERE customer_entity.`default_billing` IS NOT NULL' .
             ' GROUP BY "Total"';
 
         $customerAssociatedAddressCount = (int)$connection->fetchOne($query);
