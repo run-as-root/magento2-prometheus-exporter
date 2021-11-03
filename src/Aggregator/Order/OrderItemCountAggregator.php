@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Sales\Model\Order\Item;
+use Magento\Sales\Model\ResourceModel\Order\Item\CollectionFactory as OrderItemCollectionFactory;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 use function array_key_exists;
@@ -16,21 +15,18 @@ class OrderItemCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_orders_items_count_total';
 
-    private $updateMetricService;
-    private $orderRepository;
-    private $searchCriteriaBuilder;
-    private $storeRepository;
+    private UpdateMetricService $updateMetricService;
+    private OrderItemCollectionFactory $orderItemCollectionFactory;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         UpdateMetricService $updateMetricService,
-        OrderRepositoryInterface $orderRepository,
-        StoreRepositoryInterface $storeRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        OrderItemCollectionFactory $orderItemCollectionFactory,
+        ResourceConnection $resourceConnection
     ) {
         $this->updateMetricService = $updateMetricService;
-        $this->orderRepository = $orderRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->storeRepository = $storeRepository;
+        $this->orderItemCollectionFactory = $orderItemCollectionFactory;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -50,33 +46,34 @@ class OrderItemCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $connection = $this->resourceConnection->getConnection();
 
-        $orderSearchResult = $this->orderRepository->getList($searchCriteria);
+        $query = 'SELECT ' . 'sales_order.entity_id AS ORDER_ID, store.code AS STORE_CODE' .
+            ' FROM sales_order' .
+            ' INNER JOIN store' .
+            ' ON sales_order.`store_id` = store.store_id';
 
-        if ($orderSearchResult->getTotalCount() === 0) {
+        $ordersAndStores = $connection->fetchAll($query);
+
+        if (count($ordersAndStores) === 0) {
             return true;
         }
 
-        $orders = $orderSearchResult->getItems();
-
         $countByStore = [];
 
-        foreach ($orders as $order) {
-            $storeId = $order->getStoreId();
-
-            try {
-                $store = $this->storeRepository->getById($storeId);
-                $storeCode = $store->getCode();
-            } catch (NoSuchEntityException $e) {
-                $storeCode = $storeId;
-            }
+        foreach ($ordersAndStores as $orderAndStore) {
+            $orderId = $orderAndStore['ORDER_ID'] ?? 0;
+            $storeCode = $orderAndStore['STORE_CODE'] ?? '';
 
             if (!array_key_exists($storeCode, $countByStore)) {
                 $countByStore[$storeCode] = [];
             }
 
-            foreach ($order->getItems() as $orderItem) {
+            $orderItemCollection = $this->orderItemCollectionFactory->create();
+            $searchResults = $orderItemCollection->addFilter('order_id', $orderId);
+
+            foreach ($searchResults->getItems() as $orderItem) {
+                /** @var Item $orderItem */
                 $status = (string)$orderItem->getStatus();
 
                 if (!array_key_exists($status, $countByStore[$storeCode])) {
