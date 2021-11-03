@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
@@ -19,23 +18,20 @@ class OrderCountAggregator implements MetricAggregatorInterface
     private const METRIC_CODE = 'magento_orders_count_total';
 
     private MetricRepository $metricRepository;
-    private OrderRepositoryInterface $orderRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private StoreRepositoryInterface $storeRepository;
     private UpdateMetricService $updateMetricService;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         MetricRepository $metricRepository,
-        OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        StoreRepositoryInterface $storeRepository,
-        UpdateMetricService $updateMetricService
+        UpdateMetricService $updateMetricService,
+        ResourceConnection $resourceConnection
     ) {
         $this->metricRepository = $metricRepository;
-        $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->storeRepository = $storeRepository;
         $this->updateMetricService = $updateMetricService;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -57,44 +53,28 @@ class OrderCountAggregator implements MetricAggregatorInterface
     {
         $this->resetMetrics();
 
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $orderSearchResult = $this->orderRepository->getList($searchCriteria);
+        $connection = $this->resourceConnection->getConnection();
 
-        if ($orderSearchResult->getTotalCount() === 0) {
+        $query = 'SELECT ' . 'COUNT(*) AS ORDER_COUNT, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
+            ' FROM `sales_order` AS `ORDER`' .
+            ' INNER JOIN `store` AS `STORE`' .
+            ' ON ORDER.store_id = STORE.store_id' .
+            ' GROUP BY ORDER.state, STORE.code';
+
+        $orderSearchResult = $connection->fetchAll($query);
+
+        if (count($orderSearchResult) === 0) {
             return true;
         }
 
-        $orders = $orderSearchResult->getItems();
+        foreach ($orderSearchResult as $result) {
+            $count = $result['ORDER_COUNT'] ?? 0;
+            $orderState = $result['ORDER_STATE'] ?? '';
+            $storeCode = $result['STORE_CODE'] ?? '';
 
-        $countByStore = [];
+            $labels = ['state' => $orderState, 'store_code' => $storeCode];
 
-        foreach ($orders as $order) {
-            $state = $order->getState();
-            $storeId = $order->getStoreId();
-
-            try {
-                $storeCode = $this->storeRepository->getById($storeId)->getCode();
-            } catch (NoSuchEntityException $e) {
-                $storeCode = $storeId;
-            }
-
-            if (!array_key_exists($storeCode, $countByStore)) {
-                $countByStore[$storeCode] = [];
-            }
-
-            if (!array_key_exists($state, $countByStore[$storeCode])) {
-                $countByStore[$storeCode][$state] = 0;
-            }
-
-            $countByStore[$storeCode][$state]++;
-        }
-
-        foreach ($countByStore as $storeCode => $countByState) {
-            foreach ($countByState as $state => $count) {
-                $labels = ['state' => $state, 'store_code' => $storeCode];
-
-                $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
-            }
+            $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
         }
 
         return true;
