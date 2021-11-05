@@ -4,34 +4,21 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Customer;
 
-use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Framework\App\ResourceConnection;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
-use function array_key_exists;
 
 class CustomerCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento2_customer_count_total';
 
-    private $updateMetricService;
-    private $searchCriteriaBuilder;
-    private $storeRepository;
-    private $customerRepository;
+    private UpdateMetricService $updateMetricService;
+    private ResourceConnection $resourceConnection;
 
-    public function __construct(
-        UpdateMetricService $updateMetricService,
-        CustomerRepositoryInterface $customerRepository,
-        StoreRepositoryInterface $storeRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
-    ) {
-        $this->updateMetricService = $updateMetricService;
-        $this->customerRepository = $customerRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->storeRepository = $storeRepository;
+    public function __construct(UpdateMetricService $updateMetricService, ResourceConnection $resourceConnection)
+    {
+        $this->updateMetricService   = $updateMetricService;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -49,46 +36,27 @@ class CustomerCountAggregator implements MetricAggregatorInterface
         return 'gauge';
     }
 
-    /**
-     * @throws LocalizedException
-     */
     public function aggregate(): bool
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $connection = $this->resourceConnection->getConnection();
+        $query = 'SELECT ' . 'COUNT(*) AS CUSTOMER_COUNT, STORE.`code` AS STORE_CODE' .
+            ' FROM customer_entity AS CUSTOMERS' .
+            ' INNER JOIN store AS STORE' .
+            ' ON CUSTOMERS.`store_id` = STORE.`store_id`' .
+            ' GROUP BY STORE.`store_id`';
 
-        $searchResult = $this->customerRepository->getList($searchCriteria);
+        $customersCountPerStore = $connection->fetchAll($query);
 
-        if ($searchResult->getTotalCount() === 0) {
-            return true;
-        }
+        foreach ($customersCountPerStore as $customerCountPerStore) {
 
-        $customers = $searchResult->getItems();
+            $customerCount = $customerCountPerStore['CUSTOMER_COUNT'] ?? 0;
+            $storeCode = $customerCountPerStore['STORE_CODE'] ?? '';
 
-        $countByStore = [];
-
-        foreach ($customers as $customer) {
-            $storeId = $customer->getStoreId();
-
-            try {
-                $store = $this->storeRepository->getById($storeId);
-                $storeCode = $store->getCode();
-            } catch (NoSuchEntityException $e) {
-                $storeCode = $storeId;
-            }
-
-            if (!array_key_exists($storeCode, $countByStore)) {
-                $countByStore[$storeCode] = 0;
-            }
-
-            $countByStore[$storeCode]++;
-        }
-
-        foreach ($countByStore as $storeCode => $count) {
             $labels = [ 'store_code' => $storeCode ];
 
-            $this->updateMetricService->update(self::METRIC_CODE, (string)$count, $labels);
+            $this->updateMetricService->update(self::METRIC_CODE, (string)$customerCount, $labels);
         }
-
         return true;
+
     }
 }

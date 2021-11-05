@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Store\Api\StoreRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
@@ -19,23 +18,20 @@ class OrderAmountAggregator implements MetricAggregatorInterface
     private const METRIC_CODE = 'magento_orders_amount_total';
 
     private MetricRepository $metricRepository;
-    private OrderRepositoryInterface $orderRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
-    private StoreRepositoryInterface $storeRepository;
     private UpdateMetricServiceInterface $updateMetricService;
+    private ResourceConnection $resourceConnection;
 
     public function __construct(
         MetricRepository $metricRepository,
-        OrderRepositoryInterface $orderRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        StoreRepositoryInterface $storeRepository,
-        UpdateMetricServiceInterface $updateMetricService
+        UpdateMetricServiceInterface $updateMetricService,
+        ResourceConnection $resourceConnection
     ) {
         $this->metricRepository = $metricRepository;
-        $this->orderRepository = $orderRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->storeRepository = $storeRepository;
         $this->updateMetricService = $updateMetricService;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -57,44 +53,28 @@ class OrderAmountAggregator implements MetricAggregatorInterface
     {
         $this->resetMetrics();
 
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $orderSearchResult = $this->orderRepository->getList($searchCriteria);
+        $connection = $this->resourceConnection->getConnection();
 
-        if ($orderSearchResult->getTotalCount() === 0) {
+        $query = 'SELECT ' . 'SUM(ORDER.grand_total) AS GRAND_TOTAL, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
+            ' FROM `sales_order` AS `ORDER`' .
+            ' INNER JOIN `store` AS `STORE`' .
+            ' ON ORDER.store_id = STORE.store_id' .
+            ' GROUP BY ORDER.state, STORE.code';
+
+        $orderSearchResult = $connection->fetchAll($query);
+
+        if (count($orderSearchResult) === 0) {
             return true;
         }
 
-        $orders = $orderSearchResult->getItems();
+        foreach ($orderSearchResult as $result) {
+            $grandTotal = $result['GRAND_TOTAL'] ?? 0;
+            $orderState = $result['ORDER_STATE'] ?? '';
+            $storeCode = $result['STORE_CODE'] ?? '';
 
-        $grandTotalsByStore = [];
+            $labels = ['state' => $orderState, 'store_code' => $storeCode];
 
-        foreach ($orders as $order) {
-            $state = $order->getState();
-            $storeId = $order->getStoreId();
-
-            try {
-                $storeCode = $this->storeRepository->getById($storeId)->getCode();
-            } catch (NoSuchEntityException $e) {
-                $storeCode = $storeId;
-            }
-
-            if (!array_key_exists($storeCode, $grandTotalsByStore)) {
-                $grandTotalsByStore[$storeCode] = [];
-            }
-
-            if (!array_key_exists($state, $grandTotalsByStore[$storeCode])) {
-                $grandTotalsByStore[$storeCode][$state] = 0.0;
-            }
-
-            $grandTotalsByStore[$storeCode][$state] += $order->getGrandTotal();
-        }
-
-        foreach ($grandTotalsByStore as $storeCode => $grandTotals) {
-            foreach ($grandTotals as $state => $grandTotal) {
-                $labels = ['state' => $state, 'store_code' => $storeCode];
-
-                $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
-            }
+            $this->updateMetricService->update(self::METRIC_CODE, (string)$grandTotal, $labels);
         }
 
         return true;
