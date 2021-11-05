@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Customer;
 
-use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\App\ResourceConnection;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -14,20 +12,13 @@ class CustomerAddressesCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento2_customer_addresses_count_total';
 
-    private $updateMetricService;
+    private UpdateMetricService $updateMetricService;
+    private ResourceConnection $resourceConnection;
 
-    private $searchCriteriaBuilder;
-
-    private $customerRepository;
-
-    public function __construct(
-        UpdateMetricService $updateMetricService,
-        CustomerRepositoryInterface $customerRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
-    ) {
+    public function __construct(UpdateMetricService $updateMetricService, ResourceConnection $resourceConnection)
+    {
         $this->updateMetricService   = $updateMetricService;
-        $this->customerRepository    = $customerRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -47,27 +38,12 @@ class CustomerAddressesCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $connection = $this->resourceConnection->getConnection();
 
-        try {
-            $searchResult = $this->customerRepository->getList($searchCriteria);
-            $customers    = $searchResult->getItems();
-        } catch (LocalizedException $e) {
-            $customers = [];
-        }
+        $query = 'SELECT ' . 'COUNT(*) FROM customer_address_entity';
 
-        $allAddressesCount = 0;
+        $customerAssociatedAddressCount = (int)$connection->fetchOne($query);
 
-        foreach ($customers as $customer) {
-            $addresses = $customer->getAddresses();
-
-            // $addresses could be null
-            if ($addresses) {
-                $addressesCount    = count($addresses);
-                $allAddressesCount += $addressesCount;
-            }
-        }
-
-        return $this->updateMetricService->update(self::METRIC_CODE, (string)$allAddressesCount);
+        return $this->updateMetricService->update(self::METRIC_CODE, (string)$customerAssociatedAddressCount);
     }
 }

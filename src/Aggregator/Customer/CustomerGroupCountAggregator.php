@@ -4,28 +4,22 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Customer;
 
-use Magento\Customer\Api\GroupRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\App\ResourceConnection;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
+use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 
 class CustomerGroupCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento2_customer_group_count_total';
 
-    private $updateMetricService;
-    private $searchCriteriaBuilder;
-    private $groupRepository;
+    private UpdateMetricService $updateMetricService;
+    private ResourceConnection $resourceConnection;
 
-    public function __construct(
-        UpdateMetricServiceInterface $updateMetricService,
-        GroupRepositoryInterface $groupRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
-    ) {
+    public function __construct(UpdateMetricService $updateMetricService, ResourceConnection $resourceConnection)
+    {
         $this->updateMetricService   = $updateMetricService;
-        $this->groupRepository       = $groupRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -45,19 +39,12 @@ class CustomerGroupCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        try {
-            $totalCount = $this->groupRepository->getList($searchCriteria)->getTotalCount();
-        } catch (LocalizedException $e) {
-            $totalCount = -1;
-        }
+        $connection = $this->resourceConnection->getConnection();
 
-        if ($totalCount <= 0) {
-            return false;
-        }
+        $query = 'SELECT ' . 'COUNT(*) FROM customer_group';
 
-        $this->updateMetricService->update(self::METRIC_CODE, (string)$totalCount);
+        $totalGroup = (int)$connection->fetchOne($query);
 
-        return true;
+        return $this->updateMetricService->update(self::METRIC_CODE, (string)$totalGroup);
     }
 }
