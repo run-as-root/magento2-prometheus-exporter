@@ -48,7 +48,6 @@ class CustomerCountAggregator implements MetricAggregatorInterface
         $customersCountPerStore = $connection->fetchAll($query);
 
         foreach ($customersCountPerStore as $customerCountPerStore) {
-
             $customerCount = $customerCountPerStore['CUSTOMER_COUNT'] ?? 0;
             $storeCode = $customerCountPerStore['STORE_CODE'] ?? '';
 
@@ -57,6 +56,5 @@ class CustomerCountAggregator implements MetricAggregatorInterface
             $this->updateMetricService->update(self::METRIC_CODE, (string)$customerCount, $labels);
         }
         return true;
-
     }
 }
