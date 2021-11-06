@@ -11,7 +11,7 @@ use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 
 class CustomerGroupCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_customer_group_count_total';
+    private const METRIC_CODE = 'magento_customer_group_count_total';
 
     private UpdateMetricService $updateMetricService;
     private ResourceConnection $resourceConnection;

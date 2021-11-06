@@ -10,7 +10,7 @@ use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
 class CustomerAddressesCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento2_customer_addresses_count_total';
+    private const METRIC_CODE = 'magento_customer_addresses_count_total';
 
     private UpdateMetricService $updateMetricService;
     private ResourceConnection $resourceConnection;
