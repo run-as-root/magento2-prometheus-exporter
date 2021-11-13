@@ -53,6 +53,7 @@
 
                 <!-- Store Aggregator -->
                 <item name="StoreCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Store\StoreCountAggregator</item>
+                <item name="WebsiteCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Store\WebsiteCountAggregator</item>
 
                 <!-- User Aggregator -->
                 <item name="AdminUserCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\User\AdminUserCountAggregator</item>
