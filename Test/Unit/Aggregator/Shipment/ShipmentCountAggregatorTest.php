@@ -78,7 +78,6 @@ final class ShipmentCountAggregatorTest extends TestCase
                        'ss.store_id = s.store_id',
                        ['code']
                    ]
-
                )->willReturn($select);
         $select->expects($this->once())->method('reset')->with(Select::COLUMNS)->willReturn($select);
         $select->expects($this->once())->method('group')->with(['s.code', 'iss.source_code']);

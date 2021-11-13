@@ -72,10 +72,10 @@ class ShipmentCountAggregator implements MetricAggregatorInterface
                    'ss.entity_id = iss.shipment_id',
                    ['source_code']
                )->joinInner(
-                ['s' => $connection->getTableName('store')],
-                'ss.store_id = s.store_id',
-                ['code']
-            )->reset(Select::COLUMNS)
+                    ['s' => $connection->getTableName('store')],
+                    'ss.store_id = s.store_id',
+                    ['code']
+                )->reset(Select::COLUMNS)
                ->columns(
                    [
                        'SHIPMENT_COUNT' => 'COUNT(ss.entity_id)',

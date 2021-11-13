@@ -137,9 +137,9 @@ class CategoryCountAggregator implements MetricAggregatorInterface
                    ['s' => $connection->getTableName('store')],
                    'sg.group_id = s.group_id'
                )->joinInner(
-                ['cce1' => $connection->getTableName('catalog_category_entity')],
-                'sg.root_category_id = cce1.entity_id'
-            )->joinInner(
+                    ['cce1' => $connection->getTableName('catalog_category_entity')],
+                    'sg.root_category_id = cce1.entity_id'
+                )->joinInner(
                 ['cce2' => $connection->getTableName('catalog_category_entity')],
                 "cce2.path like CONCAT(cce1.path, '%')"
             )->joinLeft(
