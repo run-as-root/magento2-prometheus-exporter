@@ -142,24 +142,23 @@ class CategoryCountAggregator implements MetricAggregatorInterface
                 )->joinInner(
                 ['cce2' => $connection->getTableName('catalog_category_entity')],
                 "cce2.path like CONCAT(cce1.path, '%')"
-            )->joinLeft(
-                ['ccei1' => $connection->getTableName('catalog_category_entity_int')],
-                "cce2.$linkField = ccei1.$linkField AND " .
-                "ccei1.attribute_id = $isActive AND ccei1.store_id = s.store_id"
-            )->joinLeft(
-                ['ccei2' => $connection->getTableName('catalog_category_entity_int')],
-                "cce2.$linkField = ccei2.$linkField AND " .
-                "ccei2.attribute_id = $isActive AND ccei2.store_id = 0"
-            )->joinLeft(
-                ['ccei3' => $connection->getTableName('catalog_category_entity_int')],
-                "cce2.$linkField = ccei3.$linkField AND " .
-                "ccei3.attribute_id = $isInMenu AND ccei3.store_id = s.store_id"
-            )->joinLeft(
-                ['ccei4' => $connection->getTableName('catalog_category_entity_int')],
-                "cce2.$linkField = ccei4.$linkField AND " .
-                "ccei4.attribute_id = $isInMenu AND ccei4.store_id = 0"
-            )->reset(Select::COLUMNS)
-               ->columns(
+                )->joinLeft(
+                    ['ccei1' => $connection->getTableName('catalog_category_entity_int')],
+                    "cce2.$linkField = ccei1.$linkField AND " .
+                    "ccei1.attribute_id = $isActive AND ccei1.store_id = s.store_id"
+                )->joinLeft(
+                    ['ccei2' => $connection->getTableName('catalog_category_entity_int')],
+                    "cce2.$linkField = ccei2.$linkField AND " .
+                    "ccei2.attribute_id = $isActive AND ccei2.store_id = 0"
+                )->joinLeft(
+                    ['ccei3' => $connection->getTableName('catalog_category_entity_int')],
+                    "cce2.$linkField = ccei3.$linkField AND " .
+                    "ccei3.attribute_id = $isInMenu AND ccei3.store_id = s.store_id"
+                )->joinLeft(
+                    ['ccei4' => $connection->getTableName('catalog_category_entity_int')],
+                    "cce2.$linkField = ccei4.$linkField AND " .
+                    "ccei4.attribute_id = $isInMenu AND ccei4.store_id = 0"
+                )->reset(Select::COLUMNS)->columns(
                    [
                        'STORE_CODE' => 's.code',
                        'ACTIVE_IN_MENU' => $activeInMenu,

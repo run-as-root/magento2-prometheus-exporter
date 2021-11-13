@@ -22,7 +22,7 @@ class ShipmentCountAggregator implements MetricAggregatorInterface
      */
     public function __construct(
         UpdateMetricService $updateMetricService,
-        ResourceConnection $resourceConnection
+        ResourceConnection  $resourceConnection
     ) {
         $this->updateMetricService = $updateMetricService;
         $this->resourceConnection = $resourceConnection;
@@ -72,17 +72,16 @@ class ShipmentCountAggregator implements MetricAggregatorInterface
                    'ss.entity_id = iss.shipment_id',
                    ['source_code']
                )->joinInner(
-                    ['s' => $connection->getTableName('store')],
-                    'ss.store_id = s.store_id',
-                    ['code']
-                )->reset(Select::COLUMNS)
-               ->columns(
-                   [
-                       'SHIPMENT_COUNT' => 'COUNT(ss.entity_id)',
-                       'STORE_CODE' => 's.code',
-                       'SOURCE_CODE' => 'iss.source_code'
-                   ]
-               )->group(['s.code', 'iss.source_code']);
+                ['s' => $connection->getTableName('store')],
+                'ss.store_id = s.store_id',
+                ['code']
+            )->reset(Select::COLUMNS)->columns(
+                [
+                    'SHIPMENT_COUNT' => 'COUNT(ss.entity_id)',
+                    'STORE_CODE' => 's.code',
+                    'SOURCE_CODE' => 'iss.source_code'
+                ]
+            )->group(['s.code', 'iss.source_code']);
 
         return $select;
     }
