@@ -8,6 +8,9 @@
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
+                <!-- Category Aggregator -->
+                <item name="CategoryCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Category\CategoryCountAggregator</item>
+
                 <!-- CMS Aggregator -->
                 <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
                 <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>

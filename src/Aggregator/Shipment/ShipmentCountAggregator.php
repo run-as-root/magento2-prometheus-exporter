@@ -35,7 +35,7 @@ class ShipmentCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return 'Magento 2 Shipments amount by store and source.';
+        return 'Magento 2 Shipments count by store and source.';
     }
 
     public function getType(): string
