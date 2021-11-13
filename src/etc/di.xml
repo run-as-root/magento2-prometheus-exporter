@@ -36,6 +36,9 @@
                 <item name="OrderItemAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator</item>
                 <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
 
+                <!-- Shipment Aggregator -->
+                <item name="ShipmentCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Shipment\ShipmentCountAggregator</item>
+
                 <!-- Payment Aggregator -->
                 <item name="ActivePaymentMethodsCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Payment\ActivePaymentMethodsCountAggregator</item>
 
