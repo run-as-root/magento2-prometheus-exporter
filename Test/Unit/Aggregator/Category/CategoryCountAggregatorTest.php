@@ -18,11 +18,11 @@ use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 final class CategoryCountAggregatorTest extends TestCase
 {
     private const METRIC_CODE = 'magento_catalog_category_count_total';
-    private const T_ATT = 'm2_eav_attribute';
-    private const T_CAT_ENT_INT = 'm2_catalog_category_entity_int';
-    private const T_CAT_ENT = 'm2_catalog_category_entity';
-    private const T_STORE_GROUP = 'm2_store_group';
-    private const T_STORE = 'm2_store';
+    private const TABLE_ATT = 'm2_eav_attribute';
+    private const TABLE_CAT_ENT_INT = 'm2_catalog_category_entity_int';
+    private const TABLE_CAT_ENT = 'm2_catalog_category_entity';
+    private const TABLE_STORE_GROUP = 'm2_store_group';
+    private const TABLE_STORE = 'm2_store';
     private const LINK_FIELD = 'row_id';
     private const ATTR_ID = 77;
 
@@ -90,7 +90,7 @@ final class CategoryCountAggregatorTest extends TestCase
         $select = $this->createMock(Select::class);
 
         $select->expects($this->exactly(3))->method('from')
-               ->withConsecutive([self::T_ATT], [self::T_ATT], [["sg" => self::T_STORE_GROUP]])->willReturn($select);
+               ->withConsecutive([self::TABLE_ATT], [self::TABLE_ATT], [["sg" => self::TABLE_STORE_GROUP]])->willReturn($select);
 
         $select->expects($this->exactly(4))->method('where')
                ->withConsecutive(
@@ -107,15 +107,15 @@ final class CategoryCountAggregatorTest extends TestCase
         $select->expects($this->exactly(3))->method('joinInner')
                ->withConsecutive(
                    [
-                       ['s' => self::T_STORE],
+                       ['s' => self::TABLE_STORE],
                        'sg.group_id = s.group_id'
                    ],
                    [
-                       ['cce1' => self::T_CAT_ENT],
+                       ['cce1' => self::TABLE_CAT_ENT],
                        'sg.root_category_id = cce1.entity_id'
                    ],
                    [
-                       ['cce2' => self::T_CAT_ENT],
+                       ['cce2' => self::TABLE_CAT_ENT],
                        "cce2.path like CONCAT(cce1.path, '%')"
                    ]
                )->willReturn($select);
@@ -123,7 +123,7 @@ final class CategoryCountAggregatorTest extends TestCase
         $select->expects($this->exactly(4))->method('joinLeft')
                ->withConsecutive(
                    [
-                       ['ccei1' => self::T_CAT_ENT_INT],
+                       ['ccei1' => self::TABLE_CAT_ENT_INT],
                        sprintf(
                            "cce2.%s = ccei1.%s AND ccei1.attribute_id = %s AND ccei1.store_id = s.store_id",
                            self::LINK_FIELD,
@@ -132,7 +132,7 @@ final class CategoryCountAggregatorTest extends TestCase
                        )
                    ],
                    [
-                       ['ccei2' => self::T_CAT_ENT_INT],
+                       ['ccei2' => self::TABLE_CAT_ENT_INT],
                        sprintf(
                            "cce2.%s = ccei2.%s AND ccei2.attribute_id = %s AND ccei2.store_id = 0",
                            self::LINK_FIELD,
@@ -141,7 +141,7 @@ final class CategoryCountAggregatorTest extends TestCase
                        )
                    ],
                    [
-                       ['ccei3' => self::T_CAT_ENT_INT],
+                       ['ccei3' => self::TABLE_CAT_ENT_INT],
                        sprintf(
                            "cce2.%s = ccei3.%s AND ccei3.attribute_id = %s AND ccei3.store_id = s.store_id",
                            self::LINK_FIELD,
@@ -150,7 +150,7 @@ final class CategoryCountAggregatorTest extends TestCase
                        )
                    ],
                    [
-                       ['ccei4' => self::T_CAT_ENT_INT],
+                       ['ccei4' => self::TABLE_CAT_ENT_INT],
                        sprintf(
                            "cce2.%s = ccei4.%s AND ccei4.attribute_id = %s AND ccei4.store_id = 0",
                            self::LINK_FIELD,
@@ -206,11 +206,11 @@ final class CategoryCountAggregatorTest extends TestCase
     private function getTableNamesMap(): array
     {
         return [
-            ['eav_attribute', self::T_ATT],
-            ['catalog_category_entity_int', self::T_CAT_ENT_INT],
-            ['catalog_category_entity', self::T_CAT_ENT],
-            ['store', self::T_STORE],
-            ['store_group', self::T_STORE_GROUP],
+            ['eav_attribute', self::TABLE_ATT],
+            ['catalog_category_entity_int', self::TABLE_CAT_ENT_INT],
+            ['catalog_category_entity', self::TABLE_CAT_ENT],
+            ['store', self::TABLE_STORE],
+            ['store_group', self::TABLE_STORE_GROUP],
         ];
     }
 

@@ -13,9 +13,9 @@ use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 final class ShipmentCountAggregatorTest extends TestCase
 {
     private const METRIC_CODE = 'magento_shipments_count_total';
-    private const T_SHIP = 'm2_sales_shipment';
-    private const T_INV_SHIP = 'm2_inventory_shipment_source';
-    private const T_STORE = 'm2_store';
+    private const TABLE_SHIP = 'm2_sales_shipment';
+    private const TABLE_INV_SHIP = 'm2_inventory_shipment_source';
+    private const TABLE_STORE = 'm2_store';
 
     private ShipmentCountAggregator $subject;
 
@@ -62,19 +62,19 @@ final class ShipmentCountAggregatorTest extends TestCase
         $select = $this->createMock(Select::class);
         $select->expects($this->once())
                ->method('from')
-               ->with(['ss' => self::T_SHIP])
+               ->with(['ss' => self::TABLE_SHIP])
                ->willReturn($select);
 
         $select->expects($this->exactly(2))
                ->method('joinInner')
                ->withConsecutive(
                    [
-                       ['iss' => self::T_INV_SHIP],
+                       ['iss' => self::TABLE_INV_SHIP],
                        'ss.entity_id = iss.shipment_id',
                        ['source_code']
                    ],
                    [
-                       ['s' => self::T_STORE],
+                       ['s' => self::TABLE_STORE],
                        'ss.store_id = s.store_id',
                        ['code']
                    ]
@@ -110,9 +110,9 @@ final class ShipmentCountAggregatorTest extends TestCase
                    ->method('getTableName')
                    ->willReturnMap(
                        [
-                           ['sales_shipment', self::T_SHIP],
-                           ['inventory_shipment_source', self::T_INV_SHIP],
-                           ['store', self::T_STORE]
+                           ['sales_shipment', self::TABLE_SHIP],
+                           ['inventory_shipment_source', self::TABLE_INV_SHIP],
+                           ['store', self::TABLE_STORE]
                        ]
                    );
 
