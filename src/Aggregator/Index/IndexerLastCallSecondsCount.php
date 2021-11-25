@@ -8,15 +8,14 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Mview\View;
-use Magento\Framework\Mview\View\Changelog;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
-class IndexerBacklogCountAggregator implements MetricAggregatorInterface
+class IndexerLastCallSecondsCount implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento_indexer_backlog_count_total';
+    private const METRIC_CODE = 'magento_indexer_last_call_seconds_count';
 
     private UpdateMetricService $updateMetricService;
     private CollectionFactory $indexerCollectionFactory;
@@ -48,7 +47,7 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return 'Magento 2 Indexer Backlog Item Count';
+        return 'Magento 2 Indexer Last Call Seconds Count';
     }
 
     public function getType(): string
@@ -70,13 +69,9 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
             ];
 
             $view = $index->getView();
-            /** @var Changelog $changelog */
-            $changelog = $view->getChangelog();
 
             try {
-                $value  = $this->getChangelogVersionId($connection, $changelog) -
-                    $this->getStateVersionId($connection, $view);
-
+                $value  = $this->getStateLastCall($connection, $view);
                 $this->updateMetricService->update(self::METRIC_CODE, (string)$value, $labels);
             } catch (\Zend_Db_Exception $e) {
                 $this->logger->critical($e->getMessage());
@@ -88,27 +83,7 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
     }
 
     /**
-     * Provide the latest version from changelog table.
-     * Avoid service contracts to get the exact data from DB.
-     *
-     * @param AdapterInterface $adapter
-     * @param Changelog $changelog
-     *
-     * @return int
-     */
-    private function getChangelogVersionId(AdapterInterface $adapter, Changelog $changelog): int
-    {
-        $select = $adapter->select();
-        $select->from($adapter->getTableName($changelog->getName()))
-               ->reset(Select::COLUMNS)
-               ->order('version_id DESC')
-               ->columns(['version_id']);
-
-        return (int)$adapter->fetchOne($select);
-    }
-
-    /**
-     * Provide the latest version from mview_state table.
+     * Provide amount of seconds since last index update.
      * Avoid service contracts to get the exact data from DB.
      *
      * @param AdapterInterface $adapter
@@ -116,12 +91,12 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
      *
      * @return int
      */
-    private function getStateVersionId(AdapterInterface $adapter, View $view): int
+    private function getStateLastCall(AdapterInterface $adapter, View $view): int
     {
         $select = $adapter->select();
         $select->from($adapter->getTableName('mview_state'))->where('view_id = ?', $view->getId())
                ->reset(Select::COLUMNS)
-               ->columns(['version_id']);
+               ->columns(['seconds' => 'TIME_TO_SEC(timediff(now(), updated))']);
 
         return (int)$adapter->fetchOne($select);
     }
