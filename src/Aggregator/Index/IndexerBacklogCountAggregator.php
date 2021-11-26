@@ -7,8 +7,8 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Index;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
-use Magento\Framework\Mview\View;
-use Magento\Framework\Mview\View\Changelog;
+use Magento\Framework\Mview\View\ChangelogInterface;
+use Magento\Framework\Mview\ViewInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
@@ -70,7 +70,6 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
             ];
 
             $view = $index->getView();
-            /** @var Changelog $changelog */
             $changelog = $view->getChangelog();
 
             try {
@@ -92,11 +91,11 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
      * Avoid service contracts to get the exact data from DB.
      *
      * @param AdapterInterface $adapter
-     * @param Changelog $changelog
+     * @param ChangelogInterface $changelog
      *
      * @return int
      */
-    private function getChangelogVersionId(AdapterInterface $adapter, Changelog $changelog): int
+    private function getChangelogVersionId(AdapterInterface $adapter, ChangelogInterface $changelog): int
     {
         $select = $adapter->select();
         $select->from($adapter->getTableName($changelog->getName()))
@@ -112,11 +111,11 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
      * Avoid service contracts to get the exact data from DB.
      *
      * @param AdapterInterface $adapter
-     * @param View $view
+     * @param ViewInterface $view
      *
      * @return int
      */
-    private function getStateVersionId(AdapterInterface $adapter, View $view): int
+    private function getStateVersionId(AdapterInterface $adapter, ViewInterface $view): int
     {
         $select = $adapter->select();
         $select->from($adapter->getTableName('mview_state'))->where('view_id = ?', $view->getId())
