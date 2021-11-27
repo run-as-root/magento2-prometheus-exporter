@@ -8,6 +8,7 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Mview\View\Changelog;
+use Magento\Framework\Mview\View\ChangelogInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
@@ -73,7 +74,7 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
             $changelog = $view->getChangelog();
 
             try {
-                $value  = $this->getChangelogSize($connection, $changelog);
+                $value = $this->getChangelogSize($connection, $changelog);
                 $this->updateMetricService->update(self::METRIC_CODE, (string)$value, $labels);
             } catch (\Zend_Db_Exception $e) {
                 $this->logger->critical($e->getMessage());
@@ -93,7 +94,7 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
      *
      * @return int
      */
-    private function getChangelogSize(AdapterInterface $adapter, Changelog $changelog): int
+    private function getChangelogSize(AdapterInterface $adapter, ChangelogInterface $changelog): int
     {
         $select = $adapter->select();
         $select->from($adapter->getTableName($changelog->getName()))

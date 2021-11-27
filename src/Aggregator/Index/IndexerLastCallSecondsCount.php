@@ -7,7 +7,7 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Index;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
-use Magento\Framework\Mview\View;
+use Magento\Framework\Mview\ViewInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
@@ -87,11 +87,11 @@ class IndexerLastCallSecondsCount implements MetricAggregatorInterface
      * Avoid service contracts to get the exact data from DB.
      *
      * @param AdapterInterface $adapter
-     * @param View $view
+     * @param ViewInterface $view
      *
      * @return int
      */
-    private function getStateLastCall(AdapterInterface $adapter, View $view): int
+    private function getStateLastCall(AdapterInterface $adapter, ViewInterface $view): int
     {
         $select = $adapter->select();
         $select->from($adapter->getTableName('mview_state'))->where('view_id = ?', $view->getId())
