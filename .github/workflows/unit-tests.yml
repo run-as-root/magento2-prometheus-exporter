@@ -19,7 +19,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Get Composer
-        uses: ls -lah 
+        run: ls -lah
       - name: Run Unit Tests
         run: docker-php-ext-enable xdebug
 
