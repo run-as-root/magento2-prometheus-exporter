@@ -17,6 +17,7 @@ jobs:
              composer install --prefer-dist --working-dir=./build/tools
              composer --working-dir="/application" config minimum-stability dev
              composer --working-dir="/application" config prefer-stable true
+             composer --working-dir="/application" config http-basic.repo.magento.com ${{ secrets.MAGENTO2_USERNAME }} ${{ secrets.MAGENTO2_PASSWORD }}
              composer --working-dir="/application" require "run-as-root/magento2-prometheus-exporter":"github.ref"
              composer --working-dir="/application" dump-autoload
              mkdir -p /application/reports/phpunit/
