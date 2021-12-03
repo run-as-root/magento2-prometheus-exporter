@@ -21,10 +21,11 @@ jobs:
     name: "Code Style 🤡"
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Get Composer
         uses: php-actions/composer@v5
+      - name: Install PHP CS
+        run: composer install --prefer-dist --working-dir=build/tools
+      - name: Run PHP Code Style
+        run: build/tools/vendor/bin/phpcs --standard=phpcs-ruleset.xml src/ --ignore-annotations
