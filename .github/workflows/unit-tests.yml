@@ -1,7 +1,8 @@
 name: Quality Gate 🤓
 on: [push]
 jobs:
-  "Unit Tests 🎉":
+  unit-tests:
+    name: "Unit Tests 🎉"
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
