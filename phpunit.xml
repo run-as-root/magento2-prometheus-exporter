@@ -5,7 +5,7 @@
 >
     <testsuites>
         <testsuite name="unit">
-            <directory suffix="Test.php">vendor/run_as_root/Test/Unit</directory>
+            <directory suffix="Test.php">src/Test/Unit</directory>
         </testsuite>
     </testsuites>
 
