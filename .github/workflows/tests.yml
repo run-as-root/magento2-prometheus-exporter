@@ -23,6 +23,13 @@ jobs:
              mkdir -p /application/reports/phpunit/
       - name: Run Unit Tests
         run: |
+              composer install --prefer-dist --working-dir=./build/tools
+              composer --working-dir="/application" config minimum-stability dev
+              composer --working-dir="/application" config prefer-stable true
+              composer --working-dir="/application" config http-basic.repo.magento.com ${{ secrets.MAGENTO2_USERNAME }} ${{ secrets.MAGENTO2_PASSWORD }}
+              composer --working-dir="/application" require "run-as-root/magento2-prometheus-exporter":"$GITHUB_REF_NAME"
+              composer --working-dir="/application" dump-autoload
+              mkdir -p /application/reports/phpunit/
               docker-php-ext-enable xdebug
               ls -lah .
               ls -lah ./build/
