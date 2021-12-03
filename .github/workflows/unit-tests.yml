@@ -3,6 +3,7 @@ on: [push]
 jobs:
   unit-tests:
     name: "Unit Tests 🎉"
+    runs-on: ubuntu-latest
     container: registry.gitlab.com/mwltr/dev-setup/docker-base-images/mwltr-magento2-os:2.3-php73
     steps:
       - name: Composer Cache
