@@ -1,4 +1,6 @@
-name: Quality Gate 🤓
+name: run_as_root Quality Gate 🤓
+author: David Lambauer - run_as_root GmbH
+description: This GitHub Action contains a bunch of different steps to ensure the code quality is as we expect it to be.
 on: [push]
 jobs:
   login:
@@ -34,7 +36,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Get Composer
         uses: php-actions/composer@v5
-      - run: docker-php-ext-enable xdebug
+      - name: Run Unit Tests
+        run: docker-php-ext-enable xdebug
+
 
   codestyle:
     name: "Code Style 🤡"
