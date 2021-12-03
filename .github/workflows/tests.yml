@@ -10,20 +10,21 @@ jobs:
         username: ${{ secrets.GITLAB_USERNAME }}
         password: ${{ secrets.GITLAB_PASSWORD }}
     steps:
-      - name: Get Composer
+      - name: Checkout Repository
+      uses: actions/checkout@v2
+      - name: Setup Composer and Build Tools
         run: |
-             composer install --prefer-dist --working-dir=/application/build/tools
+             composer install --prefer-dist --working-dir=./build/tools
              composer --working-dir="/application" config minimum-stability dev
              composer --working-dir="/application" config prefer-stable true
              composer --working-dir="/application" require "run-as-root/magento2-prometheus-exporter":"github.ref"
              composer --working-dir="/application" dump-autoload
              mkdir -p /application/reports/phpunit/
-
-
       - name: Run Unit Tests
         run: |
               docker-php-ext-enable xdebug
-              php /application/vendor/bin/phpunit -c phpunit.xml --debug --log-junit /application/reports/phpunit/junit.xml --coverage-clover /application/reports/phpunit/clover.xml --coverage-html /application/reports/phpunit/coverage-html --coverage-text --colors=never
+              php /build/tool/vendor/bin/phpunit -c phpunit.xml --debug --log-junit /application/reports/phpunit/junit.xml --coverage-clover /application/reports/phpunit/clover.xml --coverage-html /application/reports/phpunit/coverage-html --coverage-text --colors=never /application/
+
 
   codestyle:
     name: "Code Style 🤡"
