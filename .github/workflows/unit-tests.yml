@@ -3,15 +3,19 @@ on: [push]
 jobs:
   unit-tests:
     name: "Unit Tests 🎉"
-    runs-on: registry.gitlab.com/mwltr/dev-setup/docker-base-images/mwltr-magento2-os:2.3-php73
+    container: registry.gitlab.com/mwltr/dev-setup/docker-base-images/mwltr-magento2-os:2.3-php73
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Composer Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.composer
+          key: v1-composer-deps-${{ hashFiles('**/composer-lock.json') }}
+          restore-keys: v1-composer-deps-
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Get Composer
         uses: php-actions/composer@v5
+      - run: docker-php-ext-enable xdebug
 
   codestyle:
     name: "Code Style 🤡"
