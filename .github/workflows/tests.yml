@@ -25,7 +25,7 @@ jobs:
         run: |
               docker-php-ext-enable xdebug
               cd /application
-              php ./vendor/bin/phpunit --debug --log-junit ./reports/phpunit/junit.xml --coverage-clover ./reports/phpunit/clover.xml --coverage-html ./reports/phpunit/coverage-html --coverage-text --colors=never ./vendor/run_as_root/Test/
+              php ./vendor/bin/phpunit --debug --log-junit ./reports/phpunit/junit.xml --coverage-clover ./reports/phpunit/clover.xml --coverage-html ./reports/phpunit/coverage-html --coverage-text --colors=never ./vendor/run_as_root/Test/Unit/*/**
 
   codestyle:
     name: "Code Style 🤡"
