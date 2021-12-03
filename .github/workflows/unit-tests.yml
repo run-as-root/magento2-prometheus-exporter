@@ -6,6 +6,12 @@ jobs:
     runs-on: ubuntu-latest
     container: registry.gitlab.com/mwltr/dev-setup/docker-base-images/mwltr-magento2-os:2.3-php73
     steps:
+      - name: Login to GitLab
+        uses: docker/login-action@v1
+        with:
+          registry: registry.gitlab.com
+          username: ${{ secrets.GITLAB_USERNAME }}
+          password: ${{ secrets.GITLAB_PASSWORD }}
       - name: Composer Cache
         uses: actions/cache@v2
         with:
