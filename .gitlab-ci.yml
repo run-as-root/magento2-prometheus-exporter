@@ -1,4 +1,4 @@
-image: registry.gitlab.com/mwltr/dev-setup/docker-base-images/mwltr-magento2-os:2.3-php72
+image: registry.gitlab.com/run_as_root/quality_as_root/pipeline/magento2-community:2.3.4-php73
 
 stages:
   - prepare
