@@ -14,7 +14,7 @@ jobs:
   unit-tests:
     name: "Unit Tests 🎉"
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/mwltr/dev-setup/docker-base-images/mwltr-magento2-os:2.3-php73
+    container: registry.gitlab.com/run_as_root/quality_as_root/pipeline/magento2-community:2.3.4-php73
     steps:
       - name: Composer Cache
         uses: actions/cache@v2
