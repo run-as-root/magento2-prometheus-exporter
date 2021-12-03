@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<ruleset name="run_as_root">
+    <description>run_as_root Coding Standard</description>
+
+    <exclude-pattern>*/Test/*</exclude-pattern>
+    <exclude-pattern>*/Tests/*</exclude-pattern>
+
+    <!-- Magento 2 Coding Standard -->
+    <rule ref="Magento2">
+        <exclude name="Magento2.PHP.FinalImplementation"/>
+        <exclude name="Magento2.Functions.StaticFunction"/>
+    </rule>
+
+    <rule ref="PSR12">
+        <exclude name="PSR12.Files.FileHeader.IncorrectOrder" />
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" />
+
+        <!-- exclude spacing after open brace since it results in wrong if structure for multiline ifs -->
+        <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
+    </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="ignoreComments" value="true" />
+        </properties>
+    </rule>
+
+    <rule ref="Generic.Formatting.SpaceAfterNot">
+        <properties>
+            <property name="spacing" value="0" />
+            <property name="ignoreNewlines" value="false" />
+        </properties>
+    </rule>
+
+    <rule ref="Generic.Metrics.CyclomaticComplexity"/>
+    <rule ref="Generic.Strings.UnnecessaryStringConcat"/>
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+    <rule ref="Squiz.Strings.DoubleQuoteUsage.NotRequired" />
+
+    <!-- allow test methods in snake_case -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>*Test.php</exclude-pattern>
+        <exclude-pattern>Enum/*.php</exclude-pattern>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120" />
+            <property name="absoluteLineLimit" value="120" />
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Classes.ClassStructure">
+        <exclude-pattern>*Test.php</exclude-pattern>
+    </rule>
+    <rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition" />
+    <rule ref="SlevomatCodingStandard.ControlStructures.EarlyExit" />
+    <rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+    <rule ref="SlevomatCodingStandard.Operators.DisallowEqualOperators" />
+    <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+        <properties>
+            <property name="searchAnnotations" value="true" />
+        </properties>
+    </rule>
+    <rule ref="SlevomatCodingStandard.Namespaces.UseFromSameNamespace" />
+    <rule ref="SlevomatCodingStandard.PHP.UselessSemicolon" />
+    <rule ref="SlevomatCodingStandard.Variables.UnusedVariable" />
+    <rule ref="SlevomatCodingStandard.Exceptions.DeadCatch" />
+    <rule ref="SlevomatCodingStandard.Classes.ModernClassNameReference" />
+    <rule ref="SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses" />
+    <rule ref="SlevomatCodingStandard.Namespaces.RequireOneNamespaceInFile" />
+    <rule ref="SlevomatCodingStandard.Namespaces.NamespaceDeclaration" />
+    <rule ref="SlevomatCodingStandard.TypeHints.LongTypeHints" />
+    <rule ref="SlevomatCodingStandard.Namespaces.DisallowGroupUse" />
+    <rule ref="SlevomatCodingStandard.ControlStructures.UselessIfConditionWithReturn" />
+    <rule ref="SlevomatCodingStandard.Commenting.UselessInheritDocComment" />
+    <rule ref="SlevomatCodingStandard.Commenting.EmptyComment" />
+    <rule ref="SlevomatCodingStandard.PHP.TypeCast" />
+    <rule ref="SlevomatCodingStandard.Classes.ClassConstantVisibility" />
+    <rule ref="SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration" >
+        <exclude-pattern>*.phtml</exclude-pattern>
+    </rule>
+    <rule ref="SlevomatCodingStandard.Arrays.TrailingArrayComma" />
+    <rule ref="SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement" />
+    <rule ref="SlevomatCodingStandard.TypeHints.UselessConstantTypeHint"/>
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
+        <properties>
+            <property name="newlinesCountBetweenOpenTagAndDeclare" value="2"/>
+            <property name="newlinesCountAfterDeclare" value="2"/>
+            <property name="spacesCountAroundEqualsSign" value="0"/>
+        </properties>
+    </rule>
+    <rule ref="SlevomatCodingStandard.Namespaces.UselessAlias"/>
+    <rule ref="SlevomatCodingStandard.PHP.UselessParentheses"/>
+    <rule ref="SlevomatCodingStandard.Variables.UselessVariable"/>
+    <rule ref="SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace">
+        <properties>
+            <property name="spacesAroundBrackets" value="1"/>
+        </properties>
+    </rule>
+    <rule ref="SlevomatCodingStandard.Classes.PropertySpacing">
+        <properties>
+            <property name="minLinesCountBeforeWithComment" value="1"/>
+            <property name="maxLinesCountBeforeWithComment" value="1"/>
+            <property name="minLinesCountBeforeWithoutComment" value="0"/>
+            <property name="maxLinesCountBeforeWithoutComment" value="0"/>
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Classes.ConstantSpacing">
+        <properties>
+            <property name="minLinesCountBeforeWithComment" value="0"/>
+            <property name="maxLinesCountBeforeWithComment" value="1"/>
+            <property name="minLinesCountBeforeWithoutComment" value="0"/>
+            <property name="maxLinesCountBeforeWithoutComment" value="0"/>
+        </properties>
+    </rule>
+    <rule ref="SlevomatCodingStandard.ControlStructures.DisallowYodaComparison"/>
+    <rule ref="SlevomatCodingStandard.ControlStructures.BlockControlStructureSpacing">
+        <properties>
+            <property name="linesCountBeforeControlStructure" value="1"/>
+            <property name="linesCountBeforeFirstControlStructure" value="0"/>
+            <property name="linesCountAfterControlStructure" value="1"/>
+            <property name="linesCountAfterLastControlStructure" value="0"/>
+        </properties>
+    </rule>
+</ruleset>

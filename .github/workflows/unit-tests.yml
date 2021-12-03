@@ -1,0 +1,6 @@
+name: Quality Gate 🤓
+
+on: [push]
+jobs:
+  - uses: actions/checkout@v2
+  - uses: php-actions/composer@v5
