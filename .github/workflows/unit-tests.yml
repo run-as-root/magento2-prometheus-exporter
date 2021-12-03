@@ -1,6 +1,9 @@
 name: run_as_root Quality Gate 🤓
 author: David Lambauer - run_as_root GmbH
 description: This GitHub Action contains a bunch of different steps to ensure the code quality is as we expect it to be.
+runs:
+  using: 'docker'
+  image: 'registry.gitlab.com/run_as_root/quality_as_root/pipeline/magento2-community:2.3.4-php73'
 on: [push]
 jobs:
   login:
@@ -16,8 +19,6 @@ jobs:
           logout: false
   unit-tests:
     name: "Unit Tests 🎉"
-    runs-on: ubuntu-latest
-    container: registry.gitlab.com/run_as_root/quality_as_root/pipeline/magento2-community:2.3.4-php73
     steps:
       - name: Login to GitLab
         uses: docker/login-action@v1
