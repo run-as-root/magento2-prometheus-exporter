@@ -18,14 +18,13 @@ jobs:
              composer --working-dir="/application" config minimum-stability dev
              composer --working-dir="/application" config prefer-stable true
              composer --working-dir="/application" config http-basic.repo.magento.com ${{ secrets.MAGENTO2_USERNAME }} ${{ secrets.MAGENTO2_PASSWORD }}
-             composer --working-dir="/application" require "run-as-root/magento2-prometheus-exporter":"github.ref"
+             composer --working-dir="/application" require "run-as-root/magento2-prometheus-exporter":"$GITHUB_REF"
              composer --working-dir="/application" dump-autoload
              mkdir -p /application/reports/phpunit/
       - name: Run Unit Tests
         run: |
               docker-php-ext-enable xdebug
               php /build/tool/vendor/bin/phpunit -c phpunit.xml --debug --log-junit /application/reports/phpunit/junit.xml --coverage-clover /application/reports/phpunit/clover.xml --coverage-html /application/reports/phpunit/coverage-html --coverage-text --colors=never /application/
-
 
   codestyle:
     name: "Code Style 🤡"
