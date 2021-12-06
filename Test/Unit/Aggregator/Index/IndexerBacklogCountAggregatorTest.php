@@ -157,8 +157,7 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
             $connection->expects($this->exactly(4))
                        ->method('fetchOne')
                        ->will(
-                           $this->returnCallback(function ($arg) use ($select2, $select4)
-                           {
+                           $this->returnCallback(function ($arg) use ($select2, $select4) {
                                if (spl_object_id($select2) === spl_object_id($arg)) {
                                    throw new \Zend_Db_Exception('ERROR CTNEE');
                                } elseif (spl_object_id($select4) === spl_object_id($arg)) {
