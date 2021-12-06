@@ -8,27 +8,24 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Indexer\IndexerInterface;
-use Magento\Framework\Mview\View\ChangelogInterface;
 use Magento\Framework\Mview\ViewInterface;
 use Magento\Indexer\Model\Indexer\Collection;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator;
+use RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerLastCallSecondsCount;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 
-final class IndexerBacklogCountAggregatorTest extends TestCase
+class IndexerLastCallSecondsCountTest extends TestCase
 {
-    private const TABLE_CHANGELOG_1 = 'table_name_cl';
-    private const TABLE_CHANGELOG_2 = 'table_name_2_cl';
     private const VIEW_ID_1 = 'some_name';
     private const VIEW_ID_2 = 'some_name_another_name';
     private const TABLE_MVIEW_STATE = 'mview_state';
-    private const METRIC_CODE = 'magento_indexer_backlog_count_total';
+    private const METRIC_CODE = 'magento_indexer_last_call_seconds_count';
 
-    private IndexerBacklogCountAggregator $sut;
+    private IndexerLastCallSecondsCount $sut;
 
     /** @var MockObject|UpdateMetricServiceInterface */
     private $updateMetricService;
@@ -55,7 +52,7 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
 
         $this->indexerCollectionFactory->method('create')->willReturn($this->indexerCollection);
 
-        $this->sut = new IndexerBacklogCountAggregator(
+        $this->sut = new IndexerLastCallSecondsCount(
             $this->updateMetricService,
             $this->indexerCollectionFactory,
             $this->resourceConnection,
@@ -68,13 +65,13 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
         $this->setUpIndexCollection();
         $this->setUpSelects();
 
-        $lables1 = [
+        $labels1 = [
             'isValid' => true,
             'title' => 'name',
             'status' => 'success',
         ];
 
-        $lables2 = [
+        $labels2 = [
             'isValid' => true,
             'title' => 'other_name',
             'status' => 'failed',
@@ -83,12 +80,24 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
         $this->updateMetricService
             ->expects($this->at(0))
             ->method('update')
-            ->with(self::METRIC_CODE, '320', $lables1);
+            ->with(
+                ...[
+                       self::METRIC_CODE,
+                       '200',
+                       $labels1
+                   ]
+            );
 
         $this->updateMetricService
             ->expects($this->at(1))
             ->method('update')
-            ->with(self::METRIC_CODE, '33', $lables2);
+            ->with(
+                ...[
+                       self::METRIC_CODE,
+                       '300',
+                       $labels2
+                   ]
+            );
 
         $this->sut->aggregate();
     }
@@ -101,12 +110,12 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
         $this->logger
             ->expects($this->at(0))
             ->method('critical')
-            ->with(...['ERROR CTNEE']);
+            ->with(...['ERROR NUMBER 1']);
 
         $this->logger
             ->expects($this->at(1))
             ->method('critical')
-            ->with(...['ERROR RE']);
+            ->with(...['ERROR NUMBER 2']);
 
         $this->updateMetricService
             ->expects($this->never())
@@ -119,50 +128,39 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
     {
         $select1 = $this->createMock(Select::class);
         $select2 = $this->createMock(Select::class);
-        $select3 = $this->createMock(Select::class);
-        $select4 = $this->createMock(Select::class);
 
         $connection = $this->createMock(AdapterInterface::class);
         $this->resourceConnection->expects($this->once())->method('getConnection')
                                  ->willReturn($connection);
-        $connection->expects($this->exactly(4))
+        $connection->expects($this->exactly(2))
                    ->method('select')
-                   ->will($this->onConsecutiveCalls($select1, $select2, $select3, $select4));
-        $connection->expects($this->exactly(4))
+                   ->will($this->onConsecutiveCalls($select1, $select2));
+        $connection->expects($this->exactly(2))
                    ->method('getTableName')
-                   ->willReturnMap(
-                       [
-                           [self::TABLE_CHANGELOG_1, self::TABLE_CHANGELOG_1],
-                           [self::TABLE_CHANGELOG_2, self::TABLE_CHANGELOG_2],
-                           [self::TABLE_MVIEW_STATE, self::TABLE_MVIEW_STATE]
-                       ]
-                   );
-        $select1 = $this->setUpSelectChangelog($select1, self::TABLE_CHANGELOG_1);
-        $select2 = $this->setUpSelectMviewState($select2, self::VIEW_ID_1);
-        $select3 = $this->setUpSelectChangelog($select3, self::TABLE_CHANGELOG_2);
-        $select4 = $this->setUpSelectMviewState($select4, self::VIEW_ID_2);
+                    ->with(self::TABLE_MVIEW_STATE)
+                    ->willReturn(self::TABLE_MVIEW_STATE);
+        $select1 = $this->setUpSelectMviewState($select1, self::VIEW_ID_1);
+        $select2 = $this->setUpSelectMviewState($select2, self::VIEW_ID_2);
 
         if (!$throwException) {
-            $connection->expects($this->exactly(4))
+            $connection->expects($this->exactly(2))
                        ->method('fetchOne')
                        ->willReturnMap(
                            [
-                               [$select1, [], 550],
-                               [$select2, [], 230],
-                               [$select3, [], 99],
-                               [$select4, [], 66]
+                               [$select1, [], 200],
+                               [$select2, [], 300],
                            ]
                        );
         } else {
-            $connection->expects($this->exactly(4))
+            $connection->expects($this->exactly(2))
                        ->method('fetchOne')
                        ->will(
-                           $this->returnCallback(function ($arg) use ($select2, $select4)
+                           $this->returnCallback(function ($arg) use ($select1, $select2)
                            {
-                               if (spl_object_id($select2) === spl_object_id($arg)) {
-                                   throw new \Zend_Db_Exception('ERROR CTNEE');
-                               } elseif (spl_object_id($select4) === spl_object_id($arg)) {
-                                   throw new \Zend_Db_Exception('ERROR RE');
+                               if (spl_object_id($select1) === spl_object_id($arg)) {
+                                   throw new \Zend_Db_Exception('ERROR NUMBER 1');
+                               } elseif (spl_object_id($select2) === spl_object_id($arg)) {
+                                   throw new \Zend_Db_Exception('ERROR NUMBER 2');
                                } else {
                                    return 20;
                                }
@@ -179,21 +177,9 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
                ->willReturn($select);
         $select->expects($this->once())->method('where')->with('view_id = ?', $viewId)
                ->willReturn($select);
-        $select->expects($this->once())->method('columns')->with(['version_id'])
-               ->willReturn($select);
-
-        return $select;
-    }
-
-    private function setUpSelectChangelog(Select $select, string $changelogTableName): Select
-    {
-        $select->expects($this->once())->method('from')->with($changelogTableName)
-               ->willReturn($select);
-        $select->expects($this->once())->method('reset')->with(Select::COLUMNS)
-               ->willReturn($select);
-        $select->expects($this->once())->method('order')->with('version_id DESC')
-               ->willReturn($select);
-        $select->expects($this->once())->method('columns')->with(['version_id'])
+        $select->expects($this->once())
+               ->method('columns')
+               ->with(['seconds' => 'TIME_TO_SEC(timediff(now(), updated))'])
                ->willReturn($select);
 
         return $select;
@@ -205,8 +191,6 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
         $indexer2 = $this->createMock(IndexerInterface::class);
         $view1 = $this->createMock(ViewInterface::class);
         $view2 = $this->createMock(ViewInterface::class);
-        $changelog1 = $this->createMock(ChangelogInterface::class);
-        $changelog2 = $this->createMock(ChangelogInterface::class);
 
         $indexer1->method('isValid')->willReturn(true);
         $indexer1->method('getTitle')->willReturn('name');
@@ -228,16 +212,6 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
 
         $view1
             ->expects($this->once())
-            ->method('getChangelog')
-            ->willReturn($changelog1);
-
-        $view2
-            ->expects($this->once())
-            ->method('getChangelog')
-            ->willReturn($changelog2);
-
-        $view1
-            ->expects($this->once())
             ->method('getId')
             ->willReturn(self::VIEW_ID_1);
 
@@ -245,16 +219,6 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
             ->expects($this->once())
             ->method('getId')
             ->willReturn(self::VIEW_ID_2);
-
-        $changelog1
-            ->expects($this->once())
-            ->method('getName')
-            ->willReturn(self::TABLE_CHANGELOG_1);
-
-        $changelog2
-            ->expects($this->once())
-            ->method('getName')
-            ->willReturn(self::TABLE_CHANGELOG_2);
 
         $this->indexerCollection
             ->expects($this->once())

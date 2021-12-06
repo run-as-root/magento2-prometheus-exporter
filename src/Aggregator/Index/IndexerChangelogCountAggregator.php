@@ -7,16 +7,16 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Index;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
+use Magento\Framework\Mview\View\Changelog;
 use Magento\Framework\Mview\View\ChangelogInterface;
-use Magento\Framework\Mview\ViewInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
-class IndexerBacklogCountAggregator implements MetricAggregatorInterface
+class IndexerChangelogCountAggregator implements MetricAggregatorInterface
 {
-    private const METRIC_CODE = 'magento_indexer_backlog_count_total';
+    private const METRIC_CODE = 'magento_indexer_changelog_count_total';
 
     private UpdateMetricService $updateMetricService;
     private CollectionFactory $indexerCollectionFactory;
@@ -48,7 +48,7 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return 'Magento 2 Indexer Backlog Item Count';
+        return 'Magento 2 Indexer Changelog Size Count';
     }
 
     public function getType(): string
@@ -70,12 +70,11 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
             ];
 
             $view = $index->getView();
+            /** @var Changelog $changelog */
             $changelog = $view->getChangelog();
 
             try {
-                $value  = $this->getChangelogVersionId($connection, $changelog) -
-                    $this->getStateVersionId($connection, $view);
-
+                $value = $this->getChangelogSize($connection, $changelog);
                 $this->updateMetricService->update(self::METRIC_CODE, (string)$value, $labels);
             } catch (\Zend_Db_Exception $e) {
                 $this->logger->critical($e->getMessage());
@@ -87,40 +86,20 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
     }
 
     /**
-     * Provide the latest version from changelog table.
+     * Provide size of changelog table.
      * Avoid service contracts to get the exact data from DB.
      *
      * @param AdapterInterface $adapter
-     * @param ChangelogInterface $changelog
+     * @param Changelog $changelog
      *
      * @return int
      */
-    private function getChangelogVersionId(AdapterInterface $adapter, ChangelogInterface $changelog): int
+    private function getChangelogSize(AdapterInterface $adapter, ChangelogInterface $changelog): int
     {
         $select = $adapter->select();
         $select->from($adapter->getTableName($changelog->getName()))
-               ->reset(Select::COLUMNS)
-               ->order('version_id DESC')
-               ->columns(['version_id']);
-
-        return (int)$adapter->fetchOne($select);
-    }
-
-    /**
-     * Provide the latest version from mview_state table.
-     * Avoid service contracts to get the exact data from DB.
-     *
-     * @param AdapterInterface $adapter
-     * @param ViewInterface $view
-     *
-     * @return int
-     */
-    private function getStateVersionId(AdapterInterface $adapter, ViewInterface $view): int
-    {
-        $select = $adapter->select();
-        $select->from($adapter->getTableName('mview_state'))->where('view_id = ?', $view->getId())
-               ->reset(Select::COLUMNS)
-               ->columns(['version_id']);
+            ->reset(Select::COLUMNS)
+            ->columns(['size' => 'count(version_id)']);
 
         return (int)$adapter->fetchOne($select);
     }

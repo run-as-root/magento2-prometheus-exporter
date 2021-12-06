@@ -26,6 +26,8 @@
 
                 <!-- Index Aggregator -->
                 <item name="IndexerBacklogCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator</item>
+                <item name="IndexerChangelogCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerChangelogCountAggregator</item>
+                <item name="IndexerLastCallSecondsCount" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerLastCallSecondsCount</item>
 
                 <!-- Module Aggregator -->
                 <item name="ModuleCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Module\ModuleCountAggregator</item>
