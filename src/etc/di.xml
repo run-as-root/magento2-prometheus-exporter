@@ -8,6 +8,9 @@
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
+                <!-- Category Aggregator -->
+                <item name="CategoryCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Category\CategoryCountAggregator</item>
+
                 <!-- CMS Aggregator -->
                 <item name="CmsBlockCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsBlockCountAggregator</item>
                 <item name="CmsPagesCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cms\CmsPagesCountAggregator</item>
@@ -38,6 +41,9 @@
                 <item name="OrderItemAmountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemAmountAggregator</item>
                 <item name="OrderItemCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Order\OrderItemCountAggregator</item>
 
+                <!-- Shipment Aggregator -->
+                <item name="ShipmentCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Shipment\ShipmentCountAggregator</item>
+
                 <!-- Payment Aggregator -->
                 <item name="ActivePaymentMethodsCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Payment\ActivePaymentMethodsCountAggregator</item>
 
@@ -49,6 +55,7 @@
 
                 <!-- Store Aggregator -->
                 <item name="StoreCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Store\StoreCountAggregator</item>
+                <item name="WebsiteCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Store\WebsiteCountAggregator</item>
 
                 <!-- User Aggregator -->
                 <item name="AdminUserCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\User\AdminUserCountAggregator</item>

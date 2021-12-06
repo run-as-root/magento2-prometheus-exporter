@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Console\Command;
 
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
+use Magento\Framework\Exception\LocalizedException;
 use RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,11 +20,20 @@ class CollectMetricsCommand extends Command
 
     private $aggregateMetricsCron;
 
-    public function __construct(AggregateMetricsCron $aggregateMetricsCron)
-    {
+    private State $state;
+
+    /**
+     * @param AggregateMetricsCron $aggregateMetricsCron
+     * @param State $state
+     */
+    public function __construct(
+        AggregateMetricsCron $aggregateMetricsCron,
+        State $state
+    ) {
         parent::__construct();
 
         $this->aggregateMetricsCron = $aggregateMetricsCron;
+        $this->state = $state;
     }
 
     protected function configure()
@@ -35,7 +47,18 @@ class CollectMetricsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        try {
+            $this->state->getAreaCode();
+        } catch (LocalizedException $exception) {
+            $this->state->setAreaCode(Area::AREA_CRONTAB);
+        }
+
         $onlyOption = $input->getOption('only');
-        $output->write($this->aggregateMetricsCron->executeOnly($onlyOption), true);
+
+        if ($onlyOption) {
+            $output->write($this->aggregateMetricsCron->executeOnly($onlyOption), true);
+        } else {
+            $this->aggregateMetricsCron->execute();
+        }
     }
 }

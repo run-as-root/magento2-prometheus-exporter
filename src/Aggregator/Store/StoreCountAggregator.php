@@ -12,9 +12,9 @@ class StoreCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_store_count_total';
 
-    private $updateMetricService;
+    private UpdateMetricService $updateMetricService;
 
-    private $storeRepository;
+    private StoreRepositoryInterface $storeRepository;
 
     public function __construct(
         UpdateMetricService $updateMetricService,
@@ -31,7 +31,7 @@ class StoreCountAggregator implements MetricAggregatorInterface
 
     public function getHelp(): string
     {
-        return 'Magento 2 Store Count';
+        return 'Magento 2 Store Count by status.';
     }
 
     public function getType(): string
@@ -42,8 +42,17 @@ class StoreCountAggregator implements MetricAggregatorInterface
     public function aggregate(): bool
     {
         $storeList  = $this->storeRepository->getList();
-        $storeCount = (string)count($storeList);
 
-        return $this->updateMetricService->update(self::METRIC_CODE, $storeCount);
+        $active = 0;
+        $disabled = 0;
+
+        foreach ($storeList as $store) {
+            $store->getIsActive() ? $active++ : $disabled++;
+        }
+
+        $this->updateMetricService->update(self::METRIC_CODE, (string)$active, ['status' => 'enabled']);
+        $this->updateMetricService->update(self::METRIC_CODE, (string)$disabled, ['status' => 'disabled']);
+
+        return true;
     }
 }
