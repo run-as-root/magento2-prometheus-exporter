@@ -137,11 +137,11 @@ class CategoryCountAggregator implements MetricAggregatorInterface
                    ['s' => $connection->getTableName('store')],
                    'sg.group_id = s.group_id'
                )->joinInner(
-                    ['cce1' => $connection->getTableName('catalog_category_entity')],
-                    'sg.root_category_id = cce1.entity_id'
-                )->joinInner(
-                ['cce2' => $connection->getTableName('catalog_category_entity')],
-                "cce2.path like CONCAT(cce1.path, '%')"
+                   ['cce1' => $connection->getTableName('catalog_category_entity')],
+                   'sg.root_category_id = cce1.entity_id'
+               )->joinInner(
+                    ['cce2' => $connection->getTableName('catalog_category_entity')],
+                    "cce2.path like CONCAT(cce1.path, '%')"
                 )->joinLeft(
                     ['ccei1' => $connection->getTableName('catalog_category_entity_int')],
                     "cce2.$linkField = ccei1.$linkField AND " .
@@ -159,14 +159,14 @@ class CategoryCountAggregator implements MetricAggregatorInterface
                     "cce2.$linkField = ccei4.$linkField AND " .
                     "ccei4.attribute_id = $isInMenu AND ccei4.store_id = 0"
                 )->reset(Select::COLUMNS)->columns(
-                   [
+                    [
                        'STORE_CODE' => 's.code',
                        'ACTIVE_IN_MENU' => $activeInMenu,
                        'ACTIVE_NOT_IN_MENU' => $activeNotInMenu,
                        'NOT_ACTIVE_IN_MENU' => $notActiveInMenu,
                        'NOT_ACTIVE_NOT_IN_MENU' => $notActiveNotInMenu
                    ]
-               )->group('s.code');
+                )->group('s.code');
 
         return $select;
     }
