@@ -31,6 +31,10 @@ jobs:
           coverage: xDebug
           apply_fixes: 'true'
 
+      - run: ls -lah $GITHUB_OUTPUT
+      - run: ls -lah ${{ steps.setup-magento-get-magento-path.outputs.path }}
+      - run: ls -lah ${{ steps.graycoreio/github-actions-magento2/setup-magento@main.outputs.path }}
+      - run: ls -lah ${{ steps.graycoreio/github-actions-magento2/setup-magento@main.outputs }}
 
       - run: ls -lah && composer --working-dir=${{ steps.setup-magento-get-magento-path.outputs.path }} require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
         name: Require and attempt install
