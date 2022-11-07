@@ -1,4 +1,4 @@
-name: Setup Magento Store
+name: Unit Tests
 
 on:
   push:
@@ -31,7 +31,11 @@ jobs:
           composer_auth: ${{ secrets.COMPOSER_AUTH }}
           package_name: "run_as_root/magento2-prometheus-exporter:@dev"
           source_folder: $GITHUB_WORKSPACE
+
       - run: composer config repositories.local path $GITHUB_WORKSPACE
         name: Add Github Repo for Testing
         working-directory: ${{ steps.setup-magento.outputs.path }}
         shell: bash
+
+      - run: ${{ matrix.php }} ./vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
+        name: Run Unit Tests
