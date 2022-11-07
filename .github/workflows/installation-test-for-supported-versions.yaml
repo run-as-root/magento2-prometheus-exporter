@@ -1,0 +1,17 @@
+name: Use Supported Versions
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  compute_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.supported-version.outputs.matrix }}
+    steps:
+      - uses: graycoreio/github-actions-magento2/supported-version@main
+        id: supported-version
+      - run: echo ${{ steps.supported-version.outputs.matrix }}
