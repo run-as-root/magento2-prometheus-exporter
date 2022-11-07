@@ -28,7 +28,9 @@ jobs:
           php-version: ${{ matrix.php }}
           magento_version: ${{ matrix.magento }}
           mode: extension
-          coverage: true
+          coverage: xDebug
+          apply_fixes: 'true'
+
 
       - run: ls -lah && composer --working-dir=${{ steps.setup-magento-get-magento-path.outputs.path }} require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
         name: Require and attempt install
