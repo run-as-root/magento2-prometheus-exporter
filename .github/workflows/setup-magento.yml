@@ -30,7 +30,7 @@ jobs:
           mode: extension
           coverage: true
 
-      - run: ls -lah && composer --woriking-dir=${{ steps.setup-magento-get-magento-path.outputs.path }} require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
+      - run: ls -lah && composer --working-dir=${{ steps.setup-magento-get-magento-path.outputs.path }} require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
         name: Require and attempt install
         working-directory:  ${{ inputs.magento_directory }}
         shell: bash
