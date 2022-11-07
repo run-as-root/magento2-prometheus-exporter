@@ -22,7 +22,7 @@ final class ProductCountAggregatorTest extends TestCase
     /** @var MockObject|ResourceConnection */
     private $resourceConnection;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->resourceConnection  = $this->createMock(ResourceConnection::class);

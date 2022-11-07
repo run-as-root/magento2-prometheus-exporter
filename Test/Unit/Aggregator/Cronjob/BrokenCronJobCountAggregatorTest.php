@@ -25,7 +25,7 @@ class BrokenCronJobCountAggregatorTest extends TestCase
     /** @var BrokenCronJobCountAggregator */
     private $sut;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->collectionFactory   = $this->createMock(CollectionFactory::class);

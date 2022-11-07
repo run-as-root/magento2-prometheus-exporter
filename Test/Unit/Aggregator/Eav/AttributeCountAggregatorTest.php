@@ -36,7 +36,7 @@ final class AttributeCountAggregatorTest extends TestCase
     /** @var MockObject|SearchCriteriaInterface */
     private $searchCriteria;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->updateMetricService   = $this->createMock(UpdateMetricService::class);
         $this->attributeRepository   = $this->createMock(AttributeRepositoryInterface::class);

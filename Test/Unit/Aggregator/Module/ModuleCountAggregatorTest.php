@@ -22,7 +22,7 @@ final class ModuleCountAggregatorTest extends TestCase
     /** @var MockObject|ModuleListInterface */
     private $moduleList;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->moduleList          = $this->createMock(ModuleListInterface::class);

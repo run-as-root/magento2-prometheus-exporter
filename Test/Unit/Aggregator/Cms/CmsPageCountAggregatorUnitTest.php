@@ -20,7 +20,7 @@ final class CmsPageCountAggregatorUnitTest extends TestCase
      */
     private $sut;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

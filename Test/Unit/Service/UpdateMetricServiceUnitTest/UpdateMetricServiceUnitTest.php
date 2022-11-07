@@ -30,7 +30,7 @@ final class UpdateMetricServiceUnitTest extends TestCase
     /** @var MetricLogger|MockObject */
     private $logger;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

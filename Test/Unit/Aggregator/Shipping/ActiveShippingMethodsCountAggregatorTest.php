@@ -21,7 +21,7 @@ final class ActiveShippingMethodsCountAggregatorTest extends TestCase
     /** @var MockObject|ShippingAllMethods */
     private $shippingMethods;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->shippingMethods     = $this->createMock(ShippingAllMethods::class);

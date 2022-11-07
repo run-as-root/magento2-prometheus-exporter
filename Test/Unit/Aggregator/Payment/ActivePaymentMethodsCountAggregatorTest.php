@@ -27,7 +27,7 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
     /** @var MockObject|PaymentMethodListInterface */
     private $paymentMethodList;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->storeRepository     = $this->createMock(StoreRepositoryInterface::class);
