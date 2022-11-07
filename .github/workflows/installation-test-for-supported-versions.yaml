@@ -15,3 +15,19 @@ jobs:
       - uses: graycoreio/github-actions-magento2/supported-version@main
         id: supported-version
       - run: echo ${{ steps.supported-version.outputs.matrix }}
+
+  install-test:
+    needs: compute_matrix
+    strategy:
+      matrix: ${{ fromJSON(needs.compute_matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: graycoreio/github-actions-magento2/installation-test@main
+        with:
+          composer_version: ${{ matrix.composer }}
+          php_version: ${{ matrix.php }}
+          magento_version: ${{ matrix.magento }}
+          composer_auth: ${{ secrets.COMPOSER_AUTH }}
+          package_name: graycore/magento2-graphql-logger
+          source_folder: $GITHUB_WORKSPACE
