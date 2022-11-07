@@ -24,6 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: graycoreio/github-actions-magento2/setup-magento@main
+        id: setup-magento
         with:
           php-version: ${{ matrix.php }}
           magento_version: ${{ matrix.magento }}
@@ -31,16 +32,15 @@ jobs:
           coverage: xDebug
           apply_fixes: 'true'
 
-      - run: cat $GITHUB_OUTPUT
-      - run: ls -lah ${{ steps.setup-magento-get-magento-path.outputs.path }}
-      - run: ls -lah ../magento2
+      - run: ls -lah ${{ steps.setup-magento.outputs.path }}
 
-      - run: ls -lah && composer --working-dir=${{ steps.setup-magento-get-magento-path.outputs.path }} require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
+      - run: ls -lah && composer --working-dir=${{ steps.setup-magento.outputs.path }} require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer --working-dir=${{ steps.setup-magento.outputs.path }} install
         name: Require and attempt install
-        working-directory:  ${{ inputs.magento_directory }}
+        working-directory:  ${{ steps.setup-magento.outputs.path }}
         shell: bash
         env:
           COMPOSER_CACHE_DIR: ${{ steps.composer-cache.outputs.dir }}
 
-      - run: php ${{ steps.setup-magento-get-magento-path.outputs.path }}/vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
+      - run: php ./vendor/bin/phpunit -c dev/tests/unit/phpunit.xml
+        working-directory:  ${{ steps.setup-magento.outputs.path }}
         name: Run Unit Tests
