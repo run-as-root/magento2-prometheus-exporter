@@ -25,17 +25,22 @@ jobs:
       - uses: actions/checkout@v3
       - uses: graycoreio/github-actions-magento2/setup-magento@main
         with:
-          composer_version: ${{ matrix.composer }}
           php_version: ${{ matrix.php }}
           magento_version: ${{ matrix.magento }}
-          composer_auth: ${{ secrets.COMPOSER_AUTH }}
-          package_name: "run_as_root/magento2-prometheus-exporter:@dev"
-          source_folder: $GITHUB_WORKSPACE
+          mode: extension
+          coverage: true
 
-      - run: composer config repositories.local path $GITHUB_WORKSPACE
+      - run: composer config repositories.local path ../
         name: Add Github Repo for Testing
         working-directory: ${{ steps.setup-magento.outputs.path }}
         shell: bash
 
-      - run: php ./vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
+      - run: composer require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
+        name: Require and attempt install
+        working-directory:  ${{ inputs.magento_directory }}
+        shell: bash
+        env:
+          COMPOSER_CACHE_DIR: ${{ steps.composer-cache.outputs.dir }}
+
+      - run: php   ${{ steps.setup-magento-get-magento-path.outputs.path }}/vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
         name: Run Unit Tests
