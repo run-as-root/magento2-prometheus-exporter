@@ -45,7 +45,3 @@ jobs:
       - run: php ./vendor/bin/phpunit -c phpunit.xml
         working-directory:  ${{ steps.setup-magento.outputs.path }}
         name: Run Unit Tests
-
-      - run: php ./vendor/bin/phpunit -c phpunit-integration.xml.dist
-        working-directory:  ${{ steps.setup-magento.outputs.path }}
-        name: Run Integration Tests
