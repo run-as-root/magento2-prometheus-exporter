@@ -37,5 +37,5 @@ jobs:
         working-directory: ${{ steps.setup-magento.outputs.path }}
         shell: bash
 
-      - run: ${{ matrix.php }} ./vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
+      - run: php ./vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
         name: Run Unit Tests
