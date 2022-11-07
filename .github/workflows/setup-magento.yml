@@ -30,12 +30,10 @@ jobs:
           magento_version: ${{ matrix.magento }}
           mode: extension
           coverage: xDebug
-          apply_fixes: 'true'
 
       - run: |
           composer install
           composer require "run_as_root/magento2-prometheus-exporter:@dev"
-
         name: Require and attempt install
         working-directory:  ${{ steps.setup-magento.outputs.path }}
         shell: bash
