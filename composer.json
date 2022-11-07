@@ -45,5 +45,6 @@
             "RunAsRoot\\NewRelicApi\\": "lib/",
             "RunAsRoot\\PrometheusExporter\\Test\\": "Test/"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }
