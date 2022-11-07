@@ -30,12 +30,14 @@ jobs:
           mode: extension
           coverage: true
 
-      - run: composer require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
+      - run: |
+          cd ${{ steps.setup-magento-get-magento-path.outputs.path }}
+          composer require "run_as_root/magento2-prometheus-exporter:@dev" --no-update && composer install
         name: Require and attempt install
         working-directory:  ${{ inputs.magento_directory }}
         shell: bash
         env:
           COMPOSER_CACHE_DIR: ${{ steps.composer-cache.outputs.dir }}
 
-      - run: php   ${{ steps.setup-magento-get-magento-path.outputs.path }}/vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
+      - run: php ${{ steps.setup-magento-get-magento-path.outputs.path }}/vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist
         name: Run Unit Tests
