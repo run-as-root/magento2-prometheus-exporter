@@ -76,12 +76,12 @@ class ShipmentCountAggregator implements MetricAggregatorInterface
                    'ss.store_id = s.store_id',
                    ['code']
                )->reset(Select::COLUMNS)->columns(
-                [
+                   [
                     'SHIPMENT_COUNT' => 'COUNT(ss.entity_id)',
                     'STORE_CODE' => 's.code',
                     'SOURCE_CODE' => 'iss.source_code'
                 ]
-            )->group(['s.code', 'iss.source_code']);
+               )->group(['s.code', 'iss.source_code']);
 
         return $select;
     }
