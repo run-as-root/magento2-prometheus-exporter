@@ -29,7 +29,6 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-        path: project
 
     - name: Set PHP Version
       uses: shivammathur/setup-php@v2
@@ -40,10 +39,8 @@ runs:
 
     - name: Install Dependency Checker
       shell: bash
-      working-directory: standard
-      run: composer global require --dev "run_as_root/integrity-checker:${{ inputs.version || '*' }}"
+      run: composer require --dev "run_as_root/integrity-checker:${{ inputs.version || '*' }}"
 
     - name: Run Dependency Checker
       shell: bash
       run: php vendor/bin/dependencies . ${{ inputs.path }}
-      working-directory: standard
