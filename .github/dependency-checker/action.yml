@@ -39,7 +39,7 @@ runs:
 
     - name: Install Dependency Checker
       shell: bash
-      run: composer global require --dev "run_as_root/integrity-checker:${{ inputs.version || '*' }}"
+      run: composer global require --dev --no-interaction --ignore-platform-reqs "run_as_root/integrity-checker:${{ inputs.version || '*' }}"
 
     - name: Run Dependency Checker
       shell: bash
