@@ -16,16 +16,6 @@ jobs:
         id: supported-version
       - run: echo ${{ steps.supported-version.outputs.matrix }}
 
-  check-dependencies:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./.github/dependency-checker
-        with:
-          php_version: 8.1
-          composer_version: 2
-          path: 'src'
-
   setup-magento-extension:
     runs-on: ubuntu-latest
     needs: compute_matrix
@@ -51,6 +41,11 @@ jobs:
         shell: bash
         env:
           COMPOSER_CACHE_DIR: ${{ steps.composer-cache.outputs.dir }}
+
+      - uses: ./.github/dependency-checker
+          with:
+            php_version: ${{ matrix.php }}
+            path: './vendor/run-as-root/magento2-prometheus-exporter/'
 
       - run: php ./vendor/bin/phpunit ./vendor/run-as-root/magento2-prometheus-exporter/Test/Unit
         working-directory:  ${{ steps.setup-magento.outputs.path }}
