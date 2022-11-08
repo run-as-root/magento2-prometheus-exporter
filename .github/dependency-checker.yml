@@ -1,0 +1,49 @@
+name: "Dependency Checker"
+author: "Graycore"
+description: "A Github Action that runs the Magento 2 Dependency Checker."
+
+inputs:
+  php_version:
+    required: true
+    default: "8.1"
+    description: "PHP version used to do the coding standard check."
+
+  composer_version:
+    required: true
+    default: "2"
+    description: "The version of composer to use."
+
+  path:
+    required: true
+    default: 'app/code'
+    description: "The directory (relative to the project root) in which the coding standard will be checked. Used when the event is not a pull request."
+
+  version:
+    required: false
+    description: "The version of the dependency checker to use. If not provided, will use the latest version."
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout Project
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        path: project
+
+    - name: Set PHP Version
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php_version }}
+        tools: composer:v${{ inputs.composer_version }}
+        coverage: none
+
+    - name: Install Dependency Checker
+      shell: bash
+      working-directory: standard
+      run: composer global require --dev "run_as_root/integrity-checker:${{ inputs.version || '*' }}"
+
+    - name: Run Dependency Checker
+      shell: bash
+      run: php vendor/bin/dependencies . ${{ inputs.path }}
+      working-directory: standard
