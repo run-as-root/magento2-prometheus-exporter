@@ -43,4 +43,4 @@ runs:
 
     - name: Run Dependency Checker
       shell: bash
-      run: php vendor/bin/dependencies . ${{ inputs.path }}
+      run: composer global exec dependencies . ${{ inputs.path }}
