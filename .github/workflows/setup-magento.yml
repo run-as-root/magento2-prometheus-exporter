@@ -43,9 +43,9 @@ jobs:
           COMPOSER_CACHE_DIR: ${{ steps.composer-cache.outputs.dir }}
 
       - uses: ./.github/dependency-checker
-          with:
-            php_version: ${{ matrix.php }}
-            path: './vendor/run-as-root/magento2-prometheus-exporter/'
+        with:
+          php_version: ${{ matrix.php }}
+          path: './vendor/run-as-root/magento2-prometheus-exporter/'
 
       - run: php ./vendor/bin/phpunit ./vendor/run-as-root/magento2-prometheus-exporter/Test/Unit
         working-directory:  ${{ steps.setup-magento.outputs.path }}
