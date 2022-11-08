@@ -13,9 +13,14 @@ inputs:
     default: "2"
     description: "The version of composer to use."
 
-  path:
+  module_path:
     required: true
     default: 'app/code'
+    description: "The directory (relative to the project root) in which the coding standard will be checked. Used when the event is not a pull request."
+
+  magento_root:
+    required: true
+    default: '.'
     description: "The directory (relative to the project root) in which the coding standard will be checked. Used when the event is not a pull request."
 
   version:
@@ -43,4 +48,4 @@ runs:
 
     - name: Run Dependency Checker
       shell: bash
-      run: composer global exec dependencies . ${{ inputs.path }}
+      run: composer global exec dependencies ${{ inputs.magento_root }} ${{ inputs.module_path }}

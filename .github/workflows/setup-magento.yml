@@ -45,7 +45,8 @@ jobs:
       - uses: ./.github/dependency-checker
         with:
           php_version: ${{ matrix.php }}
-          path: './vendor/run-as-root/magento2-prometheus-exporter/'
+          module_path: ${{ steps.setup-magento.outputs.path }}/vendor/run-as-root/magento2-prometheus-exporter/
+          magento_root: ${{ steps.setup-magento.outputs.path }}
 
       - run: php ./vendor/bin/phpunit ./vendor/run-as-root/magento2-prometheus-exporter/Test/Unit
         working-directory:  ${{ steps.setup-magento.outputs.path }}
