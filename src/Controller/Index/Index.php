@@ -31,16 +31,18 @@ class Index extends Action
 
     public function execute(): ResultInterface
     {
-        $token = sprintf('Bearer %s', $this->config->getToken());
-        $authorizationHeader = $this->getRequest()->getHeader('Authorization');
+        if ($this->config->getTokenValidationEnabled()) {
+            $token = sprintf('Bearer %s', $this->config->getToken());
+            $authorizationHeader = $this->getRequest()->getHeader('Authorization');
 
-        if ($token !== $authorizationHeader) {
-            /** @var \Magento\Framework\Controller\Result\Raw $result */
-            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
-            $result->setHttpResponseCode(Http::STATUS_CODE_401);
-            $result->setContents('You are not allowed to see these metrics.');
+            if ($token !== $authorizationHeader) {
+                /** @var \Magento\Framework\Controller\Result\Raw $result */
+                $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+                $result->setHttpResponseCode(Http::STATUS_CODE_401);
+                $result->setContents('You are not allowed to see these metrics.');
 
-            return $result;
+                return $result;
+            }
         }
 
         return $this->prometheusResultFactory->create();
