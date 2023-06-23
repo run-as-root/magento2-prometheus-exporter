@@ -25,15 +25,25 @@
                 <label>Security Settings for the Prometheus Scrape Config</label>
                 <comment>This section contains security related configurations. We recommend using the Bearer Token in your Prometheus Scrape Config.</comment>
 
+                <field id="enable_token" showInWebsite="1" showInStore="1" showInDefault="1" type="select">
+                    <label>Enable token authorization</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="token" showInWebsite="1" showInStore="1" showInDefault="1" type="text">
                     <label>Token</label>
                     <frontend_model>RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\DisabledText</frontend_model>
+                    <depends>
+                        <field id="metric_configuration/security/enable_token">1</field>
+                    </depends>
                 </field>
 
                 <field id="generate_auth_token" translate="button_label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <button_label>Generate</button_label>
                     <comment>Click 'Generate' to generate a random auth token, that you can use for your scrape config.</comment>
                     <frontend_model>RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\TokenGenerator</frontend_model>
+                    <depends>
+                        <field id="metric_configuration/security/enable_token">1</field>
+                    </depends>
                 </field>
             </group>
         </section>

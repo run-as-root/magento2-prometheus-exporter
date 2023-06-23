@@ -12,6 +12,7 @@ class Config
 {
     private const CONFIG_PATH_METRICS_ENABLED = 'metric_configuration/metric/metric_status';
     private const CONFIG_PATH_AUTH_TOKEN = 'metric_configuration/security/token';
+    private const CONFIG_PATH_TOKEN_VALIDATION_ENABLED = 'metric_configuration/security/enable_token';
 
     private $config;
     private $metricsSource;
@@ -36,6 +37,11 @@ class Config
     public function getDefaultMetrics(): array
     {
         return array_column($this->metricsSource->toOptionArray(), 'value');
+    }
+
+    public function getTokenValidationEnabled(?string $scopeCode = null): bool
+    {
+        return $this->config->isSetFlag(self::CONFIG_PATH_TOKEN_VALIDATION_ENABLED, ScopeInterface::SCOPE_STORE, $scopeCode);
     }
 
     public function getToken(?string $scopeCode = null): string
