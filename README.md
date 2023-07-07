@@ -1,5 +1,5 @@
 # Magento 2 Prometheus Exporter
-
+1
 ![Branch stable](https://img.shields.io/badge/stable%20branch-master-blue.svg)
 ![](https://github.styleci.io/repos/191891355/shield)
 [![codecov](https://codecov.io/gh/run-as-root/magento2-prometheus-exporter/branch/master/graph/badge.svg)](https://codecov.io/gh/run-as-root/magento2-prometheus-exporter)
