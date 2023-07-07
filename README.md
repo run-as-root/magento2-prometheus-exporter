@@ -48,21 +48,21 @@ in the table and renders the correct response for prometheus.
 
 The following metrics will be collected:
 
-| Metric                              | Labels                          | TYPE  | Help                                                                         |
-|:------------------------------------|:--------------------------------|:------|:-----------------------------------------------------------------------------|
-| magento_orders_count_total          | status, store_code              | gauge | All Magento Orders                                                           |
-| magento_orders_amount_total         | status, store_code              | gauge | Total amount of all Magento Orders                                           |
-| magento_order_items_count_total     | status, store_code              | gauge | Total count of orderitems                                                    |
-| magento_cms_block_count_total       | store_code                      | gauge | Total count of available cms blocks                                          |
-| magento_cms_page_count_total        | store_code                      | gauge | Total count of available cms pages                                           |
-| magento_customer_count_total        | store_code                      | gauge | Total count of available customer                                            |
-| magento_cronjob_broken_count_total  |                                 | gauge | Broken CronJobs occur when when status is pending but execution_time is set. |
-| magento_cronjob_count_total         | status, job_code                | gauge | Total count of available CronJob Count.                                      |
-| magento_indexer_backlog_count_total | isValid, title, status          | gauge | Total count of backlog item in indexer.                                      |
-| magento_shipments_count_total       | source, store_code              | counter| Count of Shipments created by store and source.                             |
-| magento_catalog_category_count_total| status, menu_status, store_code | gauge | Count of Categories by store, status and menu status.                        |
-| magento_store_count_total           | status                          | gauge | Total count of Stores by status.                                             |
-| magento_website_count_total         |                                 | gauge | Total count websites.                                                        |
+| Metric                               | Labels                          | TYPE    | Help                                                                            |
+|:-------------------------------------|:--------------------------------|:--------|:--------------------------------------------------------------------------------|
+| magento_orders_count_total           | status, store_code              | gauge   | All Magento Orders                                                              |
+| magento_orders_amount_total          | status, store_code              | gauge   | Total amount of all Magento Orders                                              |
+| magento_order_items_count_total      | status, store_code              | gauge   | Total count of orderitems                                                       |
+| magento_cms_block_count_total        | store_code                      | gauge   | Total count of available cms blocks                                             |
+| magento_cms_page_count_total         | store_code                      | gauge   | Total count of available cms pages                                              |
+| magento_customer_count_total         | store_code                      | gauge   | Total count of available customer                                               |
+| magento_cronjob_broken_count_total   |                                 | gauge   | Broken CronJobs occur when when status is pending but execution_time is set.    |
+| magento_cronjob_count_total          | status, job_code                | gauge   | Total count of available CronJob Count.                                         |
+| magento_indexer_backlog_count_total  | title                           | gauge   | Total count of backlog item in indexer (the data from `indexer:status` command) |
+| magento_shipments_count_total        | source, store_code              | counter | Count of Shipments created by store and source.                                 |
+| magento_catalog_category_count_total | status, menu_status, store_code | gauge   | Count of Categories by store, status and menu status.                           |
+| magento_store_count_total            | status                          | gauge   | Total count of Stores by status.                                                |
+| magento_website_count_total          |                                 | gauge   | Total count websites.                                                           |
 
 ## Add you own Metric
 
