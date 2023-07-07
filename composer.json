@@ -26,6 +26,18 @@
         }
     ],
     "require": {
+        "magento/framework": "*",
+        "magento/module-payment": "*",
+        "magento/module-eav": "*",
+        "magento/module-cron": "*",
+        "magento/module-cms": "*",
+        "magento/module-shipping": "*",
+        "magento/module-catalog": "*",
+        "magento/module-sales": "*",
+        "laminas/laminas-http": "*",
+        "magento/module-config": "*",
+        "magento/module-backend": "*",
+        "guzzlehttp/guzzle": "*",
         "symfony/console": "*",
         "psr/log": "*",
         "monolog/monolog": "*",
