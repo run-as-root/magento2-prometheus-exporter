@@ -4,13 +4,8 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Aggregator\Index;
 
-use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\DB\Adapter\AdapterInterface;
-use Magento\Framework\DB\Select;
-use Magento\Framework\Mview\View\ChangelogInterface;
-use Magento\Framework\Mview\ViewInterface;
+use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
-use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
@@ -18,27 +13,10 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_indexer_backlog_count_total';
 
-    private UpdateMetricService $updateMetricService;
-    private CollectionFactory $indexerCollectionFactory;
-    private LoggerInterface $logger;
-    private ResourceConnection $resourceConnection;
-
-    /**
-     * @param UpdateMetricService $updateMetricService
-     * @param CollectionFactory $indexerCollectionFactory
-     * @param ResourceConnection $resourceConnection
-     * @param LoggerInterface $logger
-     */
     public function __construct(
-        UpdateMetricService $updateMetricService,
-        CollectionFactory $indexerCollectionFactory,
-        ResourceConnection $resourceConnection,
-        LoggerInterface $logger
+        private readonly UpdateMetricService $updateMetricService,
+        private readonly CollectionFactory $indexerCollectionFactory
     ) {
-        $this->updateMetricService = $updateMetricService;
-        $this->indexerCollectionFactory = $indexerCollectionFactory;
-        $this->logger = $logger;
-        $this->resourceConnection = $resourceConnection;
     }
 
     public function getCode(): string
@@ -58,70 +36,22 @@ class IndexerBacklogCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $result = true;
+        /** @var IndexerInterface[] $indexers */
+        $indexers = $this->indexerCollectionFactory->create()->getItems();
+        foreach ($indexers as $indexer) {
+            $labels = [ 'title' => $indexer->getTitle() ];
 
-        $connection = $this->resourceConnection->getConnection();
-
-        foreach ($this->indexerCollectionFactory->create()->getItems() as $index) {
-            $labels = [
-                'isValid' => $index->isValid(),
-                'title' => $index->getTitle(),
-                'status' => $index->getStatus(),
-            ];
-
-            $view = $index->getView();
+            $view = $indexer->getView();
             $changelog = $view->getChangelog();
+            $state = $view->getState();
 
-            try {
-                $value  = $this->getChangelogVersionId($connection, $changelog) -
-                    $this->getStateVersionId($connection, $view);
+            $currentVersionId = $changelog->getVersion();
+            $stateVersion = $state->getVersionId();
 
-                $this->updateMetricService->update(self::METRIC_CODE, (string)$value, $labels);
-            } catch (\Zend_Db_Exception $e) {
-                $this->logger->critical($e->getMessage());
-                $result = false;
-            }
+            $pendingCount = count($changelog->getList($stateVersion, $currentVersionId));
+            $this->updateMetricService->update(self::METRIC_CODE, (string)$pendingCount, $labels);
         }
 
-        return $result;
-    }
-
-    /**
-     * Provide the latest version from changelog table.
-     * Avoid service contracts to get the exact data from DB.
-     *
-     * @param AdapterInterface $adapter
-     * @param ChangelogInterface $changelog
-     *
-     * @return int
-     */
-    private function getChangelogVersionId(AdapterInterface $adapter, ChangelogInterface $changelog): int
-    {
-        $select = $adapter->select();
-        $select->from($adapter->getTableName($changelog->getName()))
-               ->reset(Select::COLUMNS)
-               ->order('version_id DESC')
-               ->columns(['version_id']);
-
-        return (int)$adapter->fetchOne($select);
-    }
-
-    /**
-     * Provide the latest version from mview_state table.
-     * Avoid service contracts to get the exact data from DB.
-     *
-     * @param AdapterInterface $adapter
-     * @param ViewInterface $view
-     *
-     * @return int
-     */
-    private function getStateVersionId(AdapterInterface $adapter, ViewInterface $view): int
-    {
-        $select = $adapter->select();
-        $select->from($adapter->getTableName('mview_state'))->where('view_id = ?', $view->getId())
-               ->reset(Select::COLUMNS)
-               ->columns(['version_id']);
-
-        return (int)$adapter->fetchOne($select);
+        return true;
     }
 }
