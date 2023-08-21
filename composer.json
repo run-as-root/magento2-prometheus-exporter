@@ -1,7 +1,7 @@
 {
     "name": "run_as_root/magento2-prometheus-exporter",
     "description": "Magento2 Prometheus Exporter",
-    "version": "3.1.4",
+    "version": "3.1.5",
     "type": "magento2-module",
     "license": "MIT",
     "homepage": "https://github.com/run-as-root/magento2-prometheus-exporter",
