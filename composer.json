@@ -43,7 +43,7 @@
         "monolog/monolog": "*",
         "magento/module-store": "*",
         "magento/module-indexer": "*",
-        "magento/zendframework1": "*"
+        "magento/zend-db": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "*"
