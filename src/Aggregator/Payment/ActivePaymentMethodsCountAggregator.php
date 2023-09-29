@@ -50,11 +50,15 @@ class ActivePaymentMethodsCountAggregator implements MetricAggregatorInterface
 
         foreach ($storeList as $store) {
             $storeId = $store->getId();
+            $storeCode = $store->getCode();
 
             $activePaymentMethods      = $this->paymentMethodList->getActiveList($storeId);
             $activePaymentMethodsCount = (string)count($activePaymentMethods);
 
-            $labels = ['store_id' => $storeId];
+            $labels = [
+                'store_id' => $storeId,
+                'store_code' => $storeCode
+            ];
 
             $this->updateMetricService->update(self::METRIC_CODE, $activePaymentMethodsCount, $labels);
         }

@@ -50,10 +50,20 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             ->method('getId')
             ->willReturn(1);
 
+        $store1
+            ->expects($this->once())
+            ->method('getCode')
+            ->willReturn('admin');
+
         $store2
             ->expects($this->once())
             ->method('getId')
             ->willReturn(2);
+
+        $store2
+            ->expects($this->once())
+            ->method('getCode')
+            ->willReturn('default');
 
         $this->storeRepository
             ->expects($this->once())
@@ -72,8 +82,14 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             ->with(...[2])
             ->willReturn(['a']);
 
-        $labels1 = ['store_id' => 1];
-        $labels2 = ['store_id' => 2];
+        $labels1 = [
+            'store_id' => 1,
+            'store_code' => 'admin'
+        ];
+        $labels2 = [
+            'store_id' => 2,
+            'store_code' => 'default'
+        ];
 
         $this->updateMetricService
             ->expects($this->at(0))
