@@ -58,7 +58,7 @@ class ListMetricsCommand extends Command
         if ($searchResults->getTotalCount() === 0) {
             $output->writeln('No metrics found');
 
-            return;
+            return Command::SUCCESS;
         }
 
         /** @var MetricInterface[] $metrics */
@@ -72,5 +72,7 @@ class ListMetricsCommand extends Command
         }
 
         $table->render();
+
+        return Command::SUCCESS;
     }
 }

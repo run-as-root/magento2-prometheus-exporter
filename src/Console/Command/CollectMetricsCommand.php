@@ -60,5 +60,7 @@ class CollectMetricsCommand extends Command
         } else {
             $this->aggregateMetricsCron->execute();
         }
+
+        return Command::SUCCESS;
     }
 }
