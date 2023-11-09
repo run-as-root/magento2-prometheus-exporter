@@ -63,6 +63,7 @@ The following metrics will be collected:
 | magento_catalog_category_count_total | status, menu_status, store_code | gauge   | Count of Categories by store, status and menu status.                           |
 | magento_store_count_total            | status                          | gauge   | Total count of Stores by status.                                                |
 | magento_website_count_total          |                                 | gauge   | Total count websites.                                                           |
+| magento_products_by_type_count_total | project_type                    | gauge   | Total count of products by type.                                                |
 
 ## Add you own Metric
 
