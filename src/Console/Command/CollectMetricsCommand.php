@@ -6,6 +6,7 @@ namespace RunAsRoot\PrometheusExporter\Console\Command;
 
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
+use Magento\Framework\Console\Cli;
 use Magento\Framework\Exception\LocalizedException;
 use RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron;
 use Symfony\Component\Console\Command\Command;
@@ -61,6 +62,6 @@ class CollectMetricsCommand extends Command
             $this->aggregateMetricsCron->execute();
         }
 
-        return Command::SUCCESS;
+        return Cli::RETURN_SUCCESS;
     }
 }
