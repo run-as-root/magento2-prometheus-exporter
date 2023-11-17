@@ -113,7 +113,7 @@ final class ProductByTypeCountAggregatorTest extends TestCase
 
         $this->resourceConnection->expects($this->once())
             ->method('getConnection')
-            ->with('products')
+            ->with()
             ->willReturn($connection);
 
         $connection->expects($this->once())->method('select')->willReturn($select);

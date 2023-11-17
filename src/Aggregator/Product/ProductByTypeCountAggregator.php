@@ -53,7 +53,7 @@ class ProductByTypeCountAggregator implements MetricAggregatorInterface
     {
         $this->resetMetrics();
 
-        $connection = $this->resourceConnection->getConnection('products');
+        $connection = $this->resourceConnection->getConnection();
 
         $productSearchResult = $connection->fetchAll($this->getSelect($connection));
 
