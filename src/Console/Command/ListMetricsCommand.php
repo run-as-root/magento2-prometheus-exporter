@@ -7,6 +7,7 @@ namespace RunAsRoot\PrometheusExporter\Console\Command;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
+use Magento\Framework\Console\Cli;
 use Magento\Framework\Exception\LocalizedException;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
@@ -58,7 +59,7 @@ class ListMetricsCommand extends Command
         if ($searchResults->getTotalCount() === 0) {
             $output->writeln('No metrics found');
 
-            return;
+            return Cli::RETURN_SUCCESS;
         }
 
         /** @var MetricInterface[] $metrics */
@@ -72,5 +73,7 @@ class ListMetricsCommand extends Command
         }
 
         $table->render();
+
+        return Cli::RETURN_SUCCESS;
     }
 }
