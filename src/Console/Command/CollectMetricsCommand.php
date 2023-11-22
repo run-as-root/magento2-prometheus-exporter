@@ -37,7 +37,7 @@ class CollectMetricsCommand extends Command
         $this->state = $state;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName(self::COMMAND_NAME);
         $this->setDescription(self::COMMAND_DESCRIPTION);
@@ -46,7 +46,7 @@ class CollectMetricsCommand extends Command
         parent::configure();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $this->state->getAreaCode();
