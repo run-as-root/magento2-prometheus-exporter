@@ -33,6 +33,8 @@ add the following lines to your prometheus.yml under scrape_configs:
   scrape_interval: 5m
   scrape_timeout: 60s
   metrics_path: /metrics
+  # The bearer token can be generated in the Magento Admin. Using the auth is optional.
+  # bearer_token: YOUR_BEARER_TOKEN
   static_configs:
   - targets: 
     - your-magento-url
