@@ -27,7 +27,7 @@ class CronJobCountAggregatorTest extends TestCase
     /** @var MockObject|Collection */
     private $collection;
 
-    /** @var BrokenCronJobCountAggregator */
+    /** @var CronJobCountAggregator */
     private $sut;
 
     public function setUp(): void

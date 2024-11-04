@@ -47,9 +47,9 @@ TAG;
     {
         /** @var Collection $collection */
         $collection = $this->cronCollectionFactory->create();
-        $collection->addFilter('status', Schedule::STATUS_PENDING)
-            ->addFilter('executed_at', 'NULL', 'IS NOT')
-            ->addFilter('finished_at', 'NULL', 'IS');
+        $collection->addFieldToFilter('status', Schedule::STATUS_PENDING)
+            ->addFieldToFilter('executed_at', ['notnull' => true])
+            ->addFieldToFilter('finished_at', ['null' => true]);
         $this->updateMetricService->update($this->getCode(), (string)$collection->count());
 
         return true;
