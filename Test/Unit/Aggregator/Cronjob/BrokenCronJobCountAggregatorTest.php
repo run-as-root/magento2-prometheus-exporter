@@ -43,18 +43,18 @@ class BrokenCronJobCountAggregatorTest extends TestCase
     {
         $this->collection
             ->expects($this->at(0))
-            ->method('addFilter')
+            ->method('addFieldToFilter')
             ->with(...['status', 'pending'])
             ->willReturn($this->collection);
         $this->collection
             ->expects($this->at(1))
-            ->method('addFilter')
-            ->with(...['executed_at', 'NULL', 'IS NOT'])
+            ->method('addFieldToFilter')
+            ->with(...['executed_at', ['notnull' => true]])
             ->willReturn($this->collection);
         $this->collection
             ->expects($this->at(2))
-            ->method('addFilter')
-            ->with(...['finished_at', 'NULL', 'IS'])
+            ->method('addFieldToFilter')
+            ->with(...['finished_at', ['null' => true]])
             ->willReturn($this->collection);
 
         $this->collection
