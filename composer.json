@@ -45,6 +45,9 @@
         "magento/module-indexer": "*",
         "magento/zend-db": "*"
     },
+    "conflict": {
+        "symfony/process": "<5.4.46"
+    },
     "require-dev": {
         "phpunit/phpunit": "*"
     },
