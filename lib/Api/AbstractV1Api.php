@@ -41,11 +41,11 @@ abstract class AbstractV1Api
     protected ?LoggerInterface $logger;
 
     public function __construct(
-        ClientConfigInterface $clientConfig = null,
-        ClientInterface $client = null,
-        SerializerInterface $serializer = null,
-        RequestFactory $requestFactory = null,
-        LoggerInterface $logger = null
+        ?ClientConfigInterface $clientConfig = null,
+        ?ClientInterface $client = null,
+        ?SerializerInterface $serializer = null,
+        ?RequestFactory $requestFactory = null,
+        ?LoggerInterface $logger = null
     ) {
         $this->clientConfig = $clientConfig ?: new ClientConfig();
         $this->client = $client ?: new Client();
@@ -104,7 +104,7 @@ abstract class AbstractV1Api
         return $response;
     }
 
-    protected function createHttpPostRequest(string $path, array $headers = [], string $httpBody = null): Request
+    protected function createHttpPostRequest(string $path, array $headers = [], ?string $httpBody = null): Request
     {
         $uri = rtrim($this->clientConfig->getServiceUrl(), '/') . $path;
         if ($this->logger !== null) {
