@@ -11,7 +11,7 @@ class MetricsLogHandler extends BaseLogger
 {
     private const LOG_FILENAME = '/var/log/rar_prometheus_metric.log';
 
-    public function __construct(DriverInterface $filesystem, string $filePath = null)
+    public function __construct(DriverInterface $filesystem, ?string $filePath = null)
     {
         parent::__construct($filesystem, $filePath, self::LOG_FILENAME);
     }
