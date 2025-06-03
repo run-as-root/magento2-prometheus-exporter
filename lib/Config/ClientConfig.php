@@ -22,7 +22,7 @@ class ClientConfig implements ClientConfigInterface
         return $this->isDebugAllowed;
     }
 
-    public function setServiceUrl(string $serviceUrl = null): void
+    public function setServiceUrl(?string $serviceUrl = null): void
     {
         $this->serviceUrl = $serviceUrl;
     }
@@ -32,7 +32,7 @@ class ClientConfig implements ClientConfigInterface
         return $this->serviceUrl;
     }
 
-    public function setApiKey(string $apiKey = null): void
+    public function setApiKey(?string $apiKey = null): void
     {
         $this->apiKey = $apiKey;
     }

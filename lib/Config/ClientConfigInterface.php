@@ -11,11 +11,11 @@ interface ClientConfigInterface
 
     public function isDebugAllowed(): ?bool;
 
-    public function setServiceUrl(string $serviceUrl = null): void;
+    public function setServiceUrl(?string $serviceUrl = null): void;
 
     public function getServiceUrl(): ?string;
 
-    public function setApiKey(string $apiKey = null): void;
+    public function setApiKey(?string $apiKey = null): void;
 
     public function getApiKey(): ?string;
 }

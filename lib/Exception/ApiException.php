@@ -17,7 +17,7 @@ abstract class ApiException extends \RuntimeException
         HttpRequestInterface $httpRequest,
         string $message = '',
         int $code = 0,
-        Throwable $previous = null
+        ?Throwable $previous = null
     ) {
         parent::__construct($message, $code, $previous);
         $this->httpRequest = $httpRequest;

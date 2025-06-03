@@ -13,7 +13,7 @@ class RequestFactory
     public function createPostRequest(
         string $uri,
         array $headers = [],
-        string $body = null,
+        ?string $body = null,
         string $version = '1.1'
     ): Request {
         return new Request(self::METHOD_POST, $uri, $headers, $body, $version);
@@ -22,7 +22,7 @@ class RequestFactory
     public function createGetRequest(
         string $uri,
         array $headers = [],
-        string $body = null,
+        ?string $body = null,
         string $version = '1.1'
     ): Request {
         return new Request(self::METHOD_GET, $uri, $headers, $body, $version);
