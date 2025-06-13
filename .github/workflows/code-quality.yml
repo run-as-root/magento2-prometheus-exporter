@@ -1,0 +1,440 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+jobs:
+  php-cs-fixer:
+    name: PHP CS Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer, cs2pr
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-cs-fixer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-cs-fixer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Create PHP CS Fixer config
+        run: |
+          cat > .php-cs-fixer.php << 'EOF'
+          <?php
+          $finder = PhpCsFixer\Finder::create()
+              ->in(__DIR__ . '/src')
+              ->in(__DIR__ . '/lib')
+              ->in(__DIR__ . '/Test')
+              ->name('*.php')
+              ->exclude(['build', 'vendor']);
+
+          $config = new PhpCsFixer\Config();
+          return $config
+              ->setRules([
+                  '@PSR12' => true,
+                  '@Symfony' => true,
+                  'array_syntax' => ['syntax' => 'short'],
+                  'binary_operator_spaces' => true,
+                  'blank_line_after_opening_tag' => true,
+                  'concat_space' => ['spacing' => 'one'],
+                  'function_typehint_space' => true,
+                  'hash_to_slash_comment' => true,
+                  'linebreak_after_opening_tag' => true,
+                  'lowercase_cast' => true,
+                  'magic_constant_casing' => true,
+                  'method_argument_space' => true,
+                  'native_function_casing' => true,
+                  'no_alias_functions' => true,
+                  'no_blank_lines_after_class_opening' => true,
+                  'no_blank_lines_after_phpdoc' => true,
+                  'no_empty_statement' => true,
+                  'no_extra_blank_lines' => true,
+                  'no_leading_import_slash' => true,
+                  'no_leading_namespace_whitespace' => true,
+                  'no_mixed_echo_print' => ['use' => 'echo'],
+                  'no_multiline_whitespace_around_double_arrow' => true,
+                  'no_short_bool_cast' => true,
+                  'no_singleline_whitespace_before_semicolons' => true,
+                  'no_spaces_around_offset' => true,
+                  'no_trailing_comma_in_list_call' => true,
+                  'no_trailing_comma_in_singleline_array' => true,
+                  'no_unneeded_control_parentheses' => true,
+                  'no_unused_imports' => true,
+                  'no_whitespace_before_comma_in_array' => true,
+                  'no_whitespace_in_blank_line' => true,
+                  'object_operator_without_whitespace' => true,
+                  'ordered_imports' => true,
+                  'phpdoc_indent' => true,
+                  'phpdoc_inline_tag_normalizer' => true,
+                  'phpdoc_no_access' => true,
+                  'phpdoc_no_package' => true,
+                  'phpdoc_no_useless_inheritdoc' => true,
+                  'phpdoc_scalar' => true,
+                  'phpdoc_single_line_var_spacing' => true,
+                  'phpdoc_summary' => true,
+                  'phpdoc_to_comment' => true,
+                  'phpdoc_trim' => true,
+                  'phpdoc_types' => true,
+                  'phpdoc_var_without_name' => true,
+                  'return_type_declaration' => true,
+                  'short_scalar_cast' => true,
+                  'single_blank_line_before_namespace' => true,
+                  'single_class_element_per_statement' => true,
+                  'single_quote' => true,
+                  'space_after_semicolon' => true,
+                  'standardize_not_equals' => true,
+                  'ternary_operator_spaces' => true,
+                  'trailing_comma_in_multiline' => true,
+                  'trim_array_spaces' => true,
+                  'unary_operator_spaces' => true,
+                  'whitespace_after_comma_in_array' => true,
+              ])
+              ->setFinder($finder);
+          EOF
+
+      - name: Run PHP CS Fixer (Check)
+        if: github.event_name == 'pull_request'
+        run: |
+          composer global require friendsofphp/php-cs-fixer
+          ~/.composer/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle | cs2pr
+
+      - name: Run PHP CS Fixer (Fix)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: |
+          composer global require friendsofphp/php-cs-fixer
+          ~/.composer/vendor/bin/php-cs-fixer fix
+
+      - name: Commit changes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "Fix code style with PHP CS Fixer"
+          git push
+
+  phpstan:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-phpstan-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-phpstan-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Create PHPStan config
+        run: |
+          cat > phpstan.neon << 'EOF'
+          parameters:
+              level: 5
+              paths:
+                  - src
+                  - lib
+              ignoreErrors:
+                  - '#Call to an undefined method.*#'
+                  - '#Access to an undefined property.*#'
+                  - '#Cannot call method.*on.*#'
+              excludePaths:
+                  - */Test/*
+                  - */build/*
+                  - */vendor/*
+              checkMissingIterableValueType: false
+              checkGenericClassInNonGenericObjectType: false
+          EOF
+
+      - name: Run PHPStan
+        run: |
+          composer global require phpstan/phpstan
+          ~/.composer/vendor/bin/phpstan analyse --no-progress --error-format=github
+
+  psalm:
+    name: Psalm Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-psalm-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-psalm-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run Psalm
+        run: |
+          composer global require vimeo/psalm
+          ~/.composer/vendor/bin/psalm --init src lib 5 || true
+          ~/.composer/vendor/bin/psalm --output-format=github --no-progress
+
+  magento-coding-standard:
+    name: Magento Coding Standard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-mcs-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mcs-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Install Magento Coding Standard
+        run: composer global require magento/magento-coding-standard
+
+      - name: Run Magento Coding Standard
+        run: |
+          ~/.composer/vendor/bin/phpcs --standard=Magento2 --extensions=php src/ lib/ --report=checkstyle | cs2pr
+        continue-on-error: true
+
+  php-compatibility:
+    name: PHP Compatibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer, cs2pr
+
+      - name: Install PHP Compatibility
+        run: composer global require phpcompatibility/php-compatibility
+
+      - name: Run PHP Compatibility Check
+        run: |
+          ~/.composer/vendor/bin/phpcs --standard=PHPCompatibility --extensions=php --runtime-set testVersion 7.4-8.2 src/ lib/ --report=checkstyle | cs2pr
+
+  phpmd:
+    name: PHP Mess Detector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install PHPMD
+        run: composer global require phpmd/phpmd
+
+      - name: Create PHPMD ruleset
+        run: |
+          cat > phpmd.xml << 'EOF'
+          <?xml version="1.0"?>
+          <ruleset name="Magento2 Prometheus Exporter PHPMD Rules"
+                   xmlns="http://pmd.sf.net/ruleset/1.0.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+                   xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+              <description>Custom PHPMD rules for Magento 2 module</description>
+
+              <rule ref="rulesets/cleancode.xml">
+                  <exclude name="StaticAccess"/>
+              </rule>
+
+              <rule ref="rulesets/codesize.xml"/>
+
+              <rule ref="rulesets/controversial.xml">
+                  <exclude name="Superglobals"/>
+              </rule>
+
+              <rule ref="rulesets/design.xml"/>
+
+              <rule ref="rulesets/naming.xml">
+                  <exclude name="ShortVariable"/>
+                  <exclude name="LongVariable"/>
+              </rule>
+
+              <rule ref="rulesets/unusedcode.xml"/>
+          </ruleset>
+          EOF
+
+      - name: Run PHPMD
+        run: |
+          ~/.composer/vendor/bin/phpmd src/,lib/ github phpmd.xml
+        continue-on-error: true
+
+  phpcpd:
+    name: PHP Copy/Paste Detector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install PHPCPD
+        run: composer global require sebastian/phpcpd
+
+      - name: Run PHPCPD
+        run: |
+          ~/.composer/vendor/bin/phpcpd src/ lib/ --min-lines=5 --min-tokens=70
+        continue-on-error: true
+
+  security-checker:
+    name: Security Vulnerability Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Security Check
+        run: |
+          composer global require enlightn/security-checker
+          ~/.composer/vendor/bin/security-checker security:check composer.lock
+
+  dependency-check:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Check for unused dependencies
+        run: |
+          composer global require composer-unused/composer-unused
+          ~/.composer/vendor/bin/composer-unused --no-interaction
+        continue-on-error: true
+
+      - name: Check dependency versions
+        run: |
+          composer outdated --direct --strict
+        continue-on-error: true
+
+  code-metrics:
+    name: Code Metrics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install PHPLOC
+        run: composer global require phploc/phploc
+
+      - name: Generate Code Metrics
+        run: |
+          echo "## Code Metrics Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Lines of Code Analysis" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ~/.composer/vendor/bin/phploc src/ lib/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  generate-report:
+    name: Generate Quality Report
+    runs-on: ubuntu-latest
+    needs: [php-cs-fixer, phpstan, psalm, magento-coding-standard, php-compatibility, phpmd, phpcpd, security-checker, dependency-check, code-metrics]
+    if: always()
+    steps:
+      - name: Generate Summary Report
+        run: |
+          echo "## 📊 Code Quality Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| PHP CS Fixer | ${{ needs.php-cs-fixer.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPStan | ${{ needs.phpstan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Psalm | ${{ needs.psalm.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Magento Coding Standard | ${{ needs.magento-coding-standard.result == 'success' && '✅ Pass' || '⚠️ Warning' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHP Compatibility | ${{ needs.php-compatibility.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPMD | ${{ needs.phpmd.result == 'success' && '✅ Pass' || '⚠️ Warning' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPCPD | ${{ needs.phpcpd.result == 'success' && '✅ Pass' || '⚠️ Warning' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Check | ${{ needs.security-checker.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Check | ${{ needs.dependency-check.result == 'success' && '✅ Pass' || '⚠️ Warning' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Overall Status" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.php-cs-fixer.result }}" == "success" && "${{ needs.phpstan.result }}" == "success" && "${{ needs.psalm.result }}" == "success" && "${{ needs.php-compatibility.result }}" == "success" && "${{ needs.security-checker.result }}" == "success" ]]; then
+            echo "🎉 **All critical checks passed!** Your code meets the quality standards." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️  **Some checks failed.** Please review the failed checks above." >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,271 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      changelog: ${{ steps.get-changelog.outputs.changelog }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Version
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate Version Format
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format: $VERSION"
+            echo "Expected format: v1.0.0"
+            exit 1
+          fi
+
+      - name: Check if version exists in composer.json
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          COMPOSER_VERSION=$(grep -o '"version": "[^"]*"' composer.json | cut -d'"' -f4)
+          if [ "v$COMPOSER_VERSION" != "$VERSION" ]; then
+            echo "Version mismatch between tag ($VERSION) and composer.json (v$COMPOSER_VERSION)"
+            exit 1
+          fi
+
+      - name: Extract Changelog
+        id: get-changelog
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          VERSION_NUMBER=${VERSION#v}
+
+          # Extract changelog for this version
+          if [ -f CHANGELOG.md ]; then
+            # Get changelog section for this version
+            CHANGELOG=$(awk "/^## \[$VERSION_NUMBER\]/,/^## \[/{if(/^## \[/ && !/^## \[$VERSION_NUMBER\]/) exit; if(!/^## \[$VERSION_NUMBER\]/) print}" CHANGELOG.md)
+            if [ -z "$CHANGELOG" ]; then
+              echo "No changelog found for version $VERSION_NUMBER"
+              CHANGELOG="No changelog available for this release."
+            fi
+          else
+            CHANGELOG="No changelog available for this release."
+          fi
+
+          # Use multiline output
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  run-tests:
+    name: Run Tests Before Release
+    needs: validate-release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.4', '8.1', '8.2']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: bcmath, ctype, curl, dom, hash, iconv, intl, mbstring, openssl, pdo_mysql, simplexml, soap, xsl, zip
+          tools: composer
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-dev
+
+      - name: Run Unit Tests
+        run: vendor/bin/phpunit Test/Unit/ --no-coverage
+
+  create-release:
+    name: Create Release
+    needs: [validate-release, run-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
+
+      - name: Create Release Archive
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          ARCHIVE_NAME="magento2-prometheus-exporter-${VERSION}.zip"
+
+          # Create clean build directory
+          mkdir -p build/release
+
+          # Copy necessary files
+          rsync -av --exclude-from=.gitignore --exclude='.git*' --exclude='build/' --exclude='Test/' --exclude='.idea/' . build/release/
+
+          # Create archive
+          cd build/release
+          zip -r "../../$ARCHIVE_NAME" . -x "*.git*" "build/*" "Test/*" ".idea/*"
+          cd ../..
+
+          echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> $GITHUB_ENV
+
+      - name: Generate Release Notes
+        id: release-notes
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          CHANGELOG="${{ needs.validate-release.outputs.changelog }}"
+
+          cat > release-notes.md << EOF
+          # Magento 2 Prometheus Exporter $VERSION
+
+          ## What's Changed
+
+          $CHANGELOG
+
+          ## Installation
+
+          ### Via Composer (Recommended)
+          \`\`\`bash
+          composer require run_as_root/magento2-prometheus-exporter:$VERSION
+          php bin/magento setup:upgrade
+          php bin/magento setup:di:compile
+          php bin/magento cache:flush
+          \`\`\`
+
+          ### Manual Installation
+          1. Download the release archive below
+          2. Extract to your Magento 2 \`app/code/RunAsRoot/PrometheusExporter\` directory
+          3. Run the installation commands above
+
+          ## Compatibility
+
+          - **Magento**: 2.3.x - 2.4.x
+          - **PHP**: 7.4 - 8.2
+
+          ## Support
+
+          - 📧 **Email**: info@run-as-root.sh
+          - 🐛 **Issues**: [GitHub Issues](https://github.com/run-as-root/magento2-prometheus-exporter/issues)
+          - 📖 **Documentation**: [README](https://github.com/run-as-root/magento2-prometheus-exporter#readme)
+
+          **Full Changelog**: https://github.com/run-as-root/magento2-prometheus-exporter/compare/...${VERSION}
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-release.outputs.version }}
+          name: ${{ needs.validate-release.outputs.version }}
+          body_path: release-notes.md
+          files: ${{ env.ARCHIVE_NAME }}
+          draft: false
+          prerelease: ${{ contains(needs.validate-release.outputs.version, '-') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-packagist:
+    name: Update Packagist
+    needs: [validate-release, create-release]
+    runs-on: ubuntu-latest
+    if: ${{ !contains(needs.validate-release.outputs.version, '-') }}
+    steps:
+      - name: Update Packagist
+        run: |
+          if [ -n "${{ secrets.PACKAGIST_TOKEN }}" ]; then
+            curl -XPOST -H'content-type:application/json' \
+              "https://packagist.org/api/update-package?username=run_as_root&apiToken=${{ secrets.PACKAGIST_TOKEN }}" \
+              -d'{"repository":{"url":"https://packagist.org/packages/run_as_root/magento2-prometheus-exporter"}}'
+            echo "Packagist updated successfully"
+          else
+            echo "PACKAGIST_TOKEN not set, skipping Packagist update"
+          fi
+
+  post-release:
+    name: Post Release Tasks
+    needs: [validate-release, create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Update version in develop branch
+        if: github.ref_type == 'tag' && !contains(needs.validate-release.outputs.version, '-')
+        run: |
+          # Switch to develop branch if it exists
+          if git show-ref --quiet refs/remotes/origin/develop; then
+            git checkout develop
+            git pull origin develop
+
+            # Update version in composer.json for next development cycle
+            VERSION="${{ needs.validate-release.outputs.version }}"
+            CURRENT_VERSION=${VERSION#v}
+
+            # Increment patch version for next dev cycle
+            IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+            NEXT_PATCH=$((${VERSION_PARTS[2]} + 1))
+            NEXT_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.${NEXT_PATCH}-dev"
+
+            # Update composer.json
+            sed -i "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$NEXT_VERSION\"/" composer.json
+
+            git add composer.json
+            git commit -m "Bump version to $NEXT_VERSION after release $VERSION" || true
+            git push origin develop || true
+          fi
+
+      - name: Create Release Summary
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          echo "## 🎉 Release $VERSION Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Release Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release URL**: https://github.com/${{ github.repository }}/releases/tag/$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Packagist**: https://packagist.org/packages/run_as_root/magento2-prometheus-exporter" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Announce release on social media" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Update documentation if needed" >> $GITHUB_STEP_SUMMARY
+          echo "- [ ] Notify team members" >> $GITHUB_STEP_SUMMARY

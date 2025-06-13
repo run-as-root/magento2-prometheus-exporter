@@ -1,0 +1,275 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  php-cs-fixer:
+    name: PHP CS Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer, cs2pr
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHP CS Fixer
+        run: |
+          composer global require friendsofphp/php-cs-fixer
+          php-cs-fixer fix --dry-run --diff --format=checkstyle | cs2pr
+
+  phpstan:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPStan
+        run: |
+          composer global require phpstan/phpstan
+          phpstan analyse src/ --level=5 --no-progress
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.4', '8.0', '8.1', '8.2']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: bcmath, ctype, curl, dom, hash, iconv, intl, mbstring, openssl, pdo_mysql, simplexml, soap, xsl, zip
+          tools: composer
+          coverage: xdebug
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run Unit Tests
+        run: |
+          vendor/bin/phpunit Test/Unit/ \
+            --coverage-clover=coverage.xml \
+            --coverage-text \
+            --colors=never
+
+      - name: Upload coverage reports to Codecov
+        if: matrix.php-version == '8.1'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        magento-version: ['2.4.6', '2.4.5']
+        php-version: ['8.1']
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: magento
+          MYSQL_DATABASE: magento
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+        ports:
+          - 9200:9200
+        options: --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: bcmath, ctype, curl, dom, hash, iconv, intl, mbstring, openssl, pdo_mysql, simplexml, soap, xsl, zip
+          tools: composer
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ matrix.magento-version }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ matrix.magento-version }}-
+            ${{ runner.os }}-composer-${{ matrix.php-version }}-
+            ${{ runner.os }}-composer-
+
+      - name: Setup Magento ${{ matrix.magento-version }}
+        run: |
+          composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition:${{ matrix.magento-version }} magento --no-install
+          cd magento
+          composer config repositories.local path $GITHUB_WORKSPACE
+          composer require run_as_root/magento2-prometheus-exporter:@dev --no-update
+          composer install --prefer-dist --no-progress
+
+      - name: Setup Magento Database
+        run: |
+          cd magento
+          php bin/magento setup:install \
+            --base-url=http://localhost/ \
+            --db-host=127.0.0.1 \
+            --db-name=magento \
+            --db-user=root \
+            --db-password=magento \
+            --admin-firstname=Admin \
+            --admin-lastname=User \
+            --admin-email=admin@example.com \
+            --admin-user=admin \
+            --admin-password=admin123 \
+            --language=en_US \
+            --currency=USD \
+            --timezone=America/Chicago \
+            --use-rewrites=1 \
+            --search-engine=elasticsearch7 \
+            --elasticsearch-host=localhost \
+            --elasticsearch-port=9200
+
+      - name: Run Integration Tests
+        run: |
+          cd magento
+          php bin/magento setup:upgrade
+          php bin/magento setup:di:compile
+          vendor/bin/phpunit -c dev/tests/integration/phpunit.xml.dist vendor/run_as_root/magento2-prometheus-exporter/Test/Integration/
+
+  compatibility-check:
+    name: Magento Compatibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Install Magento Coding Standard
+        run: |
+          composer global require magento/magento-coding-standard
+          composer global require phpcompatibility/php-compatibility
+
+      - name: Run Magento Coding Standard
+        run: |
+          ~/.composer/vendor/bin/phpcs --standard=Magento2 src/
+        continue-on-error: true
+
+      - name: Check PHP Compatibility
+        run: |
+          ~/.composer/vendor/bin/phpcs --standard=PHPCompatibility --runtime-set testVersion 7.4-8.2 src/
+        continue-on-error: true
+
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Security Check
+        run: |
+          composer global require enlightn/security-checker
+          ~/.composer/vendor/bin/security-checker security:check composer.lock
+
+  validate-composer:
+    name: Validate Composer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Check for unused dependencies
+        run: |
+          composer global require composer-unused/composer-unused
+          ~/.composer/vendor/bin/composer-unused
+        continue-on-error: true
