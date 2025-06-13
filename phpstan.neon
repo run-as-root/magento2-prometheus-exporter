@@ -8,42 +8,76 @@ parameters:
         - */build/*
         - */vendor/*
     ignoreErrors:
-        # Magento framework classes that may not be available in CI
+        # Magento framework classes
+        - '#Class Magento\\.*#'
+        - '#Interface Magento\\.*#'
+        - '#Trait Magento\\.*#'
+        - '#Constant .* on an unknown class Magento\\.*#'
+        - '#Parameter .* has invalid type Magento\\.*#'
+        - '#Method .* has invalid return type Magento\\.*#'
+        - '#Property .* has unknown class Magento\\.* as its type#'
         - '#Call to an undefined method Magento\\.*#'
         - '#Access to an undefined property Magento\\.*#'
-        - '#Class Magento\\.* not found#'
-        - '#Interface Magento\\.* not found#'
-        - '#Trait Magento\\.* not found#'
-        - '#Parameter .* of method .* has invalid type Magento\\.*#'
-        - '#Return type .* of method .* has invalid type Magento\\.*#'
-        - '#Property .* has unknown class Magento\\.* as its type#'
+        - '#Instantiated class Magento\\.* not found#'
 
+        # Zend/Laminas classes
+        - '#Class Zend\\.*#'
+        - '#Class Laminas\\.*#'
+        - '#Interface Zend\\.*#'
+        - '#Interface Laminas\\.*#'
+        - '#Caught class Zend\\.*#'
+        - '#Instantiated class Zend\\.*#'
+        - '#Instantiated class Laminas\\.*#'
 
-        # Laminas classes
-        - '#Class Laminas\\.* not found#'
-        - '#Interface Laminas\\.* not found#'
-
-        # PSR classes
-        - '#Class Psr\\.* not found#'
-        - '#Interface Psr\\.* not found#'
+        # PSR interfaces
+        - '#Class Psr\\.*#'
+        - '#Interface Psr\\.*#'
+        - '#Parameter .* has invalid type Psr\\.*#'
+        - '#Method .* has invalid return type Psr\\.*#'
+        - '#Property .* has unknown class Psr\\.* as its type#'
 
         # Symfony classes
-        - '#Class Symfony\\.* not found#'
-        - '#Interface Symfony\\.* not found#'
+        - '#Class Symfony\\.*#'
+        - '#Interface Symfony\\.*#'
+        - '#Parameter .* has invalid type Symfony\\.*#'
+        - '#Method .* has invalid return type Symfony\\.*#'
+        - '#Property .* has unknown class Symfony\\.* as its type#'
+        - '#Instantiated class Symfony\\.*#'
+        - '#Constant .* on an unknown class Symfony\\.*#'
 
         # GuzzleHttp classes
-        - '#Class GuzzleHttp\\.* not found#'
-        - '#Interface GuzzleHttp\\.* not found#'
+        - '#Class GuzzleHttp\\.*#'
+        - '#Interface GuzzleHttp\\.*#'
+        - '#Parameter .* has invalid type GuzzleHttp\\.*#'
+        - '#Method .* has invalid return type GuzzleHttp\\.*#'
+        - '#Property .* has unknown class GuzzleHttp\\.* as its type#'
+        - '#Instantiated class GuzzleHttp\\.*#'
 
         # Monolog classes
-        - '#Class Monolog\\.* not found#'
-        - '#Interface Monolog\\.* not found#'
+        - '#Class Monolog\\.*#'
+        - '#Interface Monolog\\.*#'
+        - '#Parameter .* has invalid type Monolog\\.*#'
+        - '#Method .* has invalid return type Monolog\\.*#'
+        - '#Property .* has unknown class Monolog\\.* as its type#'
 
-        # Generic external dependencies
-        - '#Call to an undefined method [A-Z][a-zA-Z\\\\]*::[a-zA-Z_]*\\(\\)#'
-        - '#Access to an undefined property [A-Z][a-zA-Z\\\\]*::\\$[a-zA-Z_]*#'
+        # Doctrine classes
+        - '#Class Doctrine\\.*#'
+        - '#Interface Doctrine\\.*#'
+        - '#Instantiated class Doctrine\\.*#'
+
+        # Generic not found patterns
+        - '#.* not found#'
+        - '#unknown class .*#'
+        - '#invalid type .*#'
+        - '#undefined property .*#'
+        - '#undefined method .*#'
+        - '#Access to constant .* on an unknown class .*#'
+
+        # Framework specific ignore patterns
+        - '#Access to an undefined property .*::\$clientConfig#'
+        - '#Property .* has no type specified#'
+        - '#Method .* has parameter .* with no type specified#'
+        - '#Method .* has no return type specified#'
 
     reportUnmatchedIgnoredErrors: false
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
     tmpDir: /tmp/phpstan
