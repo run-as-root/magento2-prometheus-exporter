@@ -36,13 +36,16 @@ jobs:
           echo "📁 Total PHP files: $TOTAL_FILES" >> $GITHUB_STEP_SUMMARY
 
           # Time syntax checking
-          START_TIME=$(date +%s.%N)
+          START_TIME=$(date +%s)
           find src/ lib/ -name "*.php" -exec php -l {} \; > /dev/null
-          END_TIME=$(date +%s.%N)
-          DURATION=$(echo "$END_TIME - $START_TIME" | bc -l 2>/dev/null || echo "0.1")
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
 
           echo "⏱️ Syntax check time: ${DURATION}s" >> $GITHUB_STEP_SUMMARY
-          echo "📊 Average per file: $(echo "scale=4; $DURATION / $TOTAL_FILES" | bc -l 2>/dev/null || echo "0.01")s" >> $GITHUB_STEP_SUMMARY
+          if [ $TOTAL_FILES -gt 0 ]; then
+            AVG_TIME=$(awk "BEGIN {printf \"%.4f\", $DURATION / $TOTAL_FILES}")
+            echo "📊 Average per file: ${AVG_TIME}s" >> $GITHUB_STEP_SUMMARY
+          fi
 
   code-complexity:
     name: Code Complexity Analysis
@@ -57,7 +60,9 @@ jobs:
           php-version: "8.1"
 
       - name: Install PHPLOC
-        run: composer global require phploc/phploc
+        run: |
+          composer global require phploc/phploc || true
+        continue-on-error: true
 
       - name: Analyze code complexity
         run: |
@@ -65,7 +70,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Code Metrics" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          ~/.composer/vendor/bin/phploc src/ lib/ --exclude=Test 2>/dev/null || echo "Analysis completed"
+          if [ -f ~/.composer/vendor/bin/phploc ]; then
+            ~/.composer/vendor/bin/phploc src/ lib/ --exclude=Test 2>/dev/null || echo "PHPLOC analysis completed"
+          else
+            echo "PHPLOC not available - install with: composer global require phploc/phploc"
+          fi
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   memory-usage-analysis:
@@ -194,23 +203,23 @@ jobs:
           # Time composer operations
           echo "### Composer Performance" >> $GITHUB_STEP_SUMMARY
 
-          START_TIME=$(date +%s.%N)
+          START_TIME=$(date +%s)
           composer validate --no-check-all --no-check-lock composer-test.json >/dev/null 2>&1
-          END_TIME=$(date +%s.%N)
-          VALIDATE_TIME=$(echo "$END_TIME - $START_TIME" | bc -l 2>/dev/null || echo "0.1")
+          END_TIME=$(date +%s)
+          VALIDATE_TIME=$((END_TIME - START_TIME))
 
           echo "- **Validation time**: ${VALIDATE_TIME}s" >> $GITHUB_STEP_SUMMARY
 
           # Test autoload generation
-          START_TIME=$(date +%s.%N)
+          START_TIME=$(date +%s)
           composer dump-autoload --working-dir=. --file=composer-test.json >/dev/null 2>&1 || true
-          END_TIME=$(date +%s.%N)
-          AUTOLOAD_TIME=$(echo "$END_TIME - $START_TIME" | bc -l 2>/dev/null || echo "0.1")
+          END_TIME=$(date +%s)
+          AUTOLOAD_TIME=$((END_TIME - START_TIME))
 
           echo "- **Autoload generation**: ${AUTOLOAD_TIME}s" >> $GITHUB_STEP_SUMMARY
 
           # Count dependencies
-          DEP_COUNT=$(cat composer.json | grep -c '".*":' || echo "0")
+          DEP_COUNT=$(grep -c '".*":' composer.json 2>/dev/null || echo "0")
           echo "- **Total dependencies**: $DEP_COUNT" >> $GITHUB_STEP_SUMMARY
 
           rm -f composer-test.json
@@ -366,4 +375,4 @@ jobs:
           echo "- Use appropriate caching strategies" >> $GITHUB_STEP_SUMMARY
           echo "- Regular dependency updates" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next scheduled run**: $(date -d 'next sunday 03:00 UTC' '+%Y-%m-%d %H:%M UTC' 2>/dev/null || echo 'Weekly on Sundays')"
+          echo "**Next scheduled run**: Weekly on Sundays at 03:00 UTC"

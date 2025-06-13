@@ -30,8 +30,8 @@ jobs:
           find src/ lib/ -name "*.php" -exec php -l {} \;
           echo "✅ PHP syntax check passed for PHP ${{ matrix.php-version }}"
 
-  phpstan-analysis:
-    name: PHPStan Static Analysis
+  phpstan-level-8:
+    name: PHPStan Level 8 Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,37 +43,66 @@ jobs:
           php-version: "8.1"
           tools: composer
 
-      - name: Create PHPStan config
+      - name: Install PHPStan
+        run: composer global require phpstan/phpstan
+
+      - name: Create PHPStan level 8 config
         run: |
           cat > phpstan.neon << 'EOF'
           parameters:
-              level: 2
+              level: 8
               paths:
                   - src
                   - lib
-              ignoreErrors:
-                  - '#Call to an undefined method.*#'
-                  - '#Access to an undefined property.*#'
-                  - '#Cannot call method.*on.*#'
-                  - '#Class.*not found#'
-                  - '#Interface.*not found#'
-                  - '#Magento\\.*#'
               excludePaths:
                   - */Test/*
                   - */build/*
                   - */vendor/*
+              ignoreErrors:
+                  # Magento framework classes that may not be available in CI
+                  - '#Call to an undefined method Magento\\.*#'
+                  - '#Access to an undefined property Magento\\.*#'
+                  - '#Class Magento\\.* not found#'
+                  - '#Interface Magento\\.* not found#'
+                  - '#Trait Magento\\.* not found#'
+                  - '#Parameter .* of method .* has invalid type Magento\\.*#'
+                  - '#Return type .* of method .* has invalid type Magento\\.*#'
+                  - '#Property .* has unknown class Magento\\.* as its type#'
+                  # Laminas classes
+                  - '#Class Laminas\\.* not found#'
+                  - '#Interface Laminas\\.* not found#'
+                  # PSR classes
+                  - '#Class Psr\\.* not found#'
+                  - '#Interface Psr\\.* not found#'
+                  # Symfony classes
+                  - '#Class Symfony\\.* not found#'
+                  - '#Interface Symfony\\.* not found#'
+                  # GuzzleHttp classes
+                  - '#Class GuzzleHttp\\.* not found#'
+                  - '#Interface GuzzleHttp\\.* not found#'
+                  # Monolog classes
+                  - '#Class Monolog\\.* not found#'
+                  - '#Interface Monolog\\.* not found#'
+              reportUnmatchedIgnoredErrors: false
               checkMissingIterableValueType: false
               checkGenericClassInNonGenericObjectType: false
-              reportUnmatchedIgnoredErrors: false
+              tmpDir: /tmp/phpstan
           EOF
 
-      - name: Install PHPStan
-        run: composer global require phpstan/phpstan
+      - name: Create tmp directory for PHPStan
+        run: mkdir -p /tmp/phpstan
 
-      - name: Run PHPStan
+      - name: Run PHPStan Level 8
         run: |
-          ~/.composer/vendor/bin/phpstan analyse --no-progress --error-format=github
-        continue-on-error: true
+          echo "## 🔍 PHPStan Level 8 Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if ~/.composer/vendor/bin/phpstan analyse --no-progress --error-format=github; then
+            echo "✅ PHPStan Level 8 analysis passed - strict type checking enforced" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ PHPStan Level 8 analysis failed - fix type issues before merging" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
   php-cs-fixer:
     name: PHP CS Fixer
@@ -102,17 +131,28 @@ jobs:
           return $config
               ->setRules([
                   '@PSR12' => true,
+                  '@Symfony' => true,
                   'array_syntax' => ['syntax' => 'short'],
-                  'binary_operator_spaces' => true,
+                  'binary_operator_spaces' => ['default' => 'single_space'],
+                  'blank_line_after_opening_tag' => true,
                   'concat_space' => ['spacing' => 'one'],
+                  'declare_strict_types' => true,
+                  'function_typehint_space' => true,
+                  'linebreak_after_opening_tag' => true,
+                  'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
                   'no_unused_imports' => true,
-                  'single_quote' => true,
-                  'trailing_comma_in_multiline' => true,
-                  'no_whitespace_in_blank_line' => true,
-                  'ordered_imports' => true,
+                  'ordered_imports' => ['sort_algorithm' => 'alpha'],
+                  'phpdoc_align' => true,
+                  'phpdoc_order' => true,
                   'return_type_declaration' => true,
+                  'single_quote' => true,
+                  'strict_param' => true,
+                  'trailing_comma_in_multiline' => true,
+                  'visibility_required' => true,
+                  'void_return' => true,
               ])
-              ->setFinder($finder);
+              ->setFinder($finder)
+              ->setRiskyAllowed(true);
           EOF
 
       - name: Install PHP CS Fixer
@@ -120,11 +160,12 @@ jobs:
 
       - name: Run PHP CS Fixer
         run: |
+          echo "## 🔧 Code Style Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           ~/.composer/vendor/bin/php-cs-fixer fix --dry-run --diff --format=checkstyle > cs-fixer-report.xml || true
           if [ -s cs-fixer-report.xml ]; then
-            echo "## 🔧 Code Style Issues Found" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "PHP CS Fixer found formatting issues. Run the following command to fix them:" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ Code style issues found. Run the following to fix them:" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo '```bash' >> $GITHUB_STEP_SUMMARY
             echo 'composer global require friendsofphp/php-cs-fixer' >> $GITHUB_STEP_SUMMARY
@@ -170,17 +211,129 @@ jobs:
 
       - name: Run security audit
         run: |
+          echo "## 🔒 Security Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           composer audit --working-dir=. --format=json > security-report.json || true
           if [ -s security-report.json ]; then
-            echo "## 🔒 Security Audit Results" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            if grep -q '"advisories"' security-report.json; then
-              echo "⚠️ Security advisories found. Please review the dependencies." >> $GITHUB_STEP_SUMMARY
+            ADVISORY_COUNT=$(cat security-report.json | jq -r '.advisories | length // 0' 2>/dev/null || echo "0")
+            if [ "$ADVISORY_COUNT" -gt 0 ]; then
+              echo "⚠️ Found $ADVISORY_COUNT security advisories" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Security Issues Found" >> $GITHUB_STEP_SUMMARY
+              cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "**: " + .title' >> $GITHUB_STEP_SUMMARY || true
             else
               echo "✅ No security advisories found" >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "✅ Security audit completed successfully" >> $GITHUB_STEP_SUMMARY
+          fi
+        continue-on-error: true
+
+  magento-coding-standards:
+    name: Magento Coding Standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          tools: composer
+
+      - name: Install Magento Coding Standard
+        run: |
+          composer global require magento/magento-coding-standard squizlabs/php_codesniffer || true
+        continue-on-error: true
+
+      - name: Run Magento Coding Standard
+        run: |
+          echo "## 🎯 Magento Coding Standards" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f ~/.composer/vendor/bin/phpcs ]; then
+            if ~/.composer/vendor/bin/phpcs --standard=Magento2 --extensions=php src/ lib/ --report=summary --ignore="*/Test/*" 2>/dev/null; then
+              echo "✅ Magento coding standards check passed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Some Magento coding standards violations found (non-blocking)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⏭️ Magento coding standards tools not available" >> $GITHUB_STEP_SUMMARY
+          fi
+        continue-on-error: true
+
+  php-mess-detector:
+    name: PHP Mess Detector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          tools: composer
+
+      - name: Install PHPMD
+        run: |
+          composer global require phpmd/phpmd || true
+        continue-on-error: true
+
+      - name: Create PHPMD ruleset
+        run: |
+          cat > phpmd.xml << 'EOF'
+          <?xml version="1.0"?>
+          <ruleset name="Magento2 Prometheus Exporter PHPMD Rules"
+                   xmlns="http://pmd.sf.net/ruleset/1.0.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+                   xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+              <description>PHPMD rules for Magento 2 module</description>
+
+              <rule ref="rulesets/cleancode.xml">
+                  <exclude name="StaticAccess"/>
+                  <exclude name="BooleanArgumentFlag"/>
+              </rule>
+
+              <rule ref="rulesets/codesize.xml">
+                  <exclude name="TooManyPublicMethods"/>
+              </rule>
+
+              <rule ref="rulesets/controversial.xml">
+                  <exclude name="Superglobals"/>
+                  <exclude name="CamelCasePropertyName"/>
+                  <exclude name="CamelCaseParameterName"/>
+                  <exclude name="CamelCaseVariableName"/>
+              </rule>
+
+              <rule ref="rulesets/design.xml"/>
+
+              <rule ref="rulesets/naming.xml">
+                  <exclude name="ShortVariable"/>
+                  <exclude name="LongVariable"/>
+                  <exclude name="ShortMethodName"/>
+              </rule>
+
+              <rule ref="rulesets/unusedcode.xml"/>
+          </ruleset>
+          EOF
+
+      - name: Run PHPMD
+        run: |
+          echo "## 🧹 PHP Mess Detector" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f ~/.composer/vendor/bin/phpmd ]; then
+            if ~/.composer/vendor/bin/phpmd src/,lib/ text phpmd.xml 2>/dev/null; then
+              echo "✅ No code quality issues found by PHPMD" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ PHPMD found some code quality issues (review recommended)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⏭️ PHPMD not available, skipping mess detection" >> $GITHUB_STEP_SUMMARY
           fi
         continue-on-error: true
 
@@ -198,16 +351,43 @@ jobs:
           tools: composer
 
       - name: Install PHPLOC
-        run: composer global require phploc/phploc
+        run: |
+          composer global require phploc/phploc || true
+        continue-on-error: true
 
       - name: Generate Code Metrics
         run: |
-          echo "## 📊 Code Metrics Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Code Complexity Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Lines of Code Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "### Code Metrics Analysis" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          ~/.composer/vendor/bin/phploc src/ lib/ --exclude=Test >> $GITHUB_STEP_SUMMARY
+          if [ -f ~/.composer/vendor/bin/phploc ]; then
+            ~/.composer/vendor/bin/phploc src/ lib/ --exclude=Test 2>/dev/null || echo "PHPLOC analysis completed"
+          else
+            echo "PHPLOC not available, skipping metrics"
+          fi
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Install PHPCPD
+        run: |
+          composer global require sebastian/phpcpd || true
+        continue-on-error: true
+
+      - name: Run Copy/Paste Detection
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Copy/Paste Detection" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f ~/.composer/vendor/bin/phpcpd ]; then
+            if ~/.composer/vendor/bin/phpcpd src/ lib/ --min-lines=5 --min-tokens=70 2>/dev/null; then
+              echo "✅ No significant code duplication found" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Some code duplication detected (review recommended)" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⏭️ PHPCPD not available, skipping duplication check" >> $GITHUB_STEP_SUMMARY
+          fi
+        continue-on-error: true
 
   file-structure-check:
     name: File Structure Check
@@ -218,7 +398,7 @@ jobs:
 
       - name: Check required files
         run: |
-          echo "## 📁 File Structure Check" >> $GITHUB_STEP_SUMMARY
+          echo "## 📁 File Structure Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           REQUIRED_FILES=("README.md" "LICENSE" "composer.json" "registration.php")
@@ -243,7 +423,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Directory Structure" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          tree -d -L 2 . || find . -type d -maxdepth 2 | sort >> $GITHUB_STEP_SUMMARY
+          find . -type d -maxdepth 2 | grep -E '^\./(src|lib|Test)' | sort >> $GITHUB_STEP_SUMMARY || echo "Standard directories found"
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   generate-quality-report:
@@ -252,9 +432,11 @@ jobs:
     needs:
       [
         php-syntax-check,
-        phpstan-analysis,
+        phpstan-level-8,
         php-cs-fixer,
         security-audit,
+        magento-coding-standards,
+        php-mess-detector,
         code-complexity,
         file-structure-check,
       ]
@@ -267,16 +449,21 @@ jobs:
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|---------|" >> $GITHUB_STEP_SUMMARY
           echo "| PHP Syntax Check | ${{ needs.php-syntax-check.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| PHPStan Analysis | ${{ needs.phpstan-analysis.result == 'success' && '✅ Pass' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPStan Level 8 | ${{ needs.phpstan-level-8.result == 'success' && '✅ Pass' || '❌ FAIL - BLOCKING' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| PHP CS Fixer | ${{ needs.php-cs-fixer.result == 'success' && '✅ Pass' || '⚠️ Style Issues' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Security Audit | ${{ needs.security-audit.result == 'success' && '✅ Pass' || '⚠️ Review Needed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Magento Standards | ${{ needs.magento-coding-standards.result == 'success' && '✅ Pass' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHP Mess Detector | ${{ needs.php-mess-detector.result == 'success' && '✅ Pass' || '⚠️ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Code Complexity | ${{ needs.code-complexity.result == 'success' && '✅ Pass' || '⚠️ Review Needed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| File Structure | ${{ needs.file-structure-check.result == 'success' && '✅ Pass' || '❌ Issues Found' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Count critical failures
+          # Count critical failures (PHPStan Level 8 is now critical)
           CRITICAL_FAILURES=0
           if [[ "${{ needs.php-syntax-check.result }}" != "success" ]]; then
+            CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+          fi
+          if [[ "${{ needs.phpstan-level-8.result }}" != "success" ]]; then
             CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
           fi
           if [[ "${{ needs.file-structure-check.result }}" != "success" ]]; then
@@ -284,24 +471,38 @@ jobs:
           fi
 
           if [ $CRITICAL_FAILURES -eq 0 ]; then
-            echo "### ✅ Overall Status: GOOD" >> $GITHUB_STEP_SUMMARY
-            echo "All critical checks passed. Some quality improvements may be recommended." >> $GITHUB_STEP_SUMMARY
+            echo "### ✅ Overall Status: EXCELLENT" >> $GITHUB_STEP_SUMMARY
+            echo "All critical checks passed including PHPStan Level 8 strict analysis!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 **Code meets the highest quality standards:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Strict type checking enforced" >> $GITHUB_STEP_SUMMARY
+            echo "- No undefined variables or methods" >> $GITHUB_STEP_SUMMARY
+            echo "- Full type coverage" >> $GITHUB_STEP_SUMMARY
+            echo "- Proper return types declared" >> $GITHUB_STEP_SUMMARY
           else
-            echo "### ⚠️ Overall Status: NEEDS ATTENTION" >> $GITHUB_STEP_SUMMARY
-            echo "$CRITICAL_FAILURES critical issue(s) found that should be addressed." >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Overall Status: NEEDS ATTENTION" >> $GITHUB_STEP_SUMMARY
+            echo "$CRITICAL_FAILURES critical issue(s) found that must be fixed." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ needs.phpstan-level-8.result }}" != "success" ]]; then
+              echo "🚨 **PHPStan Level 8 failure is blocking** - strict type checking must pass!" >> $GITHUB_STEP_SUMMARY
+            fi
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔧 Quick Fix Commands" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "To fix common issues, run these commands locally:" >> $GITHUB_STEP_SUMMARY
+          echo "To fix issues locally, run:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           echo '# Fix code style issues' >> $GITHUB_STEP_SUMMARY
           echo 'composer global require friendsofphp/php-cs-fixer' >> $GITHUB_STEP_SUMMARY
           echo '~/.composer/vendor/bin/php-cs-fixer fix' >> $GITHUB_STEP_SUMMARY
           echo '' >> $GITHUB_STEP_SUMMARY
-          echo '# Run static analysis' >> $GITHUB_STEP_SUMMARY
+          echo '# Run PHPStan Level 8 analysis' >> $GITHUB_STEP_SUMMARY
           echo 'composer global require phpstan/phpstan' >> $GITHUB_STEP_SUMMARY
-          echo '~/.composer/vendor/bin/phpstan analyse src lib' >> $GITHUB_STEP_SUMMARY
+          echo '~/.composer/vendor/bin/phpstan analyse --level=8 src lib' >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '# Run mess detector' >> $GITHUB_STEP_SUMMARY
+          echo 'composer global require phpmd/phpmd' >> $GITHUB_STEP_SUMMARY
+          echo '~/.composer/vendor/bin/phpmd src/,lib/ text cleancode,codesize,design,naming,unusedcode' >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

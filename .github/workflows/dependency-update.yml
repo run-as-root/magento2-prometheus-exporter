@@ -57,32 +57,19 @@ jobs:
 
               # Create security issue
               if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
-                ISSUE_BODY="## 🚨 Security Vulnerabilities Detected
+                    ISSUE_TITLE="Security Vulnerabilities Found - $(date +%Y-%m-%d)"
+                    ISSUE_BODY="Security audit found $ADVISORY_COUNT advisories. Please review dependencies and update vulnerable packages."
 
-The automated security audit found $ADVISORY_COUNT security advisories in the project dependencies.
-
-### Affected Dependencies
-$(cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "** (" + .affectedVersions + "): " + .title' 2>/dev/null || echo "See security report for details")
-
-### Recommended Actions
-1. Review the security advisories above
-2. Update the affected dependencies to secure versions
-3. Test the updated dependencies
-4. Create a new release if needed
-
----
-*This issue was automatically created by the security audit workflow.*"
-
-                curl -X POST \
-                  -H "Accept: application/vnd.github.v3+json" \
-                  -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                  https://api.github.com/repos/${{ github.repository }}/issues \
-                  -d "{
-                    \"title\": \"🚨 Security Vulnerabilities Found - $(date +%Y-%m-%d)\",
-                    \"body\": $(echo "$ISSUE_BODY" | jq -Rs .),
-                    \"labels\": [\"security\", \"dependencies\", \"high-priority\"]
-                  }" || echo "Failed to create security issue"
-              fi
+                    curl -X POST \
+                      -H "Accept: application/vnd.github.v3+json" \
+                      -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                      https://api.github.com/repos/${{ github.repository }}/issues \
+                      -d "{
+                        \"title\": \"$ISSUE_TITLE\",
+                        \"body\": \"$ISSUE_BODY\",
+                        \"labels\": [\"security\", \"dependencies\", \"high-priority\"]
+                      }" 2>/dev/null || echo "Failed to create security issue"
+                  fi
             else
               echo "✅ No security advisories found" >> $GITHUB_STEP_SUMMARY
             fi
@@ -109,8 +96,8 @@ $(cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "** 
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Count dependencies
-          REQUIRE_COUNT=$(cat composer.json | jq -r '.require | length')
-          REQUIRE_DEV_COUNT=$(cat composer.json | jq -r '.["require-dev"] | length // 0')
+          REQUIRE_COUNT=$(jq -r '.require | length' composer.json 2>/dev/null || echo "0")
+          REQUIRE_DEV_COUNT=$(jq -r '.["require-dev"] | length // 0' composer.json 2>/dev/null || echo "0")
 
           echo "### Current Dependencies" >> $GITHUB_STEP_SUMMARY
           echo "- **Production dependencies**: $REQUIRE_COUNT" >> $GITHUB_STEP_SUMMARY
@@ -120,7 +107,7 @@ $(cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "** 
           # List main dependencies
           echo "### Production Dependencies" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          cat composer.json | jq -r '.require' >> $GITHUB_STEP_SUMMARY
+          jq -r '.require' composer.json 2>/dev/null || echo "Could not parse dependencies"
           echo '```' >> $GITHUB_STEP_SUMMARY
 
           # Check for potential issues
@@ -128,7 +115,7 @@ $(cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "** 
           echo "### Analysis Notes" >> $GITHUB_STEP_SUMMARY
 
           # Check for wildcard versions
-          WILDCARD_COUNT=$(cat composer.json | jq -r '.require | to_entries[] | select(.value == "*") | .key' | wc -l)
+          WILDCARD_COUNT=$(jq -r '.require | to_entries[] | select(.value == "*") | .key' composer.json 2>/dev/null | wc -l || echo "0")
           if [ "$WILDCARD_COUNT" -gt 0 ]; then
             echo "⚠️ Found $WILDCARD_COUNT dependencies with wildcard versions (*)" >> $GITHUB_STEP_SUMMARY
             echo "Consider specifying version constraints for better stability" >> $GITHUB_STEP_SUMMARY
@@ -137,7 +124,7 @@ $(cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "** 
           fi
 
           # Check minimum stability
-          MIN_STABILITY=$(cat composer.json | jq -r '.["minimum-stability"] // "stable"')
+          MIN_STABILITY=$(jq -r '.["minimum-stability"] // "stable"' composer.json 2>/dev/null || echo "stable")
           if [ "$MIN_STABILITY" != "stable" ]; then
             echo "⚠️ Minimum stability is set to: $MIN_STABILITY" >> $GITHUB_STEP_SUMMARY
             echo "Consider using 'stable' for production releases" >> $GITHUB_STEP_SUMMARY
@@ -231,4 +218,4 @@ $(cat security-report.json | jq -r '.advisories[] | "- **" + .packageName + "** 
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next scheduled run**: $(date -d 'next monday 09:00 UTC' '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Next scheduled run**: Every Monday at 09:00 UTC" >> $GITHUB_STEP_SUMMARY

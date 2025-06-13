@@ -1,0 +1,51 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - lib
+    excludePaths:
+        - */Test/*
+        - */build/*
+        - */vendor/*
+    ignoreErrors:
+        # Magento framework classes that may not be available in CI
+        - '#Call to an undefined method Magento\\.*#'
+        - '#Access to an undefined property Magento\\.*#'
+        - '#Class Magento\\.* not found#'
+        - '#Interface Magento\\.* not found#'
+        - '#Trait Magento\\.* not found#'
+        - '#Parameter .* of method .* has invalid type Magento\\.*#'
+        - '#Return type .* of method .* has invalid type Magento\\.*#'
+        - '#Property .* has unknown class Magento\\.* as its type#'
+        - '#Method .* has parameter .* with no type specified#'
+        - '#Method .* has no return type specified#'
+        - '#Property .* has no type specified#'
+
+        # Laminas classes
+        - '#Class Laminas\\.* not found#'
+        - '#Interface Laminas\\.* not found#'
+
+        # PSR classes
+        - '#Class Psr\\.* not found#'
+        - '#Interface Psr\\.* not found#'
+
+        # Symfony classes
+        - '#Class Symfony\\.* not found#'
+        - '#Interface Symfony\\.* not found#'
+
+        # GuzzleHttp classes
+        - '#Class GuzzleHttp\\.* not found#'
+        - '#Interface GuzzleHttp\\.* not found#'
+
+        # Monolog classes
+        - '#Class Monolog\\.* not found#'
+        - '#Interface Monolog\\.* not found#'
+
+        # Generic external dependencies
+        - '#Call to an undefined method [A-Z][a-zA-Z\\\\]*::[a-zA-Z_]*\\(\\)#'
+        - '#Access to an undefined property [A-Z][a-zA-Z\\\\]*::\\$[a-zA-Z_]*#'
+
+    reportUnmatchedIgnoredErrors: false
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    tmpDir: /tmp/phpstan

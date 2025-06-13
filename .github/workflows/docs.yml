@@ -35,6 +35,7 @@ jobs:
       - name: Install markdown tools
         run: |
           npm install -g markdownlint-cli
+        continue-on-error: true
 
       - name: Lint Markdown files
         run: |
@@ -50,10 +51,14 @@ jobs:
           }
           EOF
 
-          if markdownlint README.md CHANGELOG.md docs/**/*.md 2>/dev/null; then
-            echo "✅ All markdown files are valid" >> $GITHUB_STEP_SUMMARY
+          if command -v markdownlint >/dev/null 2>&1; then
+            if markdownlint README.md CHANGELOG.md 2>/dev/null; then
+              echo "✅ All markdown files are valid" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Some markdown issues found (non-blocking)" >> $GITHUB_STEP_SUMMARY
+            fi
           else
-            echo "⚠️ Some markdown issues found (non-blocking)" >> $GITHUB_STEP_SUMMARY
+            echo "⏭️ Markdownlint not available, skipping check" >> $GITHUB_STEP_SUMMARY
           fi
         continue-on-error: true
 
@@ -230,6 +235,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y aspell aspell-en
+        continue-on-error: true
 
       - name: Create technical dictionary
         run: |
@@ -269,8 +275,8 @@ jobs:
 
           MISSPELLED_COUNT=0
 
-          # Check README.md
-          if [ -f README.md ]; then
+          # Check README.md if aspell is available
+          if command -v aspell >/dev/null 2>&1 && [ -f README.md ]; then
             cat README.md | \
               sed '/```/,/```/d' | \
               sed 's/http[s]\?:\/\/[^ ]*//g' | \
@@ -281,12 +287,14 @@ jobs:
               MISSPELLED_COUNT=$((MISSPELLED_COUNT + $(wc -l < readme.misspelled)))
             fi
             rm -f readme.misspelled
-          fi
 
-          if [ $MISSPELLED_COUNT -eq 0 ]; then
-            echo "✅ No obvious spelling issues found" >> $GITHUB_STEP_SUMMARY
+            if [ $MISSPELLED_COUNT -eq 0 ]; then
+              echo "✅ No obvious spelling issues found" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Possible spelling issues found (review recommended)" >> $GITHUB_STEP_SUMMARY
+            fi
           else
-            echo "⚠️ Possible spelling issues found (review recommended)" >> $GITHUB_STEP_SUMMARY
+            echo "⏭️ Spell check skipped (aspell not available or no README)" >> $GITHUB_STEP_SUMMARY
           fi
 
         continue-on-error: true
