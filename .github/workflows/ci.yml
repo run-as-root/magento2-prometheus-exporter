@@ -179,33 +179,33 @@ jobs:
             echo "Creating basic test to validate setup..."
             mkdir -p Test/Unit
             cat > Test/Unit/BasicTest.php << 'EOF'
-<?php
+          <?php
 
-declare(strict_types=1);
+          declare(strict_types=1);
 
-namespace RunAsRoot\PrometheusExporter\Test\Unit;
+          namespace RunAsRoot\PrometheusExporter\Test\Unit;
 
-use PHPUnit\Framework\TestCase;
+          use PHPUnit\Framework\TestCase;
 
-class BasicTest extends TestCase
-{
-    public function testBasicSetup(): void
-    {
-        $this->assertTrue(true, 'Basic test setup works');
-    }
+          class BasicTest extends TestCase
+          {
+              public function testBasicSetup(): void
+              {
+                  $this->assertTrue(true, 'Basic test setup works');
+              }
 
-    public function testDirectoryStructure(): void
-    {
-        $this->assertDirectoryExists(__DIR__ . '/../../src');
-        $this->assertDirectoryExists(__DIR__ . '/../../lib');
-    }
+              public function testDirectoryStructure(): void
+              {
+                  $this->assertDirectoryExists(__DIR__ . '/../../src');
+                  $this->assertDirectoryExists(__DIR__ . '/../../lib');
+              }
 
-    public function testComposerJsonExists(): void
-    {
-        $this->assertFileExists(__DIR__ . '/../../composer.json');
-    }
-}
-EOF
+              public function testComposerJsonExists(): void
+              {
+                  $this->assertFileExists(__DIR__ . '/../../composer.json');
+              }
+          }
+          EOF
             if [ -f "vendor/bin/phpunit" ]; then
               vendor/bin/phpunit --configuration phpunit.xml --no-coverage --colors=never
             else
@@ -278,7 +278,6 @@ EOF
               "minimum-stability": "stable"
           }
           EOF
-
           composer install --no-progress --prefer-dist --working-dir=. --file=composer-security.json
 
       - name: Security audit
