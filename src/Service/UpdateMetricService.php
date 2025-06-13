@@ -13,9 +13,9 @@ use RunAsRoot\PrometheusExporter\Model\MetricFactory;
 
 class UpdateMetricService implements UpdateMetricServiceInterface
 {
-    private $metricRepository;
-    private $metricFactory;
-    private $logger;
+    private MetricRepositoryInterface $metricRepository;
+    private MetricFactory $metricFactory;
+    private LoggerInterface $logger;
 
     public function __construct(
         MetricRepositoryInterface $metricRepository,

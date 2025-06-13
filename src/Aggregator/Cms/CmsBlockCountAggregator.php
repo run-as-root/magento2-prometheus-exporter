@@ -13,9 +13,9 @@ class CmsBlockCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_cms_block_count_total';
 
-    private $updateMetricService;
-    private $cmsRepository;
-    private $searchCriteriaBuilder;
+    private UpdateMetricService $updateMetricService;
+    private BlockRepositoryInterface $cmsRepository;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
 
     public function __construct(
         UpdateMetricService $updateMetricService,

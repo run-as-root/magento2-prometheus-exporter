@@ -22,10 +22,10 @@ use RuntimeException;
 
 class MetricRepository implements MetricRepositoryInterface
 {
-    private $metricFactory;
-    private $metricResource;
-    private $collectionFactory;
-    private $searchResultsFactory;
+    private MetricFactory $metricFactory;
+    private MetricResource $metricResource;
+    private MetricCollectionFactory $collectionFactory;
+    private MetricSearchResultsInterfaceFactory $searchResultsFactory;
 
     public function __construct(
         MetricResource $metricResource,

@@ -13,9 +13,9 @@ class ModuleCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_module_installed_count_total';
 
-    private $updateMetricService;
+    private UpdateMetricServiceInterface $updateMetricService;
 
-    private $moduleList;
+    private ModuleListInterface $moduleList;
 
     public function __construct(UpdateMetricServiceInterface $updateMetricService, ModuleListInterface $moduleList)
     {

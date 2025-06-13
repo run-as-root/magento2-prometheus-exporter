@@ -15,8 +15,8 @@ use RunAsRoot\PrometheusExporter\Result\PrometheusResultFactory;
 
 class Index extends Action
 {
-    private $prometheusResultFactory;
-    private $config;
+    private PrometheusResultFactory $prometheusResultFactory;
+    private Config $config;
 
     public function __construct(
         Context $context,

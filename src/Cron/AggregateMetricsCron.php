@@ -15,9 +15,9 @@ use function json_decode;
 
 class AggregateMetricsCron
 {
-    private $metricAggregatorPool;
-    private $config;
-    private $metricRepository;
+    private MetricAggregatorPool $metricAggregatorPool;
+    private Config $config;
+    private MetricRepositoryInterface $metricRepository;
     private LoggerInterface $logger;
 
     public function __construct(

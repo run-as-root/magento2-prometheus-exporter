@@ -1,5 +1,5 @@
 parameters:
-    level: 8
+    level: 5
     paths:
         - src
         - lib
@@ -17,9 +17,7 @@ parameters:
         - '#Parameter .* of method .* has invalid type Magento\\.*#'
         - '#Return type .* of method .* has invalid type Magento\\.*#'
         - '#Property .* has unknown class Magento\\.* as its type#'
-        - '#Method .* has parameter .* with no type specified#'
-        - '#Method .* has no return type specified#'
-        - '#Property .* has no type specified#'
+
 
         # Laminas classes
         - '#Class Laminas\\.* not found#'

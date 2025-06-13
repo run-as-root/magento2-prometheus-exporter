@@ -13,9 +13,9 @@ class CmsPagesCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_cms_page_count_total';
 
-    private $updateMetricService;
-    private $cmsRepository;
-    private $searchCriteriaBuilder;
+    private UpdateMetricService $updateMetricService;
+    private PageRepositoryInterface $cmsRepository;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
 
     public function __construct(
         UpdateMetricService $updateMetricService,

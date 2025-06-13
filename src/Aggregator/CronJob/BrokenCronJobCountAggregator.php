@@ -14,8 +14,8 @@ class BrokenCronJobCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_cronjob_broken_count_total';
 
-    private $updateMetricService;
-    private $cronCollectionFactory;
+    private UpdateMetricService $updateMetricService;
+    private CollectionFactory $cronCollectionFactory;
 
     public function __construct(
         UpdateMetricService $updateMetricService,
@@ -33,7 +33,7 @@ class BrokenCronJobCountAggregator implements MetricAggregatorInterface
     public function getHelp(): string
     {
         return <<<'TAG'
-# Magento 2 CronJob Broken Count. 
+# Magento 2 CronJob Broken Count.
 # Broken CronJobs occur when when status is pending but execution_time is set.
 TAG;
     }

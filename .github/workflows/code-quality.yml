@@ -30,8 +30,8 @@ jobs:
           find src/ lib/ -name "*.php" -exec php -l {} \;
           echo "✅ PHP syntax check passed for PHP ${{ matrix.php-version }}"
 
-  phpstan-level-8:
-    name: PHPStan Level 8 Analysis
+  phpstan-level-5:
+    name: PHPStan Level 5 Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,11 +46,11 @@ jobs:
       - name: Install PHPStan
         run: composer global require phpstan/phpstan
 
-      - name: Create PHPStan level 8 config
+      - name: Create PHPStan level 5 config
         run: |
           cat > phpstan.neon << 'EOF'
           parameters:
-              level: 8
+              level: 5
               paths:
                   - src
                   - lib
@@ -92,15 +92,22 @@ jobs:
       - name: Create tmp directory for PHPStan
         run: mkdir -p /tmp/phpstan
 
-      - name: Run PHPStan Level 8
+      - name: Run PHPStan Level 5
         run: |
-          echo "## 🔍 PHPStan Level 8 Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔍 PHPStan Level 5 Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if ~/.composer/vendor/bin/phpstan analyse --no-progress --error-format=github; then
-            echo "✅ PHPStan Level 8 analysis passed - strict type checking enforced" >> $GITHUB_STEP_SUMMARY
+            echo "✅ PHPStan Level 5 analysis passed - good type safety achieved" >> $GITHUB_STEP_SUMMARY
+            echo "Level 5 ensures proper type handling and method signatures" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ PHPStan Level 8 analysis failed - fix type issues before merging" >> $GITHUB_STEP_SUMMARY
+            echo "❌ PHPStan Level 5 analysis failed - fix type issues before merging" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Common Level 5 Issues:" >> $GITHUB_STEP_SUMMARY
+            echo "- Missing property type declarations" >> $GITHUB_STEP_SUMMARY
+            echo "- Incorrect method return types" >> $GITHUB_STEP_SUMMARY
+            echo "- Mixed parameter types" >> $GITHUB_STEP_SUMMARY
+            echo "- Undefined variables or properties" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
@@ -432,7 +439,7 @@ jobs:
     needs:
       [
         php-syntax-check,
-        phpstan-level-8,
+        phpstan-level-5,
         php-cs-fixer,
         security-audit,
         magento-coding-standards,

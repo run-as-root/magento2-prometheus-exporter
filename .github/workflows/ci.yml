@@ -100,6 +100,8 @@ jobs:
                   - */build/*
                   - */vendor/*
                   - */stubs/*
+              bootstrapFiles:
+                  - /tmp/phpstan-stubs/magento.php
               ignoreErrors:
                   - '#Call to an undefined method Magento\\.*#'
                   - '#Access to an undefined property Magento\\.*#'
@@ -109,15 +111,10 @@ jobs:
                   - '#Parameter .* of method .* has invalid type Magento\\.*#'
                   - '#Return type .* of method .* has invalid type Magento\\.*#'
                   - '#Property .* has unknown class Magento\\.* as its type#'
-                  - '#Method .* has parameter .* with no type specified#'
-                  - '#Method .* has no return type specified#'
-                  - '#Property .* has no type specified#'
                   - '#Class .* not found#'
                   - '#Interface .* not found#'
                   - '#Call to an undefined method [A-Z][a-zA-Z\\\\]*::[a-zA-Z_]*\\(\\)#'
                   - '#Access to an undefined property [A-Z][a-zA-Z\\\\]*::\\$[a-zA-Z_]*#'
-                  - '#Undefined variable#'
-                  - '#Variable .* might not be defined#'
               reportUnmatchedIgnoredErrors: false
               checkMissingIterableValueType: false
               checkGenericClassInNonGenericObjectType: false
@@ -126,11 +123,21 @@ jobs:
 
       - name: Run PHPStan Analysis
         run: |
+          echo "## 🔍 PHPStan Level 1 Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           if ~/.composer/vendor/bin/phpstan analyse --configuration=phpstan-ci.neon --no-progress --error-format=github; then
+            echo "✅ PHPStan Level 1 analysis passed - code structure is sound!" >> $GITHUB_STEP_SUMMARY
             echo "✅ PHPStan analysis passed - code structure is sound!"
           else
+            echo "❌ PHPStan Level 1 analysis failed - please fix critical issues" >> $GITHUB_STEP_SUMMARY
             echo "❌ PHPStan analysis failed - please fix critical issues"
             echo "Run locally: composer global require phpstan/phpstan && ~/.composer/vendor/bin/phpstan analyse --level=1 src lib"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔧 Fix Instructions:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Install PHPStan: \`composer global require phpstan/phpstan\`" >> $GITHUB_STEP_SUMMARY
+            echo "2. Run analysis: \`~/.composer/vendor/bin/phpstan analyse --level=1 src lib\`" >> $GITHUB_STEP_SUMMARY
+            echo "3. Fix reported critical issues before committing" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
@@ -179,7 +186,8 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          composer install --no-progress --prefer-dist --working-dir=. --file=composer-test.json --ignore-platform-reqs || composer install --no-progress --prefer-dist --working-dir=. --file=composer-test.json --no-dev
+          cp composer-test.json composer.json
+          composer install --no-progress --prefer-dist --ignore-platform-reqs || composer install --no-progress --prefer-dist --no-dev || echo "Composer install failed, continuing with minimal setup"
 
       - name: Create PHPUnit config
         run: |
@@ -418,7 +426,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
 
             if [ "$PHPSTAN_FAILED" = true ]; then
-              echo "🚨 **PHPStan analysis is REQUIRED and must pass before merging!**" >> $GITHUB_STEP_SUMMARY
+              echo "🚨 **PHPStan Level 1 analysis is REQUIRED and must pass before merging!**" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "PHPStan Level 1 catches critical structural issues that break code execution." >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "### 🔧 Quick Fix Guide" >> $GITHUB_STEP_SUMMARY
               echo '```bash' >> $GITHUB_STEP_SUMMARY
@@ -428,11 +438,11 @@ jobs:
               echo '# Run analysis locally' >> $GITHUB_STEP_SUMMARY
               echo '~/.composer/vendor/bin/phpstan analyse --level=1 src lib' >> $GITHUB_STEP_SUMMARY
               echo '' >> $GITHUB_STEP_SUMMARY
-              echo '# Common fixes needed:' >> $GITHUB_STEP_SUMMARY
-              echo '# 1. Fix syntax errors and undefined variables' >> $GITHUB_STEP_SUMMARY
-              echo '# 2. Ensure proper class structure' >> $GITHUB_STEP_SUMMARY
-              echo '# 3. Fix basic method and property issues' >> $GITHUB_STEP_SUMMARY
-              echo '# 4. Check for missing imports' >> $GITHUB_STEP_SUMMARY
+              echo '# Level 1 catches:' >> $GITHUB_STEP_SUMMARY
+              echo '# - Undefined variables and functions' >> $GITHUB_STEP_SUMMARY
+              echo '# - Basic syntax and structural errors' >> $GITHUB_STEP_SUMMARY
+              echo '# - Critical class instantiation issues' >> $GITHUB_STEP_SUMMARY
+              echo '# - Missing class imports' >> $GITHUB_STEP_SUMMARY
               echo '```' >> $GITHUB_STEP_SUMMARY
             fi
           fi

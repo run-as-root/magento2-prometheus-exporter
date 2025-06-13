@@ -15,8 +15,8 @@ class CronJobCountAggregator implements MetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_cronjob_count_total';
 
-    private $updateMetricService;
-    private $cronCollectionFactory;
+    private UpdateMetricService $updateMetricService;
+    private CollectionFactory $cronCollectionFactory;
 
     public function __construct(
         UpdateMetricServiceInterface $updateMetricService,

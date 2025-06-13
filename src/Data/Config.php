@@ -14,8 +14,8 @@ class Config
     private const CONFIG_PATH_AUTH_TOKEN = 'metric_configuration/security/token';
     private const CONFIG_PATH_TOKEN_VALIDATION_ENABLED = 'metric_configuration/security/enable_token';
 
-    private $config;
-    private $metricsSource;
+    private ScopeConfigInterface $config;
+    private MetricsSource $metricsSource;
 
     public function __construct(ScopeConfigInterface $config, MetricsSource $metricsSource)
     {

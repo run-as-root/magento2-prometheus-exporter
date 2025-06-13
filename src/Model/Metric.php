@@ -16,10 +16,7 @@ use RunAsRoot\PrometheusExporter\Model\ResourceModel\MetricResource;
 
 class Metric extends AbstractModel implements MetricInterface
 {
-    /**
-     * @var array
-     */
-    private $labels;
+    private array $labels = [];
 
     protected function _construct()
     {
