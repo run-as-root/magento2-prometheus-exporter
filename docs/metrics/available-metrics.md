@@ -110,4 +110,4 @@ The `/metrics` endpoint serves data in Prometheus format.
 **Source**: `src/Aggregator/Store/WebsiteCountAggregator.php`
 
 
-*Last updated: Fri Jun 13 14:09:45 UTC 2025*
+*Last updated: Fri Jun 13 14:20:33 UTC 2025*
