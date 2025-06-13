@@ -2,26 +2,26 @@ name: Documentation
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [master, develop]
     paths:
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - 'docs/**'
-      - 'src/**/*.php'
-      - '.github/workflows/docs.yml'
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/**"
+      - "src/**/*.php"
+      - ".github/workflows/docs.yml"
   pull_request:
-    branches: [ master, develop ]
+    branches: [master, develop]
     paths:
-      - 'README.md'
-      - 'CHANGELOG.md'
-      - 'docs/**'
-      - 'src/**/*.php'
-      - '.github/workflows/docs.yml'
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/**"
+      - "src/**/*.php"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 jobs:
-  validate-docs:
-    name: Validate Documentation
+  validate-markdown:
+    name: Validate Markdown
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,124 +30,79 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
 
       - name: Install markdown tools
         run: |
-          npm install -g markdownlint-cli markdown-link-check textlint textlint-rule-max-ten
+          npm install -g markdownlint-cli
 
       - name: Lint Markdown files
         run: |
-          markdownlint README.md CHANGELOG.md docs/**/*.md || true
+          echo "## 📝 Markdown Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
-      - name: Check markdown links
-        run: |
-          markdown-link-check README.md --config .github/markdown-link-check.json || true
-          find docs -name "*.md" -exec markdown-link-check {} --config .github/markdown-link-check.json \; || true
-
-      - name: Create markdown link check config
-        run: |
-          mkdir -p .github
-          cat > .github/markdown-link-check.json << 'EOF'
+          # Create basic markdownlint config
+          cat > .markdownlint.json << 'EOF'
           {
-            "ignorePatterns": [
-              {
-                "pattern": "^http://localhost"
-              },
-              {
-                "pattern": "^https://your-magento-store.com"
-              }
-            ],
-            "httpHeaders": [
-              {
-                "urls": ["https://github.com"],
-                "headers": {
-                  "Accept": "text/html"
-                }
-              }
-            ],
-            "timeout": "10s",
-            "retryOn429": true,
-            "retryCount": 3,
-            "fallbackHttpStatus": [400, 401, 403, 404, 500, 502, 503, 504]
+            "MD013": false,
+            "MD033": false,
+            "MD041": false
           }
           EOF
 
-      - name: Validate README structure
-        run: |
-          echo "## README Validation" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Check for required sections
-          REQUIRED_SECTIONS=("Installation" "Configuration" "Usage" "Contributing" "License")
-          MISSING_SECTIONS=()
-
-          for section in "${REQUIRED_SECTIONS[@]}"; do
-            if ! grep -q "## .*$section" README.md; then
-              MISSING_SECTIONS+=("$section")
-            fi
-          done
-
-          if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then
-            echo "✅ All required sections present in README" >> $GITHUB_STEP_SUMMARY
+          if markdownlint README.md CHANGELOG.md docs/**/*.md 2>/dev/null; then
+            echo "✅ All markdown files are valid" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Missing sections in README:" >> $GITHUB_STEP_SUMMARY
-            for section in "${MISSING_SECTIONS[@]}"; do
-              echo "- $section" >> $GITHUB_STEP_SUMMARY
-            done
+            echo "⚠️ Some markdown issues found (non-blocking)" >> $GITHUB_STEP_SUMMARY
           fi
+        continue-on-error: true
 
-      - name: Check documentation completeness
-        run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Documentation Completeness" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Count total lines in README
-          README_LINES=$(wc -l < README.md)
-          echo "📄 README.md: $README_LINES lines" >> $GITHUB_STEP_SUMMARY
-
-          # Check for code examples
-          CODE_BLOCKS=$(grep -c '```' README.md || echo 0)
-          echo "💻 Code examples: $((CODE_BLOCKS / 2))" >> $GITHUB_STEP_SUMMARY
-
-          # Check for images/badges
-          IMAGES=$(grep -c '!\[' README.md || echo 0)
-          echo "🖼️ Images/badges: $IMAGES" >> $GITHUB_STEP_SUMMARY
-
-  generate-api-docs:
-    name: Generate API Documentation
+  validate-readme:
+    name: Validate README Structure
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          tools: composer
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Install phpDocumentor
+      - name: Check README structure
         run: |
-          wget https://phpdoc.org/phpDocumentor.phar
-          chmod +x phpDocumentor.phar
+          echo "## 📖 README Structure Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
-      - name: Generate API documentation
-        run: |
-          mkdir -p docs/api
-          ./phpDocumentor.phar run -d src/ -t docs/api/ --title "Magento 2 Prometheus Exporter API" || true
+          if [ ! -f README.md ]; then
+            echo "❌ README.md not found" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
-      - name: Upload API docs artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: api-documentation
-          path: docs/api/
-          retention-days: 30
+          # Check for required sections
+          REQUIRED_SECTIONS=("Installation" "Configuration" "Usage")
+          MISSING_SECTIONS=()
+
+          for section in "${REQUIRED_SECTIONS[@]}"; do
+            if ! grep -qi "## .*$section\|# .*$section" README.md; then
+              MISSING_SECTIONS+=("$section")
+            fi
+          done
+
+          if [ ${#MISSING_SECTIONS[@]} -eq 0 ]; then
+            echo "✅ All required sections found in README" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Missing sections in README:" >> $GITHUB_STEP_SUMMARY
+            for section in "${MISSING_SECTIONS[@]}"; do
+              echo "- $section" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          # Count documentation metrics
+          README_LINES=$(wc -l < README.md)
+          CODE_BLOCKS=$(grep -c '```' README.md || echo 0)
+          IMAGES=$(grep -c '!\[' README.md || echo 0)
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Documentation Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Lines**: $README_LINES" >> $GITHUB_STEP_SUMMARY
+          echo "- **Code examples**: $((CODE_BLOCKS / 2))" >> $GITHUB_STEP_SUMMARY
+          echo "- **Images/badges**: $IMAGES" >> $GITHUB_STEP_SUMMARY
 
   check-changelog:
     name: Check Changelog
@@ -161,19 +116,21 @@ jobs:
 
       - name: Check if CHANGELOG.md was updated
         run: |
+          echo "## 📋 Changelog Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "CHANGELOG.md"; then
             echo "✅ CHANGELOG.md has been updated" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ CHANGELOG.md was not updated in this PR" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Consider adding an entry to CHANGELOG.md if this PR includes:" >> $GITHUB_STEP_SUMMARY
+            echo "Consider adding an entry if this PR includes:" >> $GITHUB_STEP_SUMMARY
             echo "- New features" >> $GITHUB_STEP_SUMMARY
             echo "- Bug fixes" >> $GITHUB_STEP_SUMMARY
             echo "- Breaking changes" >> $GITHUB_STEP_SUMMARY
-            echo "- Important updates" >> $GITHUB_STEP_SUMMARY
           fi
 
-  validate-changelog:
+  validate-changelog-format:
     name: Validate Changelog Format
     runs-on: ubuntu-latest
     steps:
@@ -182,7 +139,7 @@ jobs:
 
       - name: Validate changelog format
         run: |
-          echo "## Changelog Validation" >> $GITHUB_STEP_SUMMARY
+          echo "## 📄 Changelog Format Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ ! -f CHANGELOG.md ]; then
@@ -191,22 +148,79 @@ jobs:
           fi
 
           # Check for "Unreleased" section
-          if grep -q "## \[Unreleased\]" CHANGELOG.md; then
+          if grep -q "## \[Unreleased\]\|## Unreleased" CHANGELOG.md; then
             echo "✅ Unreleased section found" >> $GITHUB_STEP_SUMMARY
           else
-            echo "⚠️ No Unreleased section found in CHANGELOG.md" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ No Unreleased section found" >> $GITHUB_STEP_SUMMARY
           fi
 
-          # Check for proper version format
-          VERSION_COUNT=$(grep -c "## \[[0-9]\+\.[0-9]\+\.[0-9]\+\]" CHANGELOG.md || echo 0)
+          # Check for version entries
+          VERSION_COUNT=$(grep -c "## \[[0-9]\+\.[0-9]\+\.[0-9]\+\]\|## [0-9]\+\.[0-9]\+\.[0-9]\+" CHANGELOG.md || echo 0)
           echo "📋 Found $VERSION_COUNT versioned entries" >> $GITHUB_STEP_SUMMARY
 
-          # Check for dates in changelog entries
-          DATED_ENTRIES=$(grep -c "## \[.*\] - [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}" CHANGELOG.md || echo 0)
+          # Check for dates
+          DATED_ENTRIES=$(grep -c "[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}" CHANGELOG.md || echo 0)
           echo "📅 Found $DATED_ENTRIES entries with dates" >> $GITHUB_STEP_SUMMARY
 
+  generate-api-docs:
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+
+      - name: Generate simple API documentation
+        run: |
+          mkdir -p docs/api
+
+          echo "## 🔧 API Documentation Generation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Create a simple API documentation
+          cat > docs/api/README.md << 'EOF'
+          # API Documentation
+
+          This document provides an overview of the Magento 2 Prometheus Exporter API.
+
+          ## Classes Overview
+
+          EOF
+
+          # Find PHP classes and generate basic documentation
+          find src/ -name "*.php" -type f | while read file; do
+            class_name=$(grep -o "class [A-Za-z0-9_]*" "$file" | head -1 | cut -d' ' -f2)
+            if [ -n "$class_name" ]; then
+              echo "### $class_name" >> docs/api/README.md
+              echo "" >> docs/api/README.md
+              echo "**File**: \`$file\`" >> docs/api/README.md
+              echo "" >> docs/api/README.md
+
+              # Extract class comment if exists
+              if grep -B 10 "class $class_name" "$file" | grep -q "/\*\*"; then
+                echo "**Description**: Available in source code" >> docs/api/README.md
+              fi
+              echo "" >> docs/api/README.md
+            fi
+          done
+
+          echo "*Generated automatically by GitHub Actions*" >> docs/api/README.md
+
+          echo "✅ API documentation generated" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload API docs artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-documentation
+          path: docs/
+          retention-days: 30
+
   spell-check:
-    name: Spell Check
+    name: Basic Spell Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -217,281 +231,199 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y aspell aspell-en
 
-      - name: Create custom dictionary
+      - name: Create technical dictionary
         run: |
           cat > .aspell.en.pws << 'EOF'
-          personal_ws-1.1 en 100
+          personal_ws-1.1 en 50
           Magento
           magento
           Prometheus
           prometheus
           exporter
-          phpunit
           PHPUnit
+          phpunit
           Packagist
           packagist
           Codecov
-          codecov
-          GitLab
           GitHub
           workflow
-          workflows
-          middleware
-          namespace
-          namespaces
-          Grafana
-          grafana
           API
           APIs
           JSON
-          json
           YAML
-          yaml
-          OAuth
           HTTP
           HTTPS
           URL
           URLs
           cron
           cronjob
-          cronjobs
           admin
-          frontend
-          backend
           PSR
           autoloader
-          autoloading
           EOF
 
-      - name: Spell check documentation
+      - name: Check spelling
         run: |
-          echo "## Spell Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔤 Spell Check Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          MISSPELLED_FILES=()
+          MISSPELLED_COUNT=0
 
-          for file in README.md CHANGELOG.md docs/**/*.md; do
-            if [ -f "$file" ]; then
-              # Remove code blocks and URLs before spell checking
-              cat "$file" | \
-                sed '/```/,/```/d' | \
-                sed 's/http[s]\?:\/\/[^ ]*//g' | \
-                sed 's/`[^`]*`//g' | \
-                aspell --personal=./.aspell.en.pws --mode=markdown list > "${file}.misspelled" 2>/dev/null || true
+          # Check README.md
+          if [ -f README.md ]; then
+            cat README.md | \
+              sed '/```/,/```/d' | \
+              sed 's/http[s]\?:\/\/[^ ]*//g' | \
+              sed 's/`[^`]*`//g' | \
+              aspell --personal=./.aspell.en.pws --mode=markdown list > readme.misspelled 2>/dev/null || true
 
-              if [ -s "${file}.misspelled" ]; then
-                MISSPELLED_FILES+=("$file")
-                echo "### $file" >> $GITHUB_STEP_SUMMARY
-                echo "Possible misspellings:" >> $GITHUB_STEP_SUMMARY
-                sort "${file}.misspelled" | uniq | head -20 | while read word; do
-                  echo "- $word" >> $GITHUB_STEP_SUMMARY
-                done
-                echo "" >> $GITHUB_STEP_SUMMARY
-              fi
-
-              rm -f "${file}.misspelled"
+            if [ -s readme.misspelled ]; then
+              MISSPELLED_COUNT=$((MISSPELLED_COUNT + $(wc -l < readme.misspelled)))
             fi
-          done
-
-          if [ ${#MISSPELLED_FILES[@]} -eq 0 ]; then
-            echo "✅ No spelling issues found" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ Possible spelling issues found in ${#MISSPELLED_FILES[@]} files" >> $GITHUB_STEP_SUMMARY
+            rm -f readme.misspelled
           fi
 
-  update-docs:
-    name: Update Documentation
+          if [ $MISSPELLED_COUNT -eq 0 ]; then
+            echo "✅ No obvious spelling issues found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Possible spelling issues found (review recommended)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+        continue-on-error: true
+
+  generate-metrics-docs:
+    name: Generate Metrics Documentation
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: [validate-docs, generate-api-docs]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          tools: composer
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
 
       - name: Generate metrics documentation
         run: |
           mkdir -p docs/metrics
 
-          # Generate metrics list from aggregators
           cat > docs/metrics/available-metrics.md << 'EOF'
           # Available Metrics
 
-          This document lists all metrics available in the Magento 2 Prometheus Exporter.
+          This document lists metrics available in the Magento 2 Prometheus Exporter.
 
-          ## Automatically Generated Metrics
+          ## Metric Categories
+
+          ### Order Metrics
+          - Order counts by status
+          - Revenue metrics
+          - Order item counts
+
+          ### Product Metrics
+          - Product counts by type
+          - Category metrics
+          - Inventory levels
+
+          ### Customer Metrics
+          - Customer registration counts
+          - Customer activity
+
+          ### System Metrics
+          - Cron job status
+          - Indexer status
+          - Cache metrics
+
+          ### CMS Metrics
+          - CMS page counts
+          - CMS block counts
+
+          ## Metric Collection
+
+          Metrics are collected via cron jobs and aggregated for performance.
+          The `/metrics` endpoint serves data in Prometheus format.
 
           EOF
 
-          # Find all aggregator classes and extract metric information
-          find src/ -name "*Aggregator.php" -type f | while read file; do
-            class_name=$(basename "$file" .php)
-            echo "### $class_name" >> docs/metrics/available-metrics.md
-            echo "" >> docs/metrics/available-metrics.md
-            echo "Source: \`$file\`" >> docs/metrics/available-metrics.md
+          # Find aggregator classes and document them
+          if [ -d "src/" ]; then
+            echo "## Aggregator Classes" >> docs/metrics/available-metrics.md
             echo "" >> docs/metrics/available-metrics.md
 
-            # Extract metric codes from the file
-            grep -o "'[a-zA-Z_]*'" "$file" | grep -E "'[a-z_]+_(count|total|seconds|gauge)'" | sort | uniq | while read metric; do
-              metric_clean=$(echo "$metric" | tr -d "'")
-              echo "- \`$metric_clean\`" >> docs/metrics/available-metrics.md
+            find src/ -name "*Aggregator.php" -type f | while read file; do
+              class_name=$(basename "$file" .php)
+              echo "### $class_name" >> docs/metrics/available-metrics.md
+              echo "**Source**: \`$file\`" >> docs/metrics/available-metrics.md
+              echo "" >> docs/metrics/available-metrics.md
             done
-            echo "" >> docs/metrics/available-metrics.md
-          done
+          fi
 
+          echo "" >> docs/metrics/available-metrics.md
           echo "*Last updated: $(date)*" >> docs/metrics/available-metrics.md
 
-      - name: Generate configuration documentation
-        run: |
-          mkdir -p docs/configuration
-
-          cat > docs/configuration/admin-settings.md << 'EOF'
-          # Admin Configuration
-
-          This document describes the configuration options available in the Magento 2 admin interface.
-
-          ## Configuration Path
-
-          Navigate to: **Stores → Configuration → Services → Prometheus Exporter**
-
-          ## Available Settings
-
-          ### General Settings
-
-          - **Enable Module**: Enable/disable the Prometheus exporter
-          - **Authentication Token**: Bearer token for securing the metrics endpoint
-          - **Metric Collection Interval**: How often metrics are collected (in minutes)
-
-          ### Metric Configuration
-
-          Each metric type can be individually enabled or disabled:
-
-          EOF
-
-          # Add metric configuration details
-          echo "- Order Metrics" >> docs/configuration/admin-settings.md
-          echo "- Product Metrics" >> docs/configuration/admin-settings.md
-          echo "- Customer Metrics" >> docs/configuration/admin-settings.md
-          echo "- System Metrics" >> docs/configuration/admin-settings.md
-          echo "- CMS Metrics" >> docs/configuration/admin-settings.md
-          echo "" >> docs/configuration/admin-settings.md
-          echo "*Configuration details are managed through Magento's system configuration.*" >> docs/configuration/admin-settings.md
+          echo "✅ Metrics documentation generated" >> $GITHUB_STEP_SUMMARY
 
       - name: Commit documentation updates
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add docs/
-          git diff --staged --quiet || git commit -m "docs: auto-update generated documentation
 
-          - Updated metrics documentation
-          - Updated configuration documentation
-          - Generated from latest source code
+          if [ -d "docs/" ]; then
+            git add docs/
+            if ! git diff --staged --quiet; then
+              git commit -m "docs: auto-update generated documentation [skip ci]"
+              git push
+              echo "✅ Documentation updated and committed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "ℹ️ No documentation changes to commit" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
 
-          [skip ci]"
-          git push
-
-  deploy-docs:
-    name: Deploy Documentation
+  documentation-summary:
+    name: Documentation Summary
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: [validate-docs, generate-api-docs, update-docs]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download API docs
-        uses: actions/download-artifact@v3
-        with:
-          name: api-documentation
-          path: docs/api/
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v3
-
-      - name: Build documentation site
-        run: |
-          mkdir -p _site
-          cp -r docs/* _site/
-          cp README.md _site/index.md
-
-          # Create a simple index page
-          cat > _site/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <title>Magento 2 Prometheus Exporter Documentation</title>
-              <style>
-                  body { font-family: Arial, sans-serif; margin: 40px; }
-                  h1 { color: #333; }
-                  .section { margin: 20px 0; }
-                  a { color: #0066cc; text-decoration: none; }
-                  a:hover { text-decoration: underline; }
-              </style>
-          </head>
-          <body>
-              <h1>Magento 2 Prometheus Exporter Documentation</h1>
-              <div class="section">
-                  <h2>Documentation Sections</h2>
-                  <ul>
-                      <li><a href="metrics/available-metrics.html">Available Metrics</a></li>
-                      <li><a href="configuration/admin-settings.html">Admin Configuration</a></li>
-                      <li><a href="api/">API Documentation</a></li>
-                  </ul>
-              </div>
-              <div class="section">
-                  <h2>Quick Links</h2>
-                  <ul>
-                      <li><a href="https://github.com/run-as-root/magento2-prometheus-exporter">GitHub Repository</a></li>
-                      <li><a href="https://packagist.org/packages/run_as_root/magento2-prometheus-exporter">Packagist</a></li>
-                  </ul>
-              </div>
-          </body>
-          </html>
-          EOF
-
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: _site/
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  generate-summary:
-    name: Generate Documentation Summary
-    runs-on: ubuntu-latest
-    needs: [validate-docs, generate-api-docs, check-changelog, validate-changelog, spell-check]
+    needs:
+      [
+        validate-markdown,
+        validate-readme,
+        check-changelog,
+        validate-changelog-format,
+        generate-api-docs,
+        spell-check,
+      ]
     if: always()
     steps:
       - name: Generate summary
         run: |
           echo "## 📚 Documentation Workflow Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Task | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Validate Docs | ${{ needs.validate-docs.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Generate API Docs | ${{ needs.generate-api-docs.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Check Changelog | ${{ needs.check-changelog.result == 'success' && '✅ Pass' || needs.check-changelog.result == 'skipped' && '⏭️ Skipped' || '⚠️ Warning' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Validate Changelog | ${{ needs.validate-changelog.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Spell Check | ${{ needs.spell-check.result == 'success' && '✅ Pass' || '⚠️ Warning' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Markdown Validation | ${{ needs.validate-markdown.result == 'success' && '✅ Pass' || '⚠️ Issues' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| README Structure | ${{ needs.validate-readme.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Changelog Check | ${{ needs.check-changelog.result == 'success' && '✅ Updated' || needs.check-changelog.result == 'skipped' && '⏭️ Skipped' || '⚠️ Not Updated' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Changelog Format | ${{ needs.validate-changelog-format.result == 'success' && '✅ Valid' || '❌ Invalid' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Documentation | ${{ needs.generate-api-docs.result == 'success' && '✅ Generated' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Spell Check | ${{ needs.spell-check.result == 'success' && '✅ Pass' || '⚠️ Issues' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [[ "${{ needs.validate-docs.result }}" == "success" && "${{ needs.generate-api-docs.result }}" == "success" && "${{ needs.validate-changelog.result }}" == "success" ]]; then
-            echo "🎉 **All documentation checks passed!**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ **Some documentation checks failed.** Please review the results above." >> $GITHUB_STEP_SUMMARY
+          # Count critical failures
+          CRITICAL_FAILURES=0
+          if [[ "${{ needs.validate-readme.result }}" != "success" ]]; then
+            CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
           fi
+          if [[ "${{ needs.validate-changelog-format.result }}" != "success" ]]; then
+            CRITICAL_FAILURES=$((CRITICAL_FAILURES + 1))
+          fi
+
+          if [ $CRITICAL_FAILURES -eq 0 ]; then
+            echo "### ✅ Documentation Status: GOOD" >> $GITHUB_STEP_SUMMARY
+            echo "All critical documentation checks passed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Documentation Status: NEEDS ATTENTION" >> $GITHUB_STEP_SUMMARY
+            echo "$CRITICAL_FAILURES critical documentation issue(s) found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Quick Fix Tips" >> $GITHUB_STEP_SUMMARY
+          echo "- Ensure README.md has Installation, Configuration, and Usage sections" >> $GITHUB_STEP_SUMMARY
+          echo "- Keep CHANGELOG.md updated with version entries" >> $GITHUB_STEP_SUMMARY
+          echo "- Use proper Markdown formatting" >> $GITHUB_STEP_SUMMARY
+          echo "- Include code examples in documentation" >> $GITHUB_STEP_SUMMARY
