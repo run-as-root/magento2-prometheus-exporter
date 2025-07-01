@@ -34,6 +34,7 @@ A comprehensive Magento 2 module that exposes essential Magento metrics in Prome
 - Magento 2.3.x or higher
 - PHP 7.4 or higher
 - Composer
+- Secure dependency versions (see Security section)
 
 ### Install via Composer
 
@@ -136,6 +137,12 @@ scrape_configs:
 | `magento_products_by_type_count_total` | gauge | `product_type` | Count of products by type (simple, configurable, etc.) |
 | `magento_catalog_category_count_total` | gauge | `status`, `menu_status`, `store_code` | Count of categories by status |
 
+### EAV & Attribute Metrics
+| Metric | Type | Labels | Description |
+|--------|------|--------|-------------|
+| `magento_eav_attribute_count_total` | gauge | - | Total count of EAV attributes |
+| `magento_eav_attribute_options_above_recommended_level_total` | gauge | - | Count of attributes with more than 100 options (performance risk) |
+
 ### Customer Metrics
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
@@ -153,6 +160,8 @@ scrape_configs:
 | `magento_cronjob_count_total` | gauge | `status`, `job_code` | Count of cron jobs by status |
 | `magento_cronjob_broken_count_total` | gauge | - | Count of broken cron jobs |
 | `magento_indexer_backlog_count_total` | gauge | `title` | Count of items in indexer backlog |
+
+
 
 ### Infrastructure Metrics
 | Metric | Type | Labels | Description |
@@ -175,6 +184,8 @@ scrape_configs:
 - Regularly rotate authentication tokens
 - Restrict access to metrics endpoint via firewall rules
 - Monitor access logs for unusual activity
+- Keep dependencies updated to address security vulnerabilities
+- Use specific version constraints in composer.json to prevent vulnerable packages
 
 ### IP Whitelisting
 
@@ -188,6 +199,17 @@ location /metrics {
     try_files $uri $uri/ /index.php?$args;
 }
 ```
+
+### Dependency Security
+
+This module includes security fixes for vulnerable dependencies:
+
+- **GuzzleHTTP**: Minimum version 7.4.5 (fixes CVE-2022-31043)
+- **Monolog**: Minimum version 2.9.0 (fixes log injection vulnerabilities)
+- **Symfony Console**: Minimum version 5.4.46 (fixes XSS vulnerabilities)
+- **Changed stability**: From "dev" to "stable" for production safety
+
+Regular security updates are applied via composer constraints and conflict declarations.
 
 ## 🔧 Custom Metrics
 
@@ -421,6 +443,15 @@ Please include:
 - Module version
 - Detailed error messages
 - Steps to reproduce
+
+## 📝 Changelog
+
+### Recent Updates
+
+- **🛡️ Security Fix**: Updated dependency constraints to prevent vulnerable package versions
+- **📊 New Metric**: Added `magento_eav_attribute_options_above_recommended_level_total` to track catalog health
+- **⚡ Performance**: Improved metric collection efficiency with optimized SQL queries
+- **🔒 Stability**: Changed minimum-stability from "dev" to "stable" for production safety
 
 ## 📄 License
 
