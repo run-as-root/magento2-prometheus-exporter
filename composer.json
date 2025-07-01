@@ -1,65 +1,68 @@
 {
-    "name": "run_as_root/magento2-prometheus-exporter",
-    "description": "Magento2 Prometheus Exporter",
-    "version": "3.2.3",
-    "type": "magento2-module",
-    "license": "MIT",
-    "homepage": "https://github.com/run-as-root/magento2-prometheus-exporter",
-    "readme": "./README.md",
-    "support": {
-        "email": "info@run-as-root.sh",
-        "source": "https://github.com/run-as-root/magento2-prometheus-exporter"
+  "name": "run_as_root/magento2-prometheus-exporter",
+  "description": "Magento2 Prometheus Exporter",
+  "version": "3.2.3",
+  "type": "magento2-module",
+  "license": "MIT",
+  "homepage": "https://github.com/run-as-root/magento2-prometheus-exporter",
+  "readme": "./README.md",
+  "support": {
+    "email": "info@run-as-root.sh",
+    "source": "https://github.com/run-as-root/magento2-prometheus-exporter"
+  },
+  "keywords": [
+    "magento",
+    "magento2",
+    "magento2-module"
+  ],
+  "authors": [
+    {
+      "name": "David Lambauer",
+      "email": "david@run-as-root.sh"
     },
-    "keywords": [
-        "magento",
-        "magento2",
-        "magento2-module"
+    {
+      "name": "Matthias Walter",
+      "email": "matthias@run-as-root.sh"
+    }
+  ],
+  "require": {
+    "magento/framework": "*",
+    "magento/module-payment": "*",
+    "magento/module-eav": "*",
+    "magento/module-cron": "*",
+    "magento/module-cms": "*",
+    "magento/module-shipping": "*",
+    "magento/module-catalog": "*",
+    "magento/module-sales": "*",
+    "laminas/laminas-http": "^2.15.0",
+    "magento/module-config": "*",
+    "magento/module-backend": "*",
+    "guzzlehttp/guzzle": "^7.4.5",
+    "symfony/console": "^5.4.46|^6.0",
+    "psr/log": "^1.1|^2.0|^3.0",
+    "monolog/monolog": "^2.9.0|^3.0",
+    "magento/module-store": "*",
+    "magento/module-indexer": "*",
+    "magento/zend-db": "*"
+  },
+  "conflict": {
+    "symfony/process": "<5.4.46",
+    "guzzlehttp/guzzle": "<7.4.5",
+    "monolog/monolog": "<2.9.0",
+    "symfony/console": "<5.4.46"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5|^10.0"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
     ],
-    "authors": [
-        {
-            "name": "David Lambauer",
-            "email": "david@run-as-root.sh"
-        },
-        {
-            "name": "Matthias Walter",
-            "email": "matthias@run-as-root.sh"
-        }
-    ],
-    "require": {
-        "magento/framework": "*",
-        "magento/module-payment": "*",
-        "magento/module-eav": "*",
-        "magento/module-cron": "*",
-        "magento/module-cms": "*",
-        "magento/module-shipping": "*",
-        "magento/module-catalog": "*",
-        "magento/module-sales": "*",
-        "laminas/laminas-http": "*",
-        "magento/module-config": "*",
-        "magento/module-backend": "*",
-        "guzzlehttp/guzzle": "*",
-        "symfony/console": "*",
-        "psr/log": "*",
-        "monolog/monolog": "*",
-        "magento/module-store": "*",
-        "magento/module-indexer": "*",
-        "magento/zend-db": "*"
-    },
-    "conflict": {
-        "symfony/process": "<5.4.46"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "*"
-    },
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "RunAsRoot\\PrometheusExporter\\": "src/",
-            "RunAsRoot\\NewRelicApi\\": "lib/",
-            "RunAsRoot\\PrometheusExporter\\Test\\": "Test/"
-        }
-    },
-    "minimum-stability": "dev"
+    "psr-4": {
+      "RunAsRoot\\PrometheusExporter\\": "src/",
+      "RunAsRoot\\NewRelicApi\\": "lib/",
+      "RunAsRoot\\PrometheusExporter\\Test\\": "Test/"
+    }
+  },
+  "minimum-stability": "stable"
 }
