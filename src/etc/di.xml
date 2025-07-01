@@ -26,6 +26,7 @@
 
                 <!-- EAV Aggregator -->
                 <item name="AttributeCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Eav\AttributeCountAggregator</item>
+                <item name="AttributeOptionsAboveRecommendedLevelAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Eav\AttributeOptionsAboveRecommendedLevelAggregator</item>
 
                 <!-- Index Aggregator -->
                 <item name="IndexerBacklogCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator</item>
