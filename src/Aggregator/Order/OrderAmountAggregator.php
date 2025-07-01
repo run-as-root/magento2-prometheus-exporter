@@ -55,7 +55,8 @@ class OrderAmountAggregator implements MetricAggregatorInterface
 
         $connection = $this->resourceConnection->getConnection();
 
-        $query = 'SELECT ' . 'SUM(ORDER.grand_total) AS GRAND_TOTAL, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
+        $salesOrderTable = $connection->getTableName('sales_order'); 
+        $storeTable = $connection->getTableName('store');        $query = 'SELECT SUM(ORDER.grand_total) AS GRAND_TOTAL, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
             ' FROM `sales_order` AS `ORDER`' .
             ' INNER JOIN `store` AS `STORE`' .
             ' ON ORDER.store_id = STORE.store_id' .

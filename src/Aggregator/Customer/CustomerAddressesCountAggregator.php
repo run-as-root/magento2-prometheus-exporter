@@ -40,7 +40,8 @@ class CustomerAddressesCountAggregator implements MetricAggregatorInterface
     {
         $connection = $this->resourceConnection->getConnection();
 
-        $query = 'SELECT ' . 'COUNT(*) FROM customer_address_entity';
+        $tableName = $connection->getTableName('customer_address_entity');
+        $query = 'SELECT COUNT(*) FROM ' . $tableName;
 
         $customerAssociatedAddressCount = (int)$connection->fetchOne($query);
 

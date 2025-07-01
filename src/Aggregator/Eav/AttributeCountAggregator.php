@@ -51,7 +51,8 @@ class AttributeCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $select     = 'SELECT entity_type_code FROM eav_entity_type;';
+        $tableName = $this->connection->getConnection()->getTableName('eav_entity_type'); 
+        $select = 'SELECT entity_type_code FROM ' . $tableName;
         $eavTypes   = $this->connection->getConnection()->fetchAll($select);
         $totalCount = 0;
 

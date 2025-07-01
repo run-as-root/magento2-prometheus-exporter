@@ -41,7 +41,9 @@ class CustomerGroupCountAggregator implements MetricAggregatorInterface
     {
         $connection = $this->resourceConnection->getConnection();
 
-        $query = 'SELECT ' . 'COUNT(*) FROM customer_group';
+        $tableName = $connection->getTableName('customer_group');
+        
+        $query = 'SELECT COUNT(*) FROM ' . $tableName;
 
         $totalGroup = (int)$connection->fetchOne($query);
 
