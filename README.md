@@ -1,8 +1,5 @@
 # Magento 2 Prometheus Exporter
 
-![Branch stable](https://img.shields.io/badge/stable%20branch-master-blue.svg)
-![](https://github.styleci.io/repos/191891355/shield)
-[![codecov](https://codecov.io/gh/run-as-root/magento2-prometheus-exporter/branch/master/graph/badge.svg)](https://codecov.io/gh/run-as-root/magento2-prometheus-exporter)
 [![pipeline status](https://gitlab.com/run_as_root/magento2-prometheus-exporter/badges/master/pipeline.svg)](https://gitlab.com/run_as_root/magento2-prometheus-exporter/commits/master)
 
 A comprehensive Magento 2 module that exposes essential Magento metrics in Prometheus format, enabling powerful monitoring and observability for your e-commerce platform.
@@ -398,7 +395,7 @@ We welcome contributions! Here's how you can help:
 ### Development Setup
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/magento2-prometheus-exporter.git`
+2. Clone your fork: `git clone https://gitlab.com/your-username/magento2-prometheus-exporter.git`
 3. Install dependencies: `composer install`
 4. Create a feature branch: `git checkout -b feature/your-feature-name`
 
@@ -438,8 +435,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Email**: info@run-as-root.sh
-- **GitHub Issues**: [Report a bug](https://github.com/run-as-root/magento2-prometheus-exporter/issues)
-- **Documentation**: [Wiki](https://github.com/run-as-root/magento2-prometheus-exporter/wiki)
+- **GitLab Issues**: [Report a bug](https://gitlab.com/run_as_root/magento2-prometheus-exporter/issues)
+- **Documentation**: [Wiki](https://gitlab.com/run_as_root/magento2-prometheus-exporter/wiki)
 
 ---
 
