@@ -38,7 +38,8 @@ class ProductCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $select       = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity;';
+        $tableName = $this->connection->getConnection()->getTableName('catalog_product_entity'); 
+        $select = 'SELECT COUNT(entity_id) as ProductCount FROM ' . $tableName;
         $productCount = $this->connection->getConnection()->fetchOne($select);
 
         return $this->updateMetricService->update(self::METRIC_CODE, $productCount);

@@ -41,7 +41,8 @@ class AdminUserCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $select       = 'SELECT COUNT(user_id) FROM admin_user WHERE is_active = 1;';
+        $tableName = $this->connection->getConnection()->getTableName('admin_user'); 
+        $select = 'SELECT COUNT(user_id) FROM ' . $tableName . ' WHERE is_active = 1';
         $productCount = $this->connection->getConnection()->fetchOne($select);
 
         return $this->updateMetricService->update(self::METRIC_CODE, $productCount);

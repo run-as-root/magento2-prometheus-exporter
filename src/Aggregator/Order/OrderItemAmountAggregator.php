@@ -50,10 +50,11 @@ class OrderItemAmountAggregator implements MetricAggregatorInterface
     {
         $connection = $this->resourceConnection->getConnection();
 
-        $query = 'SELECT ' . 'sales_order.entity_id AS ORDER_ID, store.code AS STORE_CODE' .
-            ' FROM sales_order' .
-            ' INNER JOIN store' .
-            ' ON sales_order.`store_id` = store.store_id';
+        $salesOrderTable = $connection->getTableName('sales_order'); 
+        $storeTable = $connection->getTableName('store');        $query = 'SELECT ' . $salesOrderTable . '.entity_id AS ORDER_ID, ' . $storeTable . '.code AS STORE_CODE' .
+            ' FROM ' . $salesOrderTable .
+            ' INNER JOIN ' . $storeTable .
+            ' ON ' . $salesOrderTable . '.`store_id` = ' . $storeTable . '.store_id';
 
         $ordersAndStores = $connection->fetchAll($query);
 

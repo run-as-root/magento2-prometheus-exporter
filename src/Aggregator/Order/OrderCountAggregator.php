@@ -55,7 +55,8 @@ class OrderCountAggregator implements MetricAggregatorInterface
 
         $connection = $this->resourceConnection->getConnection();
 
-        $query = 'SELECT ' . 'COUNT(*) AS ORDER_COUNT, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
+        $salesOrderTable = $connection->getTableName('sales_order'); 
+        $storeTable = $connection->getTableName('store');        $query = 'SELECT COUNT(*) AS ORDER_COUNT, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
             ' FROM `sales_order` AS `ORDER`' .
             ' INNER JOIN `store` AS `STORE`' .
             ' ON ORDER.store_id = STORE.store_id' .
