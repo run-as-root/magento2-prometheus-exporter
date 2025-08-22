@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Result;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SortOrder;
+use Magento\Framework\Api\SortOrderBuilder;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\Response\HttpInterface as HttpResponseInterface;
 use Magento\Framework\Controller\Result\Raw;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
@@ -19,17 +22,20 @@ class PrometheusResult extends Raw
     private $searchCriteriaBuilder;
     private $metricAggregatorPool;
     private $config;
+    private $sortOrderBuilder;
 
     public function __construct(
         MetricAggregatorPool $metricAggregatorPool,
         MetricRepositoryInterface $metricRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        Config $config
+        Config $config,
+        ?SortOrderBuilder $sortOrderBuilder = null,
     ) {
-        $this->metricRepository      = $metricRepository;
+        $this->metricRepository = $metricRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->metricAggregatorPool  = $metricAggregatorPool;
-        $this->config                = $config;
+        $this->metricAggregatorPool = $metricAggregatorPool;
+        $this->config = $config;
+        $this->sortOrderBuilder = $sortOrderBuilder ?? ObjectManager::getInstance()->get(SortOrderBuilder::class);
     }
 
     protected function render(HttpResponseInterface $response)
@@ -49,6 +55,9 @@ class PrometheusResult extends Raw
     protected function collectMetrics(): string
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
+        $searchCriteria->setSortOrders([
+            $this->sortOrderBuilder->setField('code')->setDirection(SortOrder::SORT_ASC)->create()
+        ]);
 
         /** @var MetricInterface[] $metrics */
         $metrics = $this->metricRepository->getList($searchCriteria)->getItems();
