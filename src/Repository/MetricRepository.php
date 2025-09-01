@@ -25,7 +25,7 @@ class MetricRepository implements MetricRepositoryInterface
     private MetricFactory $metricFactory;
     private MetricResource $metricResource;
     private MetricCollectionFactory $collectionFactory;
-    private MetricSearchResultsInterfaceFactory $searchResultsFactory;
+    private SearchResultsInterfaceFactory $searchResultsFactory;
 
     public function __construct(
         MetricResource $metricResource,
