@@ -38,7 +38,7 @@ A comprehensive Magento 2 module that exposes essential Magento metrics in Prome
 ### Install via Composer
 
 ```bash
-composer require run_as_root/magento2-prometheus-exporter
+composer require run-as-root/magento2-prometheus-exporter
 php bin/magento setup:upgrade
 php bin/magento setup:di:compile
 php bin/magento cache:flush
