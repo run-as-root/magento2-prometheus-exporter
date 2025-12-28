@@ -46,6 +46,7 @@ class PrometheusResult extends Raw
         $this->setContents($formattedMetrics);
 
         $response->setBody($this->contents);
+        $response->setNoCacheHeaders();
         $response->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
         $this->setHeader('Content-Type', 'text/plain; charset=UTF-8', true);
 
