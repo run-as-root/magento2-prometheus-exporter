@@ -70,17 +70,22 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             ->method('getList')
             ->willReturn([$store1, $store2]);
 
+        $paymentMethodCallCount = 0;
         $this->paymentMethodList
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('getActiveList')
-            ->with(...[1])
-            ->willReturn(['a', 'b']);
-
-        $this->paymentMethodList
-            ->expects($this->at(1))
-            ->method('getActiveList')
-            ->with(...[2])
-            ->willReturn(['a']);
+            ->willReturnCallback(function (...$args) use (&$paymentMethodCallCount) {
+                $paymentMethodCallCount++;
+                if ($paymentMethodCallCount === 1) {
+                    $this->assertSame([1], $args);
+                    return ['a', 'b'];
+                }
+                if ($paymentMethodCallCount === 2) {
+                    $this->assertSame([2], $args);
+                    return ['a'];
+                }
+                return [];
+            });
 
         $labels1 = [
             'store_id' => 1,
@@ -91,27 +96,29 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             'store_code' => 'default'
         ];
 
+        $updateCallCount = 0;
         $this->updateMetricService
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('update')
-            ->with(
-                ...[
-                       'magento_active_payment_methods_count_total',
-                       '2',
-                       $labels1
-                   ]
-            );
-
-        $this->updateMetricService
-            ->expects($this->at(1))
-            ->method('update')
-            ->with(
-                ...[
-                       'magento_active_payment_methods_count_total',
-                       '1',
-                       $labels2
-                   ]
-            );
+            ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
+                $updateCallCount++;
+                if ($updateCallCount === 1) {
+                    $this->assertSame([
+                        'magento_active_payment_methods_count_total',
+                        '2',
+                        $labels1,
+                    ], $args);
+                    return;
+                }
+                if ($updateCallCount === 2) {
+                    $this->assertSame([
+                        'magento_active_payment_methods_count_total',
+                        '1',
+                        $labels2,
+                    ], $args);
+                    return;
+                }
+            });
 
         $this->sut->aggregate();
     }

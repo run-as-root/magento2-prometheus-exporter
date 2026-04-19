@@ -77,27 +77,21 @@ class IndexerLastCallSecondsCountTest extends TestCase
             'status' => 'failed',
         ];
 
+        $updateCallCount = 0;
         $this->updateMetricService
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('update')
-            ->with(
-                ...[
-                       self::METRIC_CODE,
-                       '200',
-                       $labels1
-                   ]
-            );
-
-        $this->updateMetricService
-            ->expects($this->at(1))
-            ->method('update')
-            ->with(
-                ...[
-                       self::METRIC_CODE,
-                       '300',
-                       $labels2
-                   ]
-            );
+            ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
+                $updateCallCount++;
+                if ($updateCallCount === 1) {
+                    $this->assertSame([self::METRIC_CODE, '200', $labels1], $args);
+                    return;
+                }
+                if ($updateCallCount === 2) {
+                    $this->assertSame([self::METRIC_CODE, '300', $labels2], $args);
+                    return;
+                }
+            });
 
         $this->sut->aggregate();
     }
@@ -107,15 +101,21 @@ class IndexerLastCallSecondsCountTest extends TestCase
         $this->setUpIndexCollection();
         $this->setUpSelects(true);
 
+        $loggerCallCount = 0;
         $this->logger
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('critical')
-            ->with(...['ERROR NUMBER 1']);
-
-        $this->logger
-            ->expects($this->at(1))
-            ->method('critical')
-            ->with(...['ERROR NUMBER 2']);
+            ->willReturnCallback(function (...$args) use (&$loggerCallCount) {
+                $loggerCallCount++;
+                if ($loggerCallCount === 1) {
+                    $this->assertSame(['ERROR NUMBER 1'], $args);
+                    return;
+                }
+                if ($loggerCallCount === 2) {
+                    $this->assertSame(['ERROR NUMBER 2'], $args);
+                    return;
+                }
+            });
 
         $this->updateMetricService
             ->expects($this->never())
@@ -134,7 +134,7 @@ class IndexerLastCallSecondsCountTest extends TestCase
                                  ->willReturn($connection);
         $connection->expects($this->exactly(2))
                    ->method('select')
-                   ->will($this->onConsecutiveCalls($select1, $select2));
+                   ->willReturnOnConsecutiveCalls($select1, $select2);
         $connection->expects($this->exactly(2))
                    ->method('getTableName')
                     ->with(self::TABLE_MVIEW_STATE)
