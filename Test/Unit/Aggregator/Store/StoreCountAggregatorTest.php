@@ -50,13 +50,21 @@ final class StoreCountAggregatorTest extends TestCase
             ->method('getList')
             ->willReturn([$store1, $store2, $store3]);
 
+        $callCount = 0;
         $this->updateMetricService
             ->expects($this->exactly(2))
             ->method('update')
-            ->withConsecutive(
-                [self::METRIC_CODE, '2', ['status' => 'enabled']],
-                [self::METRIC_CODE, '1', ['status' => 'disabled']],
-            );
+            ->willReturnCallback(function (...$args) use (&$callCount) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $this->assertSame([self::METRIC_CODE, '2', ['status' => 'enabled']], $args);
+                    return;
+                }
+                if ($callCount === 2) {
+                    $this->assertSame([self::METRIC_CODE, '1', ['status' => 'disabled']], $args);
+                    return;
+                }
+            });
 
         $this->sut->aggregate();
     }
