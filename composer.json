@@ -55,6 +55,12 @@
   "require-dev": {
     "phpunit/phpunit": "^9.5|^10.0"
   },
+  "repositories": {
+    "mage-os": {
+      "type": "composer",
+      "url": "https://mirror.mage-os.org/"
+    }
+  },
   "autoload": {
     "files": [
       "registration.php"
