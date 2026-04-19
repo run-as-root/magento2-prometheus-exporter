@@ -52,7 +52,7 @@ final class IndexUnitTest extends TestCase
         $prometheusResultFactory = $this->createMock(PrometheusResultFactory::class);
         $prometheusResultFactory->method('create')->willReturn($prometheusResult);
 
-        $this->sut = new Index($contextMock, $prometheusResultFactory);
+        $this->sut = new Index($contextMock, $prometheusResultFactory, $configMock);
     }
 
     public function testExecuteReturnPrometheusResult(): void
