@@ -15,6 +15,7 @@ class IndexControllerTest extends AbstractController
 {
     /**
      * @magentoAppArea frontend
+     * @magentoConfigFixture current_store metric_configuration/security/enable_token 1
      */
     public function testUnauthorizedResponse()
     {
@@ -29,6 +30,7 @@ class IndexControllerTest extends AbstractController
 
     /**
      * @magentoAppArea frontend
+     * @magentoConfigFixture current_store metric_configuration/security/enable_token 1
      * @magentoConfigFixture current_store metric_configuration/security/token supersecrettokenxxx
      */
     public function testAuthorizedResponse()
