@@ -32,7 +32,7 @@ A comprehensive Magento 2 module that exposes essential Magento metrics in Prome
 ### Requirements
 
 - Magento 2.3.x or higher
-- PHP 7.4 or higher
+- PHP 8.2 or higher
 - Composer
 
 ### Install via Composer
