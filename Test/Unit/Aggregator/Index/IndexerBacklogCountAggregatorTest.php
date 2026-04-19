@@ -90,12 +90,13 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
                 $callCount++;
                 if ($callCount === 1) {
                     $this->assertSame([self::METRIC_CODE, '11', $lables1], $args);
-                    return;
+                    return true;
                 }
                 if ($callCount === 2) {
                     $this->assertSame([self::METRIC_CODE, '22', $lables2], $args);
-                    return;
+                    return true;
                 }
+                return true;
             });
 
         $this->sut->aggregate();

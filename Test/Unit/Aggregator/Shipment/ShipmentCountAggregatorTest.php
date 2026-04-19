@@ -137,6 +137,7 @@ final class ShipmentCountAggregatorTest extends TestCase
                                   ->willReturnCallback(function (...$args) use (&$updateCallCount, $params) {
                                       $this->assertSame($params[$updateCallCount] ?? null, $args);
                                       $updateCallCount++;
+                                      return true;
                                   });
 
         $this->subject->aggregate();

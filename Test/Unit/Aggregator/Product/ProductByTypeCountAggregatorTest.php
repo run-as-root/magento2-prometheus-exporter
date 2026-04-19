@@ -138,6 +138,7 @@ final class ProductByTypeCountAggregatorTest extends TestCase
                 $expected = $params[$callCount] ?? null;
                 $callCount++;
                 $this->assertSame($expected, $args);
+                return true;
             });
 
         $this->subject->aggregate();

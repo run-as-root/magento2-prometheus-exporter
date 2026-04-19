@@ -108,7 +108,7 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
                         '2',
                         $labels1,
                     ], $args);
-                    return;
+                    return true;
                 }
                 if ($updateCallCount === 2) {
                     $this->assertSame([
@@ -116,8 +116,9 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
                         '1',
                         $labels2,
                     ], $args);
-                    return;
+                    return true;
                 }
+                return true;
             });
 
         $this->sut->aggregate();

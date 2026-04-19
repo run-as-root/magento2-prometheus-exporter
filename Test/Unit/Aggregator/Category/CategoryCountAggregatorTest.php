@@ -272,6 +272,7 @@ final class CategoryCountAggregatorTest extends TestCase
                                   ->willReturnCallback(function (...$args) use (&$updateCallCount, $updateExpected) {
                                       $this->assertSame($updateExpected[$updateCallCount] ?? null, $args);
                                       $updateCallCount++;
+                                      return true;
                                   });
 
         $this->subject->aggregate();

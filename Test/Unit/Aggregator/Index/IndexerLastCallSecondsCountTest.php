@@ -85,12 +85,13 @@ class IndexerLastCallSecondsCountTest extends TestCase
                 $updateCallCount++;
                 if ($updateCallCount === 1) {
                     $this->assertSame([self::METRIC_CODE, '200', $labels1], $args);
-                    return;
+                    return true;
                 }
                 if ($updateCallCount === 2) {
                     $this->assertSame([self::METRIC_CODE, '300', $labels2], $args);
-                    return;
+                    return true;
                 }
+                return true;
             });
 
         $this->sut->aggregate();
