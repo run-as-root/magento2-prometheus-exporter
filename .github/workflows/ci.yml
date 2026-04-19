@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v6
       - uses: graycoreio/github-actions-magento2/supported-version@main
         id: supported-version
+        with:
+          include_services: true
       - name: Echo matrix
         run: echo "${{ steps.supported-version.outputs.matrix }}"
 
