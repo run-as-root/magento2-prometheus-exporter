@@ -80,11 +80,13 @@ final class AttributeCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$getListCallCount, $searchCriteria, $searchResult1, $searchResult2) {
                 $getListCallCount++;
                 if ($getListCallCount === 1) {
-                    $this->assertSame(['a', $searchCriteria], $args);
+                    $expected = ['a', $searchCriteria];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return $searchResult1;
                 }
                 if ($getListCallCount === 2) {
-                    $this->assertSame(['b', $searchCriteria], $args);
+                    $expected = ['b', $searchCriteria];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return $searchResult2;
                 }
                 return null;

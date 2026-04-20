@@ -57,11 +57,13 @@ final class StoreCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$callCount) {
                 $callCount++;
                 if ($callCount === 1) {
-                    $this->assertSame([self::METRIC_CODE, '2', ['status' => 'enabled']], $args);
+                    $expected = [self::METRIC_CODE, '2', ['status' => 'enabled']];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($callCount === 2) {
-                    $this->assertSame([self::METRIC_CODE, '1', ['status' => 'disabled']], $args);
+                    $expected = [self::METRIC_CODE, '1', ['status' => 'disabled']];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;

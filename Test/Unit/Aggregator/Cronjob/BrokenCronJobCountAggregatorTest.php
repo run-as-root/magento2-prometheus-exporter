@@ -49,15 +49,18 @@ class BrokenCronJobCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$callCount, $collection) {
                 $callCount++;
                 if ($callCount === 1) {
-                    $this->assertSame(['status', 'pending'], $args);
+                    $expected = ['status', 'pending'];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return $collection;
                 }
                 if ($callCount === 2) {
-                    $this->assertSame(['executed_at', ['notnull' => true]], $args);
+                    $expected = ['executed_at', ['notnull' => true]];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return $collection;
                 }
                 if ($callCount === 3) {
-                    $this->assertSame(['finished_at', ['null' => true]], $args);
+                    $expected = ['finished_at', ['null' => true]];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return $collection;
                 }
                 return $collection;

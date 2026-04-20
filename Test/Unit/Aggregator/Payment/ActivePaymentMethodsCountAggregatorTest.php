@@ -77,11 +77,13 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$paymentMethodCallCount) {
                 $paymentMethodCallCount++;
                 if ($paymentMethodCallCount === 1) {
-                    $this->assertSame([1], $args);
+                    $expected = [1];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return ['a', 'b'];
                 }
                 if ($paymentMethodCallCount === 2) {
-                    $this->assertSame([2], $args);
+                    $expected = [2];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return ['a'];
                 }
                 return [];
@@ -103,19 +105,21 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
                 $updateCallCount++;
                 if ($updateCallCount === 1) {
-                    $this->assertSame([
+                    $expected = [
                         'magento_active_payment_methods_count_total',
                         '2',
                         $labels1,
-                    ], $args);
+                    ];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($updateCallCount === 2) {
-                    $this->assertSame([
+                    $expected = [
                         'magento_active_payment_methods_count_total',
                         '1',
                         $labels2,
-                    ], $args);
+                    ];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;

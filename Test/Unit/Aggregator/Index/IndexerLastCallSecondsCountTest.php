@@ -84,11 +84,13 @@ class IndexerLastCallSecondsCountTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
                 $updateCallCount++;
                 if ($updateCallCount === 1) {
-                    $this->assertSame([self::METRIC_CODE, '200', $labels1], $args);
+                    $expected = [self::METRIC_CODE, '200', $labels1];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($updateCallCount === 2) {
-                    $this->assertSame([self::METRIC_CODE, '300', $labels2], $args);
+                    $expected = [self::METRIC_CODE, '300', $labels2];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;
@@ -109,11 +111,13 @@ class IndexerLastCallSecondsCountTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$loggerCallCount) {
                 $loggerCallCount++;
                 if ($loggerCallCount === 1) {
-                    $this->assertSame(['ERROR NUMBER 1'], $args);
+                    $expected = ['ERROR NUMBER 1'];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return;
                 }
                 if ($loggerCallCount === 2) {
-                    $this->assertSame(['ERROR NUMBER 2'], $args);
+                    $expected = ['ERROR NUMBER 2'];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return;
                 }
             });

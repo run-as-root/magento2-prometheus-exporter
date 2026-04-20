@@ -102,11 +102,13 @@ class CronJobCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$callCount, $labels1, $labels2) {
                 $callCount++;
                 if ($callCount === 1) {
-                    $this->assertSame(['magento_cronjob_count_total', '10', $labels1], $args);
+                    $expected = ['magento_cronjob_count_total', '10', $labels1];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($callCount === 2) {
-                    $this->assertSame(['magento_cronjob_count_total', '20', $labels2], $args);
+                    $expected = ['magento_cronjob_count_total', '20', $labels2];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;

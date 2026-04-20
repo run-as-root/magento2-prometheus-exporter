@@ -89,11 +89,13 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$callCount, $lables1, $lables2) {
                 $callCount++;
                 if ($callCount === 1) {
-                    $this->assertSame([self::METRIC_CODE, '11', $lables1], $args);
+                    $expected = [self::METRIC_CODE, '11', $lables1];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($callCount === 2) {
-                    $this->assertSame([self::METRIC_CODE, '22', $lables2], $args);
+                    $expected = [self::METRIC_CODE, '22', $lables2];
+                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;

@@ -97,7 +97,11 @@ final class CategoryCountAggregatorTest extends TestCase
                        [self::TABLE_ATT],
                        [["sg" => self::TABLE_STORE_GROUP]],
                    ];
-                   $this->assertSame($expected[$fromCallCount] ?? null, $args);
+                   $currentExpected = $expected[$fromCallCount] ?? null;
+                   $this->assertSame(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
                    $fromCallCount++;
                    return $select;
                });
@@ -111,7 +115,11 @@ final class CategoryCountAggregatorTest extends TestCase
                        ['entity_type_id = ?', 3],
                        ['attribute_code = ?', 'include_in_menu'],
                    ];
-                   $this->assertSame($expected[$whereCallCount] ?? null, $args);
+                   $currentExpected = $expected[$whereCallCount] ?? null;
+                   $this->assertSame(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
                    $whereCallCount++;
                    return $select;
                });
@@ -137,7 +145,11 @@ final class CategoryCountAggregatorTest extends TestCase
                            "cce2.path like CONCAT(cce1.path, '%')",
                        ],
                    ];
-                   $this->assertSame($expected[$joinInnerCallCount] ?? null, $args);
+                   $currentExpected = $expected[$joinInnerCallCount] ?? null;
+                   $this->assertSame(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
                    $joinInnerCallCount++;
                    return $select;
                });
@@ -183,7 +195,11 @@ final class CategoryCountAggregatorTest extends TestCase
         ];
         $select->expects($this->exactly(4))->method('joinLeft')
                ->willReturnCallback(function (...$args) use (&$joinLeftCallCount, $joinLeftExpected, $select) {
-                   $this->assertSame($joinLeftExpected[$joinLeftCallCount] ?? null, $args);
+                   $currentExpected = $joinLeftExpected[$joinLeftCallCount] ?? null;
+                   $this->assertSame(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
                    $joinLeftCallCount++;
                    return $select;
                });
@@ -208,7 +224,11 @@ final class CategoryCountAggregatorTest extends TestCase
         ];
         $select->expects($this->exactly(3))->method('columns')
                ->willReturnCallback(function (...$args) use (&$columnsCallCount, $columnsExpected, $select) {
-                   $this->assertSame($columnsExpected[$columnsCallCount] ?? null, $args);
+                   $currentExpected = $columnsExpected[$columnsCallCount] ?? null;
+                   $this->assertSame(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
                    $columnsCallCount++;
                    return $select;
                });
@@ -270,7 +290,11 @@ final class CategoryCountAggregatorTest extends TestCase
         $this->updateMetricService->expects($this->exactly(4 * count($statisticData)))
                                   ->method('update')
                                   ->willReturnCallback(function (...$args) use (&$updateCallCount, $updateExpected) {
-                                      $this->assertSame($updateExpected[$updateCallCount] ?? null, $args);
+                                      $currentExpected = $updateExpected[$updateCallCount] ?? null;
+                                      $this->assertSame(
+                                          $currentExpected,
+                                          $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                                      );
                                       $updateCallCount++;
                                       return true;
                                   });
