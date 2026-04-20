@@ -35,4 +35,19 @@ final class IncrementCacheFlushCounterObserverTest extends TestCase
 
         $this->sut->execute($observer);
     }
+
+    public function testExecuteSwallowsExceptionsFromIncrement(): void
+    {
+        $observer = $this->createMock(Observer::class);
+
+        $this->updateMetricService
+            ->expects($this->once())
+            ->method('increment')
+            ->willThrowException(new \RuntimeException('table missing during setup:install'));
+
+        // Must not re-throw. If it did, Magento's install process would crash.
+        $this->sut->execute($observer);
+
+        $this->expectNotToPerformAssertions();
+    }
 }
