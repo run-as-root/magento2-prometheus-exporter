@@ -35,6 +35,7 @@
     "magento/module-shipping": "*",
     "magento/module-catalog": "*",
     "magento/module-sales": "*",
+    "magento/module-quote": "*",
     "laminas/laminas-http": "^2.15.0",
     "magento/module-config": "*",
     "magento/module-backend": "*",

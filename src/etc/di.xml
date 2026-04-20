@@ -52,6 +52,9 @@
                 <item name="ProductCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Product\ProductCountAggregator</item>
                 <item name="ProductByTypeCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Product\ProductByTypeCountAggregator</item>
 
+                <!-- Quote Aggregator -->
+                <item name="QuotesOverItemLimitCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Quote\QuotesOverItemLimitCountAggregator</item>
+
                 <!-- Shipping Aggregator -->
                 <item name="ActiveShippingMethodsCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Shipping\ActiveShippingMethodsCountAggregator</item>
 

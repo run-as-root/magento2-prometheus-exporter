@@ -166,6 +166,7 @@ scrape_configs:
 | `magento_store_count_total` | gauge | `status` | Count of stores by status |
 | `magento_website_count_total` | gauge | - | Total count of websites |
 | `magento_shipments_count_total` | counter | `source`, `store_code` | Count of shipments created |
+| `magento_quotes_over_item_limit_count_total` | gauge | `store_code` | Count of active carts with more than 100 items (performance risk) |
 
 ## 🔐 Security
 
