@@ -131,9 +131,18 @@ final class ProductByTypeCountAggregatorTest extends TestCase
             ];
         }
 
+        $callCount = 0;
         $this->updateMetricService->expects($this->exactly(6))
             ->method('update')
-            ->withConsecutive(...$params);
+            ->willReturnCallback(function (...$args) use (&$callCount, $params) {
+                $expected = $params[$callCount] ?? null;
+                $callCount++;
+                $this->assertEquals(
+                    $expected,
+                    $expected === null ? $args : array_slice($args, 0, count($expected))
+                );
+                return true;
+            });
 
         $this->subject->aggregate();
     }

@@ -82,15 +82,24 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
         $lables1 = [ 'title' => self::VIEW_ID_1 ];
         $lables2 = [ 'title' => self::VIEW_ID_2 ];
 
+        $callCount = 0;
         $this->updateMetricService
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('update')
-            ->with(self::METRIC_CODE, '11', $lables1);
-
-        $this->updateMetricService
-            ->expects($this->at(1))
-            ->method('update')
-            ->with(self::METRIC_CODE, '22', $lables2);
+            ->willReturnCallback(function (...$args) use (&$callCount, $lables1, $lables2) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $expected = [self::METRIC_CODE, '11', $lables1];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                if ($callCount === 2) {
+                    $expected = [self::METRIC_CODE, '22', $lables2];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                return true;
+            });
 
         $this->sut->aggregate();
     }

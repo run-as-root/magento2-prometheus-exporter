@@ -79,15 +79,24 @@ class IndexerChangelogCountAggregatorTest extends TestCase
             'status' => 'failed',
         ];
 
+        $updateCallCount = 0;
         $this->updateMetricService
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('update')
-            ->with(self::METRIC_CODE, '777', $labels1);
-
-        $this->updateMetricService
-            ->expects($this->at(1))
-            ->method('update')
-            ->with(self::METRIC_CODE, '888', $labels2);
+            ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
+                $updateCallCount++;
+                if ($updateCallCount === 1) {
+                    $expected = [self::METRIC_CODE, '777', $labels1];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                if ($updateCallCount === 2) {
+                    $expected = [self::METRIC_CODE, '888', $labels2];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                return true;
+            });
 
         $this->sut->aggregate();
     }
@@ -97,15 +106,23 @@ class IndexerChangelogCountAggregatorTest extends TestCase
         $this->setUpIndexCollection();
         $this->setUpSelects(true);
 
+        $loggerCallCount = 0;
         $this->logger
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('critical')
-            ->with(self::EXCEPTION_1);
-
-        $this->logger
-            ->expects($this->at(1))
-            ->method('critical')
-            ->with(self::EXCEPTION_2);
+            ->willReturnCallback(function (...$args) use (&$loggerCallCount) {
+                $loggerCallCount++;
+                if ($loggerCallCount === 1) {
+                    $expected = [self::EXCEPTION_1];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return;
+                }
+                if ($loggerCallCount === 2) {
+                    $expected = [self::EXCEPTION_2];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return;
+                }
+            });
 
         $this->updateMetricService
             ->expects($this->never())
@@ -124,7 +141,7 @@ class IndexerChangelogCountAggregatorTest extends TestCase
                                  ->willReturn($connection);
         $connection->expects($this->exactly(2))
                    ->method('select')
-                   ->will($this->onConsecutiveCalls($select1, $select2));
+                   ->willReturnOnConsecutiveCalls($select1, $select2);
         $connection->expects($this->exactly(2))
                    ->method('getTableName')
                    ->willReturnMap(

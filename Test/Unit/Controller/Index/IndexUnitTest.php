@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RunAsRoot\PrometheusExporter\Test\Unit\Controller\Index;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Framework\App\Action\Context;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -38,11 +39,15 @@ final class IndexUnitTest extends TestCase
         /** @var Config | MockObject $configMock */
         $configMock = $this->createMock(Config::class);
 
+        /** @var SortOrderBuilder | MockObject $sortOrderBuilderMock */
+        $sortOrderBuilderMock = $this->createMock(SortOrderBuilder::class);
+
         $prometheusResult = new PrometheusResult(
             $metricAggregatorPoolMock,
             $metricRepositoryMock,
             $searchResultBuilder,
-            $configMock
+            $configMock,
+            $sortOrderBuilderMock
         );
 
         /** @var Context| MockObject $contextMock */
@@ -52,7 +57,7 @@ final class IndexUnitTest extends TestCase
         $prometheusResultFactory = $this->createMock(PrometheusResultFactory::class);
         $prometheusResultFactory->method('create')->willReturn($prometheusResult);
 
-        $this->sut = new Index($contextMock, $prometheusResultFactory);
+        $this->sut = new Index($contextMock, $prometheusResultFactory, $configMock);
     }
 
     public function testExecuteReturnPrometheusResult(): void

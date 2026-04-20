@@ -89,99 +89,149 @@ final class CategoryCountAggregatorTest extends TestCase
     {
         $select = $this->createMock(Select::class);
 
+        $fromCallCount = 0;
         $select->expects($this->exactly(3))->method('from')
-               ->withConsecutive([self::TABLE_ATT], [self::TABLE_ATT], [["sg" => self::TABLE_STORE_GROUP]])->willReturn($select);
+               ->willReturnCallback(function (...$args) use (&$fromCallCount, $select) {
+                   $expected = [
+                       [self::TABLE_ATT],
+                       [self::TABLE_ATT],
+                       [["sg" => self::TABLE_STORE_GROUP]],
+                   ];
+                   $currentExpected = $expected[$fromCallCount] ?? null;
+                   $this->assertEquals(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
+                   $fromCallCount++;
+                   return $select;
+               });
 
+        $whereCallCount = 0;
         $select->expects($this->exactly(4))->method('where')
-               ->withConsecutive(
-                   ['entity_type_id = ?', 3],
-                   ['attribute_code = ?', 'is_active'],
-                   ['entity_type_id = ?', 3],
-                   ['attribute_code = ?', 'include_in_menu'],
-               )->willReturn($select);
+               ->willReturnCallback(function (...$args) use (&$whereCallCount, $select) {
+                   $expected = [
+                       ['entity_type_id = ?', 3],
+                       ['attribute_code = ?', 'is_active'],
+                       ['entity_type_id = ?', 3],
+                       ['attribute_code = ?', 'include_in_menu'],
+                   ];
+                   $currentExpected = $expected[$whereCallCount] ?? null;
+                   $this->assertEquals(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
+                   $whereCallCount++;
+                   return $select;
+               });
         $select->expects($this->exactly(3))
                ->method('reset')
                ->with(Select::COLUMNS)
                ->willReturn($select);
 
+        $joinInnerCallCount = 0;
         $select->expects($this->exactly(3))->method('joinInner')
-               ->withConsecutive(
-                   [
-                       ['s' => self::TABLE_STORE],
-                       'sg.group_id = s.group_id'
-                   ],
-                   [
-                       ['cce1' => self::TABLE_CAT_ENT],
-                       'sg.root_category_id = cce1.entity_id'
-                   ],
-                   [
-                       ['cce2' => self::TABLE_CAT_ENT],
-                       "cce2.path like CONCAT(cce1.path, '%')"
-                   ]
-               )->willReturn($select);
+               ->willReturnCallback(function (...$args) use (&$joinInnerCallCount, $select) {
+                   $expected = [
+                       [
+                           ['s' => self::TABLE_STORE],
+                           'sg.group_id = s.group_id',
+                       ],
+                       [
+                           ['cce1' => self::TABLE_CAT_ENT],
+                           'sg.root_category_id = cce1.entity_id',
+                       ],
+                       [
+                           ['cce2' => self::TABLE_CAT_ENT],
+                           "cce2.path like CONCAT(cce1.path, '%')",
+                       ],
+                   ];
+                   $currentExpected = $expected[$joinInnerCallCount] ?? null;
+                   $this->assertEquals(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
+                   $joinInnerCallCount++;
+                   return $select;
+               });
 
+        $joinLeftCallCount = 0;
+        $joinLeftExpected = [
+            [
+                ['ccei1' => self::TABLE_CAT_ENT_INT],
+                sprintf(
+                    "cce2.%s = ccei1.%s AND ccei1.attribute_id = %s AND ccei1.store_id = s.store_id",
+                    self::LINK_FIELD,
+                    self::LINK_FIELD,
+                    self::ATTR_ID
+                ),
+            ],
+            [
+                ['ccei2' => self::TABLE_CAT_ENT_INT],
+                sprintf(
+                    "cce2.%s = ccei2.%s AND ccei2.attribute_id = %s AND ccei2.store_id = 0",
+                    self::LINK_FIELD,
+                    self::LINK_FIELD,
+                    self::ATTR_ID
+                ),
+            ],
+            [
+                ['ccei3' => self::TABLE_CAT_ENT_INT],
+                sprintf(
+                    "cce2.%s = ccei3.%s AND ccei3.attribute_id = %s AND ccei3.store_id = s.store_id",
+                    self::LINK_FIELD,
+                    self::LINK_FIELD,
+                    self::ATTR_ID
+                ),
+            ],
+            [
+                ['ccei4' => self::TABLE_CAT_ENT_INT],
+                sprintf(
+                    "cce2.%s = ccei4.%s AND ccei4.attribute_id = %s AND ccei4.store_id = 0",
+                    self::LINK_FIELD,
+                    self::LINK_FIELD,
+                    self::ATTR_ID
+                ),
+            ],
+        ];
         $select->expects($this->exactly(4))->method('joinLeft')
-               ->withConsecutive(
-                   [
-                       ['ccei1' => self::TABLE_CAT_ENT_INT],
-                       sprintf(
-                           "cce2.%s = ccei1.%s AND ccei1.attribute_id = %s AND ccei1.store_id = s.store_id",
-                           self::LINK_FIELD,
-                           self::LINK_FIELD,
-                           self::ATTR_ID
-                       )
-                   ],
-                   [
-                       ['ccei2' => self::TABLE_CAT_ENT_INT],
-                       sprintf(
-                           "cce2.%s = ccei2.%s AND ccei2.attribute_id = %s AND ccei2.store_id = 0",
-                           self::LINK_FIELD,
-                           self::LINK_FIELD,
-                           self::ATTR_ID
-                       )
-                   ],
-                   [
-                       ['ccei3' => self::TABLE_CAT_ENT_INT],
-                       sprintf(
-                           "cce2.%s = ccei3.%s AND ccei3.attribute_id = %s AND ccei3.store_id = s.store_id",
-                           self::LINK_FIELD,
-                           self::LINK_FIELD,
-                           self::ATTR_ID
-                       )
-                   ],
-                   [
-                       ['ccei4' => self::TABLE_CAT_ENT_INT],
-                       sprintf(
-                           "cce2.%s = ccei4.%s AND ccei4.attribute_id = %s AND ccei4.store_id = 0",
-                           self::LINK_FIELD,
-                           self::LINK_FIELD,
-                           self::ATTR_ID
-                       )
-                   ]
-               )->willReturn($select);
+               ->willReturnCallback(function (...$args) use (&$joinLeftCallCount, $joinLeftExpected, $select) {
+                   $currentExpected = $joinLeftExpected[$joinLeftCallCount] ?? null;
+                   $this->assertEquals(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
+                   $joinLeftCallCount++;
+                   return $select;
+               });
 
         $expressionMock = $this->createMock(Expression::class);
         $this->expressionFactory->expects($this->exactly(4))
                                 ->method('create')
                                 ->willReturnMap($this->getExpressionsMap($expressionMock));
+        $columnsCallCount = 0;
+        $columnsExpected = [
+            [['attribute_id']],
+            [['attribute_id']],
+            [
+                [
+                    'STORE_CODE' => 's.code',
+                    'ACTIVE_IN_MENU' => $expressionMock,
+                    'ACTIVE_NOT_IN_MENU' => $expressionMock,
+                    'NOT_ACTIVE_IN_MENU' => $expressionMock,
+                    'NOT_ACTIVE_NOT_IN_MENU' => $expressionMock,
+                ],
+            ],
+        ];
         $select->expects($this->exactly(3))->method('columns')
-               ->withConsecutive(
-                   [
-                       ['attribute_id']
-                   ],
-                   [
-                       ['attribute_id']
-                   ],
-                   [
-                       [
-                           'STORE_CODE' => 's.code',
-                           'ACTIVE_IN_MENU' => $expressionMock,
-                           'ACTIVE_NOT_IN_MENU' => $expressionMock,
-                           'NOT_ACTIVE_IN_MENU' => $expressionMock,
-                           'NOT_ACTIVE_NOT_IN_MENU' => $expressionMock
-                       ]
-                   ]
-               )->willReturn($select);
+               ->willReturnCallback(function (...$args) use (&$columnsCallCount, $columnsExpected, $select) {
+                   $currentExpected = $columnsExpected[$columnsCallCount] ?? null;
+                   $this->assertEquals(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
+                   $columnsCallCount++;
+                   return $select;
+               });
 
         $select->expects($this->once())->method('group')->with('s.code');
 
@@ -235,9 +285,19 @@ final class CategoryCountAggregatorTest extends TestCase
                    ->with($select)
                    ->willReturn($statisticData);
 
+        $updateExpected = $this->getUpdateMetricsArguments($statisticData);
+        $updateCallCount = 0;
         $this->updateMetricService->expects($this->exactly(4 * count($statisticData)))
                                   ->method('update')
-                                  ->withConsecutive(...$this->getUpdateMetricsArguments($statisticData));
+                                  ->willReturnCallback(function (...$args) use (&$updateCallCount, $updateExpected) {
+                                      $currentExpected = $updateExpected[$updateCallCount] ?? null;
+                                      $this->assertEquals(
+                                          $currentExpected,
+                                          $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                                      );
+                                      $updateCallCount++;
+                                      return true;
+                                  });
 
         $this->subject->aggregate();
     }

@@ -55,6 +55,21 @@
   "require-dev": {
     "phpunit/phpunit": "^9.5|^10.0"
   },
+  "repositories": {
+    "mage-os": {
+      "type": "composer",
+      "url": "https://mirror.mage-os.org/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "magento/composer-dependency-version-audit-plugin": true,
+      "magento/composer-root-update-plugin": true,
+      "magento/inventory-composer-installer": true,
+      "laminas/laminas-dependency-plugin": true
+    }
+  },
   "autoload": {
     "files": [
       "registration.php"

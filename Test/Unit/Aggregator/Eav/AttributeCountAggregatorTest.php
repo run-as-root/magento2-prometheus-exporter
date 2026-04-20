@@ -56,15 +56,17 @@ final class AttributeCountAggregatorTest extends TestCase
 
     public function testAggregate(): void
     {
-        $select        = 'SELECT entity_type_code FROM eav_entity_type;';
+        $select        = 'SELECT entity_type_code FROM eav_entity_type';
         $adapter       = $this->createMock(AdapterInterface::class);
         $searchResult1 = $this->createMock(SearchResultsInterface::class);
         $searchResult2 = $this->createMock(SearchResultsInterface::class);
 
         $this->resourceConnection
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($adapter);
+
+        $adapter->method('getTableName')->willReturnArgument(0);
 
         $adapter
             ->expects($this->once())
@@ -72,17 +74,25 @@ final class AttributeCountAggregatorTest extends TestCase
             ->with(...[$select])
             ->willReturn([['entity_type_code' => 'a'], ['entity_type_code' => 'b']]);
 
+        $searchCriteria = $this->searchCriteria;
+        $getListCallCount = 0;
         $this->attributeRepository
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('getList')
-            ->with(...['a', $this->searchCriteria])
-            ->willReturn($searchResult1);
-
-        $this->attributeRepository
-            ->expects($this->at(1))
-            ->method('getList')
-            ->with(...['b', $this->searchCriteria])
-            ->willReturn($searchResult2);
+            ->willReturnCallback(function (...$args) use (&$getListCallCount, $searchCriteria, $searchResult1, $searchResult2) {
+                $getListCallCount++;
+                if ($getListCallCount === 1) {
+                    $expected = ['a', $searchCriteria];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return $searchResult1;
+                }
+                if ($getListCallCount === 2) {
+                    $expected = ['b', $searchCriteria];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return $searchResult2;
+                }
+                return null;
+            });
 
         $searchResult1
             ->expects($this->once())

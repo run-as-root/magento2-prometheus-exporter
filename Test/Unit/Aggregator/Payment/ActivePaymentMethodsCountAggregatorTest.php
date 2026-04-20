@@ -70,17 +70,24 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             ->method('getList')
             ->willReturn([$store1, $store2]);
 
+        $paymentMethodCallCount = 0;
         $this->paymentMethodList
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('getActiveList')
-            ->with(...[1])
-            ->willReturn(['a', 'b']);
-
-        $this->paymentMethodList
-            ->expects($this->at(1))
-            ->method('getActiveList')
-            ->with(...[2])
-            ->willReturn(['a']);
+            ->willReturnCallback(function (...$args) use (&$paymentMethodCallCount) {
+                $paymentMethodCallCount++;
+                if ($paymentMethodCallCount === 1) {
+                    $expected = [1];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return ['a', 'b'];
+                }
+                if ($paymentMethodCallCount === 2) {
+                    $expected = [2];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return ['a'];
+                }
+                return [];
+            });
 
         $labels1 = [
             'store_id' => 1,
@@ -91,27 +98,32 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
             'store_code' => 'default'
         ];
 
+        $updateCallCount = 0;
         $this->updateMetricService
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('update')
-            ->with(
-                ...[
-                       'magento_active_payment_methods_count_total',
-                       '2',
-                       $labels1
-                   ]
-            );
-
-        $this->updateMetricService
-            ->expects($this->at(1))
-            ->method('update')
-            ->with(
-                ...[
-                       'magento_active_payment_methods_count_total',
-                       '1',
-                       $labels2
-                   ]
-            );
+            ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
+                $updateCallCount++;
+                if ($updateCallCount === 1) {
+                    $expected = [
+                        'magento_active_payment_methods_count_total',
+                        '2',
+                        $labels1,
+                    ];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                if ($updateCallCount === 2) {
+                    $expected = [
+                        'magento_active_payment_methods_count_total',
+                        '1',
+                        $labels2,
+                    ];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                return true;
+            });
 
         $this->sut->aggregate();
     }

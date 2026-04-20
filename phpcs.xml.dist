@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<ruleset name="RunAsRoot_PrometheusExporter">
+    <description>Magento 2 coding standard with project-specific exclusions.</description>
+
+    <arg name="extensions" value="php"/>
+
+    <!-- Warnings are informational; only errors block CI. Matches Magento's
+         own ruleset behaviour and lets the doc-block warnings surface in
+         the output without failing the build. -->
+    <config name="ignore_warnings_on_exit" value="1"/>
+
+    <file>src</file>
+    <file>lib</file>
+    <file>Test</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/build/*</exclude-pattern>
+
+    <rule ref="Magento2"/>
+
+    <!-- Tests are intentionally `final` per project convention (CLAUDE.md).
+         The Magento2 sniff that forbids `final` is disabled for Test/*. -->
+    <rule ref="Magento2.PHP.FinalImplementation">
+        <exclude-pattern>Test/*</exclude-pattern>
+    </rule>
+
+    <!-- CronJobCountAggregatorTest imports Zend_Db_Select and
+         Zend_Db_Statement_Interface to mock the production-code collaborator
+         (Magento's cron schedule collection surfaces those types in its API).
+         Swapping to \Magento\Framework\DB\Select would not match what the
+         aggregator actually talks to. -->
+    <rule ref="Magento2.Legacy.RestrictedCode">
+        <exclude-pattern>Test/Unit/Aggregator/Cronjob/CronJobCountAggregatorTest.php</exclude-pattern>
+    </rule>
+
+    <!-- Data patches under src/Setup/Patch/ implement DataPatchInterface —
+         the current, recommended mechanism. The sniff flags any src/Setup/
+         file as a legacy install script based on a path heuristic. -->
+    <rule ref="Magento2.Legacy.InstallUpgrade">
+        <exclude-pattern>src/Setup/Patch/*</exclude-pattern>
+    </rule>
+</ruleset>

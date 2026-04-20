@@ -38,11 +38,13 @@ final class AdminUserCountAggregatorTest extends TestCase
         $adapter = $this->createMock(AdapterInterface::class);
 
         $this->resourceConnection
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($adapter);
 
-        $select = 'SELECT COUNT(user_id) FROM admin_user WHERE is_active = 1;';
+        $adapter->method('getTableName')->willReturnArgument(0);
+
+        $select = 'SELECT COUNT(user_id) FROM admin_user WHERE is_active = 1';
 
         $adapter
             ->expects($this->once())

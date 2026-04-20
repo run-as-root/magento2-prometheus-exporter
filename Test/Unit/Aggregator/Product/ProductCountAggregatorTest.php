@@ -38,11 +38,13 @@ final class ProductCountAggregatorTest extends TestCase
         $adapter = $this->createMock(AdapterInterface::class);
 
         $this->resourceConnection
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($adapter);
 
-        $select = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity;';
+        $adapter->method('getTableName')->willReturnArgument(0);
+
+        $select = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity';
 
         $adapter
             ->expects($this->once())

@@ -41,21 +41,30 @@ class BrokenCronJobCountAggregatorTest extends TestCase
 
     public function testAggregate()
     {
+        $callCount = 0;
+        $collection = $this->collection;
         $this->collection
-            ->expects($this->at(0))
+            ->expects($this->exactly(3))
             ->method('addFieldToFilter')
-            ->with(...['status', 'pending'])
-            ->willReturn($this->collection);
-        $this->collection
-            ->expects($this->at(1))
-            ->method('addFieldToFilter')
-            ->with(...['executed_at', ['notnull' => true]])
-            ->willReturn($this->collection);
-        $this->collection
-            ->expects($this->at(2))
-            ->method('addFieldToFilter')
-            ->with(...['finished_at', ['null' => true]])
-            ->willReturn($this->collection);
+            ->willReturnCallback(function (...$args) use (&$callCount, $collection) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $expected = ['status', 'pending'];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return $collection;
+                }
+                if ($callCount === 2) {
+                    $expected = ['executed_at', ['notnull' => true]];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return $collection;
+                }
+                if ($callCount === 3) {
+                    $expected = ['finished_at', ['null' => true]];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return $collection;
+                }
+                return $collection;
+            });
 
         $this->collection
             ->expects($this->once())

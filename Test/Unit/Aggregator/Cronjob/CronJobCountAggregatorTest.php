@@ -95,15 +95,24 @@ class CronJobCountAggregatorTest extends TestCase
         $labels1 = ['status' => 'nope', 'job_code' => 'some_code'];
         $labels2 = ['status' => 'yes', 'job_code' => 'some_other_code'];
 
+        $callCount = 0;
         $this->updateMetricService
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('update')
-            ->with(...['magento_cronjob_count_total', '10', $labels1]);
-
-        $this->updateMetricService
-            ->expects($this->at(1))
-            ->method('update')
-            ->with(...['magento_cronjob_count_total', '20', $labels2]);
+            ->willReturnCallback(function (...$args) use (&$callCount, $labels1, $labels2) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $expected = ['magento_cronjob_count_total', '10', $labels1];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                if ($callCount === 2) {
+                    $expected = ['magento_cronjob_count_total', '20', $labels2];
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    return true;
+                }
+                return true;
+            });
 
         $this->sut->aggregate();
     }

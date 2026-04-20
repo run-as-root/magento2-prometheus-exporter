@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  compute_matrix:
+    name: Compute Mage-OS matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.supported-version.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: graycoreio/github-actions-magento2/supported-version@main
+        id: supported-version
+        with:
+          include_services: true
+      - name: Echo matrix
+        run: echo "${{ steps.supported-version.outputs.matrix }}"
+
+  check-extension:
+    name: Check extension
+    needs: compute_matrix
+    uses: graycoreio/github-actions-magento2/.github/workflows/check-extension.yaml@main
+    with:
+      matrix: ${{ needs.compute_matrix.outputs.matrix }}
+      fail-fast: false

@@ -65,20 +65,30 @@ final class ShipmentCountAggregatorTest extends TestCase
                ->with(['ss' => self::TABLE_SHIP])
                ->willReturn($select);
 
+        $joinInnerCallCount = 0;
+        $joinInnerExpected = [
+            [
+                ['iss' => self::TABLE_INV_SHIP],
+                'ss.entity_id = iss.shipment_id',
+                ['source_code'],
+            ],
+            [
+                ['s' => self::TABLE_STORE],
+                'ss.store_id = s.store_id',
+                ['code'],
+            ],
+        ];
         $select->expects($this->exactly(2))
                ->method('joinInner')
-               ->withConsecutive(
-                   [
-                       ['iss' => self::TABLE_INV_SHIP],
-                       'ss.entity_id = iss.shipment_id',
-                       ['source_code']
-                   ],
-                   [
-                       ['s' => self::TABLE_STORE],
-                       'ss.store_id = s.store_id',
-                       ['code']
-                   ]
-               )->willReturn($select);
+               ->willReturnCallback(function (...$args) use (&$joinInnerCallCount, $joinInnerExpected, $select) {
+                   $currentExpected = $joinInnerExpected[$joinInnerCallCount] ?? null;
+                   $this->assertEquals(
+                       $currentExpected,
+                       $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                   );
+                   $joinInnerCallCount++;
+                   return $select;
+               });
         $select->expects($this->once())->method('reset')->with(Select::COLUMNS)->willReturn($select);
         $select->expects($this->once())->method('group')->with(['s.code', 'iss.source_code']);
         $select->expects($this->once())
@@ -125,9 +135,18 @@ final class ShipmentCountAggregatorTest extends TestCase
             ];
         }
 
+        $updateCallCount = 0;
         $this->updateMetricService->expects($this->exactly(3))
                                   ->method('update')
-                                  ->withConsecutive(...$params);
+                                  ->willReturnCallback(function (...$args) use (&$updateCallCount, $params) {
+                                      $currentExpected = $params[$updateCallCount] ?? null;
+                                      $this->assertEquals(
+                                          $currentExpected,
+                                          $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
+                                      );
+                                      $updateCallCount++;
+                                      return true;
+                                  });
 
         $this->subject->aggregate();
     }

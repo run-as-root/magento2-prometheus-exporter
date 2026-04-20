@@ -6,7 +6,9 @@ namespace RunAsRoot\PrometheusExporter\Test\Unit\Cron;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
+use RunAsRoot\PrometheusExporter\Api\MetricRepositoryInterface;
 use RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron;
 use RunAsRoot\PrometheusExporter\Data\Config;
 use RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool;
@@ -35,7 +37,13 @@ final class AggregateMetricsCronUnitTest extends TestCase
 
         $metricAggregatorPool = new MetricAggregatorPool($items);
 
-        $sut = new AggregateMetricsCron($metricAggregatorPool, $configMock);
+        /** @var MetricRepositoryInterface | MockObject $metricRepositoryMock */
+        $metricRepositoryMock = $this->createMock(MetricRepositoryInterface::class);
+
+        /** @var LoggerInterface | MockObject $loggerMock */
+        $loggerMock = $this->createMock(LoggerInterface::class);
+
+        $sut = new AggregateMetricsCron($metricAggregatorPool, $configMock, $metricRepositoryMock, $loggerMock);
 
         $sut->execute();
     }
