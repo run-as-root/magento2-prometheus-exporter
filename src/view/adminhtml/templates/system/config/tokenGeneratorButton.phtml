@@ -5,15 +5,16 @@
  * make it pretty. 😈😏
  */
 /** @var \RunAsRoot\PrometheusExporter\Block\Adminhtml\System\Config\TokenGenerator $block */
+/** @var \Magento\Framework\Escaper $escaper */
 ?>
 <script>
     require(['prototype'], function(){
 
 //<![CDATA[
     function generateToken() {
-        let field = $('<?= $block::getFieldId()?>');
+        let field = $('<?= $escaper->escapeJs($block::getFieldId()) ?>');
         console.log('Field', field);
-        new Ajax.Request('<?= $block->escapeJs($block->escapeUrl($block->getAjaxUrl())) ?>', {
+        new Ajax.Request('<?= $escaper->escapeJs($escaper->escapeUrl($block->getAjaxUrl())) ?>', {
             onSuccess: function(response) {
                 response = response.responseText.evalJSON();
                 field.value = response.token;
@@ -28,7 +29,7 @@
 </script>
 <div class="actions actions-generate-token">
     <button onclick="javascript:generateToken(); return false;" class="action-generate-token" type="button" id="<?= /* @noEscape */ $block->getHtmlId() ?>">
-        <span><?= $block->escapeHtml($block->getButtonLabel()) ?></span>
+        <span><?= $escaper->escapeHtml($block->getButtonLabel()) ?></span>
     </button>
 </div>
 
