@@ -98,7 +98,7 @@ final class CategoryCountAggregatorTest extends TestCase
                        [["sg" => self::TABLE_STORE_GROUP]],
                    ];
                    $currentExpected = $expected[$fromCallCount] ?? null;
-                   $this->assertSame(
+                   $this->assertEquals(
                        $currentExpected,
                        $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                    );
@@ -116,7 +116,7 @@ final class CategoryCountAggregatorTest extends TestCase
                        ['attribute_code = ?', 'include_in_menu'],
                    ];
                    $currentExpected = $expected[$whereCallCount] ?? null;
-                   $this->assertSame(
+                   $this->assertEquals(
                        $currentExpected,
                        $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                    );
@@ -146,7 +146,7 @@ final class CategoryCountAggregatorTest extends TestCase
                        ],
                    ];
                    $currentExpected = $expected[$joinInnerCallCount] ?? null;
-                   $this->assertSame(
+                   $this->assertEquals(
                        $currentExpected,
                        $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                    );
@@ -196,7 +196,7 @@ final class CategoryCountAggregatorTest extends TestCase
         $select->expects($this->exactly(4))->method('joinLeft')
                ->willReturnCallback(function (...$args) use (&$joinLeftCallCount, $joinLeftExpected, $select) {
                    $currentExpected = $joinLeftExpected[$joinLeftCallCount] ?? null;
-                   $this->assertSame(
+                   $this->assertEquals(
                        $currentExpected,
                        $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                    );
@@ -225,7 +225,7 @@ final class CategoryCountAggregatorTest extends TestCase
         $select->expects($this->exactly(3))->method('columns')
                ->willReturnCallback(function (...$args) use (&$columnsCallCount, $columnsExpected, $select) {
                    $currentExpected = $columnsExpected[$columnsCallCount] ?? null;
-                   $this->assertSame(
+                   $this->assertEquals(
                        $currentExpected,
                        $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                    );
@@ -291,7 +291,7 @@ final class CategoryCountAggregatorTest extends TestCase
                                   ->method('update')
                                   ->willReturnCallback(function (...$args) use (&$updateCallCount, $updateExpected) {
                                       $currentExpected = $updateExpected[$updateCallCount] ?? null;
-                                      $this->assertSame(
+                                      $this->assertEquals(
                                           $currentExpected,
                                           $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                                       );

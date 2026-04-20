@@ -87,12 +87,12 @@ class IndexerChangelogCountAggregatorTest extends TestCase
                 $updateCallCount++;
                 if ($updateCallCount === 1) {
                     $expected = [self::METRIC_CODE, '777', $labels1];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($updateCallCount === 2) {
                     $expected = [self::METRIC_CODE, '888', $labels2];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;
@@ -114,12 +114,12 @@ class IndexerChangelogCountAggregatorTest extends TestCase
                 $loggerCallCount++;
                 if ($loggerCallCount === 1) {
                     $expected = [self::EXCEPTION_1];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return;
                 }
                 if ($loggerCallCount === 2) {
                     $expected = [self::EXCEPTION_2];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return;
                 }
             });

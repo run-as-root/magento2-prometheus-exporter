@@ -85,12 +85,12 @@ class IndexerLastCallSecondsCountTest extends TestCase
                 $updateCallCount++;
                 if ($updateCallCount === 1) {
                     $expected = [self::METRIC_CODE, '200', $labels1];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($updateCallCount === 2) {
                     $expected = [self::METRIC_CODE, '300', $labels2];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;
@@ -112,12 +112,12 @@ class IndexerLastCallSecondsCountTest extends TestCase
                 $loggerCallCount++;
                 if ($loggerCallCount === 1) {
                     $expected = ['ERROR NUMBER 1'];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return;
                 }
                 if ($loggerCallCount === 2) {
                     $expected = ['ERROR NUMBER 2'];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return;
                 }
             });

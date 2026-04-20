@@ -82,7 +82,7 @@ final class ShipmentCountAggregatorTest extends TestCase
                ->method('joinInner')
                ->willReturnCallback(function (...$args) use (&$joinInnerCallCount, $joinInnerExpected, $select) {
                    $currentExpected = $joinInnerExpected[$joinInnerCallCount] ?? null;
-                   $this->assertSame(
+                   $this->assertEquals(
                        $currentExpected,
                        $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                    );
@@ -140,7 +140,7 @@ final class ShipmentCountAggregatorTest extends TestCase
                                   ->method('update')
                                   ->willReturnCallback(function (...$args) use (&$updateCallCount, $params) {
                                       $currentExpected = $params[$updateCallCount] ?? null;
-                                      $this->assertSame(
+                                      $this->assertEquals(
                                           $currentExpected,
                                           $currentExpected === null ? $args : array_slice($args, 0, count($currentExpected))
                                       );

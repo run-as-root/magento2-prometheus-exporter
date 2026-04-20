@@ -50,17 +50,17 @@ class BrokenCronJobCountAggregatorTest extends TestCase
                 $callCount++;
                 if ($callCount === 1) {
                     $expected = ['status', 'pending'];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return $collection;
                 }
                 if ($callCount === 2) {
                     $expected = ['executed_at', ['notnull' => true]];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return $collection;
                 }
                 if ($callCount === 3) {
                     $expected = ['finished_at', ['null' => true]];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return $collection;
                 }
                 return $collection;

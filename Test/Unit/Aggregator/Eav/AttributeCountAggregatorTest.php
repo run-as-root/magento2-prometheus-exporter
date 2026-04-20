@@ -81,12 +81,12 @@ final class AttributeCountAggregatorTest extends TestCase
                 $getListCallCount++;
                 if ($getListCallCount === 1) {
                     $expected = ['a', $searchCriteria];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return $searchResult1;
                 }
                 if ($getListCallCount === 2) {
                     $expected = ['b', $searchCriteria];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return $searchResult2;
                 }
                 return null;

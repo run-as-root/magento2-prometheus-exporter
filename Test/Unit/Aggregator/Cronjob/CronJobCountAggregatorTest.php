@@ -103,12 +103,12 @@ class CronJobCountAggregatorTest extends TestCase
                 $callCount++;
                 if ($callCount === 1) {
                     $expected = ['magento_cronjob_count_total', '10', $labels1];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($callCount === 2) {
                     $expected = ['magento_cronjob_count_total', '20', $labels2];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;

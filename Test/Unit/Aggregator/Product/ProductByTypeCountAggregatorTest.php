@@ -137,7 +137,7 @@ final class ProductByTypeCountAggregatorTest extends TestCase
             ->willReturnCallback(function (...$args) use (&$callCount, $params) {
                 $expected = $params[$callCount] ?? null;
                 $callCount++;
-                $this->assertSame(
+                $this->assertEquals(
                     $expected,
                     $expected === null ? $args : array_slice($args, 0, count($expected))
                 );

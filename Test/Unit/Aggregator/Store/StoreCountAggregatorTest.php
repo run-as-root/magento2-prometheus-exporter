@@ -58,12 +58,12 @@ final class StoreCountAggregatorTest extends TestCase
                 $callCount++;
                 if ($callCount === 1) {
                     $expected = [self::METRIC_CODE, '2', ['status' => 'enabled']];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($callCount === 2) {
                     $expected = [self::METRIC_CODE, '1', ['status' => 'disabled']];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;

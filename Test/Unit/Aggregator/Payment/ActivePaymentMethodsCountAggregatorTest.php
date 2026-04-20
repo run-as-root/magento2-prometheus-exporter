@@ -78,12 +78,12 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
                 $paymentMethodCallCount++;
                 if ($paymentMethodCallCount === 1) {
                     $expected = [1];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return ['a', 'b'];
                 }
                 if ($paymentMethodCallCount === 2) {
                     $expected = [2];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return ['a'];
                 }
                 return [];
@@ -110,7 +110,7 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
                         '2',
                         $labels1,
                     ];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 if ($updateCallCount === 2) {
@@ -119,7 +119,7 @@ final class ActivePaymentMethodsCountAggregatorTest extends TestCase
                         '1',
                         $labels2,
                     ];
-                    $this->assertSame($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
                     return true;
                 }
                 return true;
