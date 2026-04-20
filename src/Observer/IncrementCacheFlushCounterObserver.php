@@ -8,16 +8,16 @@ use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use RunAsRoot\PrometheusExporter\Aggregator\Cache\CacheFlushCountAggregator;
-use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
+use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 use Throwable;
 
 class IncrementCacheFlushCounterObserver implements ObserverInterface
 {
-    private UpdateMetricServiceInterface $updateMetricService;
+    private UpdateMetricService $updateMetricService;
     private DeploymentConfig $deploymentConfig;
 
     public function __construct(
-        UpdateMetricServiceInterface $updateMetricService,
+        UpdateMetricService $updateMetricService,
         DeploymentConfig $deploymentConfig
     ) {
         $this->updateMetricService = $updateMetricService;

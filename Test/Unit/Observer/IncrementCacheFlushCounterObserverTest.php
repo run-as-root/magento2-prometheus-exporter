@@ -9,11 +9,11 @@ use Magento\Framework\Event\Observer;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Observer\IncrementCacheFlushCounterObserver;
-use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
+use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
 final class IncrementCacheFlushCounterObserverTest extends TestCase
 {
-    /** @var MockObject|UpdateMetricServiceInterface */
+    /** @var MockObject|UpdateMetricService */
     private $updateMetricService;
 
     /** @var MockObject|DeploymentConfig */
@@ -23,7 +23,7 @@ final class IncrementCacheFlushCounterObserverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->updateMetricService = $this->createMock(UpdateMetricServiceInterface::class);
+        $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $this->deploymentConfig = $this->createMock(DeploymentConfig::class);
         $this->sut = new IncrementCacheFlushCounterObserver(
             $this->updateMetricService,
