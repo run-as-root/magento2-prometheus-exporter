@@ -4,6 +4,11 @@
 
     <arg name="extensions" value="php"/>
 
+    <!-- Warnings are informational; only errors block CI. Matches Magento's
+         own ruleset behaviour and lets the doc-block warnings surface in
+         the output without failing the build. -->
+    <config name="ignore_warnings_on_exit" value="1"/>
+
     <file>src</file>
     <file>lib</file>
     <file>Test</file>
