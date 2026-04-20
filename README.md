@@ -135,6 +135,7 @@ scrape_configs:
 |--------|------|--------|-------------|
 | `magento_products_by_type_count_total` | gauge | `product_type` | Count of products by type (simple, configurable, etc.) |
 | `magento_catalog_category_count_total` | gauge | `status`, `menu_status`, `store_code` | Count of categories by status |
+| `magento_complex_product_variations_above_recommended_level` | gauge | - | Count of configurable products with more than 50 variations (performance risk) |
 
 ### EAV & Attribute Metrics
 | Metric | Type | Labels | Description |
