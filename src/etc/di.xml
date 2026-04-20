@@ -8,6 +8,9 @@
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
+                <!-- Cache Aggregator -->
+                <item name="CacheFlushCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cache\CacheFlushCountAggregator</item>
+
                 <!-- Category Aggregator -->
                 <item name="CategoryCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Category\CategoryCountAggregator</item>
 
@@ -118,6 +121,11 @@
         <arguments>
             <argument name="aggregateMetricsCron" xsi:type="object">RunAsRoot\PrometheusExporter\Cron\AggregateMetricsCron\Proxy</argument>
         </arguments>
+    </type>
+
+    <type name="Magento\Framework\App\Cache\Manager">
+        <plugin name="run_as_root_prometheus_cache_flush_counter"
+                type="RunAsRoot\PrometheusExporter\Plugin\Cache\ManagerPlugin"/>
     </type>
 
 </config>
