@@ -45,6 +45,7 @@
     "monolog/monolog": "^2.9.0|^3.0",
     "magento/module-store": "*",
     "magento/module-indexer": "*",
+    "magento/module-review": "*",
     "magento/zend-db": "*"
   },
   "conflict": {

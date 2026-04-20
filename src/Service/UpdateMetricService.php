@@ -50,4 +50,16 @@ class UpdateMetricService implements UpdateMetricServiceInterface
 
         return true;
     }
+
+    public function increment(string $code, array $labels = []): bool
+    {
+        try {
+            $metric = $this->metricRepository->getByCodeAndLabels($code, $labels);
+            $next = (int) $metric->getValue() + 1;
+        } catch (NoSuchEntityException) {
+            $next = 1;
+        }
+
+        return $this->update($code, (string) $next, $labels);
+    }
 }

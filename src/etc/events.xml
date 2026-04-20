@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="clean_cache_by_tags">
+        <observer name="run_as_root_prometheus_increment_cache_flush_counter"
+                  instance="RunAsRoot\PrometheusExporter\Observer\IncrementCacheFlushCounterObserver"/>
+    </event>
+</config>
