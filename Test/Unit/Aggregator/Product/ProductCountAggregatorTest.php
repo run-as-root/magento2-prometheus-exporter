@@ -44,7 +44,7 @@ final class ProductCountAggregatorTest extends TestCase
 
         $adapter->method('getTableName')->willReturnArgument(0);
 
-        $select = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity;';
+        $select = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity';
 
         $adapter
             ->expects($this->once())

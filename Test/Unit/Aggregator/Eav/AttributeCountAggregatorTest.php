@@ -56,7 +56,7 @@ final class AttributeCountAggregatorTest extends TestCase
 
     public function testAggregate(): void
     {
-        $select        = 'SELECT entity_type_code FROM eav_entity_type;';
+        $select        = 'SELECT entity_type_code FROM eav_entity_type';
         $adapter       = $this->createMock(AdapterInterface::class);
         $searchResult1 = $this->createMock(SearchResultsInterface::class);
         $searchResult2 = $this->createMock(SearchResultsInterface::class);

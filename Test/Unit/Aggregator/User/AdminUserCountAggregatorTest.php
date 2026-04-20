@@ -44,7 +44,7 @@ final class AdminUserCountAggregatorTest extends TestCase
 
         $adapter->method('getTableName')->willReturnArgument(0);
 
-        $select = 'SELECT COUNT(user_id) FROM admin_user WHERE is_active = 1;';
+        $select = 'SELECT COUNT(user_id) FROM admin_user WHERE is_active = 1';
 
         $adapter
             ->expects($this->once())
