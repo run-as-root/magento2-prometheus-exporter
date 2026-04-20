@@ -161,7 +161,6 @@ scrape_configs:
 | `magento_cronjob_count_total` | gauge | `status`, `job_code` | Count of cron jobs by status |
 | `magento_cronjob_broken_count_total` | gauge | - | Count of broken cron jobs |
 | `magento_indexer_backlog_count_total` | gauge | `title` | Count of items in indexer backlog |
-| `magento_cache_flush_count_total` | counter | - | Cumulative count of cache invalidations (via `clean_cache_by_tags` event) |
 
 ### Infrastructure Metrics
 | Metric | Type | Labels | Description |

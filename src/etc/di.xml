@@ -8,9 +8,6 @@
     <type name="RunAsRoot\PrometheusExporter\Metric\MetricAggregatorPool">
         <arguments>
             <argument name="items" xsi:type="array">
-                <!-- Cache Aggregator -->
-                <item name="CacheFlushCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Cache\CacheFlushCountAggregator</item>
-
                 <!-- Category Aggregator -->
                 <item name="CategoryCountAggregator" xsi:type="object">RunAsRoot\PrometheusExporter\Aggregator\Category\CategoryCountAggregator</item>
 
