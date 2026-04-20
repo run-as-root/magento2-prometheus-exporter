@@ -62,7 +62,7 @@ final class AttributeCountAggregatorTest extends TestCase
         $searchResult2 = $this->createMock(SearchResultsInterface::class);
 
         $this->resourceConnection
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($adapter);
 

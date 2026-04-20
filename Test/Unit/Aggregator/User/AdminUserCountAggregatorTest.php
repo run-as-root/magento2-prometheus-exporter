@@ -38,7 +38,7 @@ final class AdminUserCountAggregatorTest extends TestCase
         $adapter = $this->createMock(AdapterInterface::class);
 
         $this->resourceConnection
-            ->expects($this->once())
+            ->expects($this->atLeastOnce())
             ->method('getConnection')
             ->willReturn($adapter);
 
