@@ -45,7 +45,6 @@
     "monolog/monolog": "^2.9.0|^3.0",
     "magento/module-store": "*",
     "magento/module-indexer": "*",
-    "magento/module-review": "*",
     "magento/zend-db": "*"
   },
   "conflict": {
@@ -56,6 +55,9 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5|^10.0"
+  },
+  "suggest": {
+    "magento/module-review": "Enables the magento_products_with_bad_reviews_count_total metric"
   },
   "repositories": {
     "mage-os": {
