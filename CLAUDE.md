@@ -25,7 +25,11 @@ Adding or changing metrics almost always means working with this pipeline. All f
 3. **`AggregateMetricsCron`** (`src/Cron/AggregateMetricsCron.php`) — runs `* * * * *` under cron group `run_as_root_prometheus_metrics_aggregator` (`src/etc/crontab.xml` + `src/etc/cron_groups.xml`), iterates the pool, writes rows to the `run_as_root_prometheus_metrics` table (schema in `src/etc/db_schema.xml`).
 4. **`Controller\Index\Index`** (front route `metrics`, see `src/etc/frontend/routes.xml`) — reads the table via `PrometheusResultFactory` and emits Prometheus exposition format. Optional Bearer-token gate controlled by `Data\Config::getTokenValidationEnabled()`.
 
-Aggregators are grouped by domain under `src/Aggregator/{Category,Cms,CronJob,Customer,Eav,Index,Module,Order,Payment,Product,Shipment,Shipping,Store,User}/`. Follow the existing file in the matching folder as a template; don't invent a new structure.
+Aggregators are grouped by domain under `src/Aggregator/{Cache,Category,Cms,CronJob,Customer,Eav,Index,Module,Order,Payment,Product,Quote,Review,Shipment,Shipping,Store,User}/`. Follow the existing file in the matching folder as a template; don't invent a new structure.
+
+**Plugin-driven counter pattern** (used when a metric must increment on an event rather than being computed every minute): create a metadata-only aggregator whose `aggregate()` returns `true` without writing anything, then add a Magento plugin that calls `UpdateMetricService::increment($code)` on the relevant event. Register both the aggregator in `di.xml` (pool items) and the plugin in `di.xml` (`<type>` → `<plugin>`). See `src/Aggregator/Cache/CacheFlushCountAggregator.php` + `src/Plugin/Cache/ManagerPlugin.php` as the reference implementation. The aggregator still needs pool registration so it appears in the admin enable/disable list and the `/metrics` renderer.
+
+`UpdateMetricService` exposes two write methods: `update(string $code, string $value, array $labels)` (overwrites the current value — use for gauges) and `increment(string $code, array $labels)` (increments the stored value by 1 — use for counters).
 
 A parallel, optional pipeline pushes the same metrics to New Relic: `Cron\SendNewRelicMetricsCron` + the `RunAsRoot\NewRelicApi\*` library + the `MetricNewRelicApiProxy` DI preference. This only runs if `newrelic_configuration/cron/cron_interval` is configured.
 
