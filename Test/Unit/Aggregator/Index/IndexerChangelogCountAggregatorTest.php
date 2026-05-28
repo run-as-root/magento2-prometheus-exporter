@@ -165,8 +165,8 @@ class IndexerChangelogCountAggregatorTest extends TestCase
         } else {
             $connection->expects($this->exactly(2))
                        ->method('fetchOne')
-                       ->will(
-                           $this->returnCallback(function ($arg) use ($select1, $select2) {
+                       ->willReturnCallback(
+                           function ($arg) use ($select1, $select2) {
                                if (spl_object_id($select1) === spl_object_id($arg)) {
                                    throw new \Zend_Db_Exception(self::EXCEPTION_1);
                                } elseif (spl_object_id($select2) === spl_object_id($arg)) {
@@ -174,7 +174,7 @@ class IndexerChangelogCountAggregatorTest extends TestCase
                                } else {
                                    return 20;
                                }
-                           })
+                           }
                        );
         }
     }
