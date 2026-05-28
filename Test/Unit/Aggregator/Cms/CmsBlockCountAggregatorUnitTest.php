@@ -31,15 +31,11 @@ final class CmsBlockCountAggregatorUnitTest extends TestCase
         $updateMetricService = $this->createMock(UpdateMetricService::class);
         $updateMetricService->method('update')->willReturn(true);
 
-        $searchResultInterface = $this->getMockBuilder(BlockSearchResultsInterface::class)
-            ->onlyMethods(['getTotalCount'])
-            ->getMock();
+        $searchResultInterface = $this->getMockBuilder(BlockSearchResultsInterface::class)->getMockForAbstractClass();
         $searchResultInterface->expects($this->once())->method('getTotalCount')->willReturn('10');
 
         /** @var BlockRepositoryInterface | MockObject $cmsRepository */
-        $cmsRepository = $this->getMockBuilder(BlockRepositoryInterface::class)
-            ->onlyMethods(['getList'])
-            ->getMock();
+        $cmsRepository = $this->getMockBuilder(BlockRepositoryInterface::class)->getMockForAbstractClass();
         $cmsRepository->method('getList')->willReturn($searchResultInterface);
 
         /** @var SearchCriteriaBuilder | MockObject $searchCriteriaBuilder */
