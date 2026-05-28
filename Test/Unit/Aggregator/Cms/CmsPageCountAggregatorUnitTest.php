@@ -32,7 +32,7 @@ final class CmsPageCountAggregatorUnitTest extends TestCase
         $updateMetricService->expects($this->once())->method('update')->willReturn(true);
 
         $searchResultInterface = $this->getMockBuilder(PageSearchResultsInterface::class)
-            ->onlyMethods(['getTotalCount'])
+            ->onlyMethods(['getTotalCount', 'getItems', 'setItems', 'getSearchCriteria', 'setSearchCriteria'])
             ->getMock();
         $searchResultInterface->expects($this->once())->method('getTotalCount')->willReturn('10');
 
