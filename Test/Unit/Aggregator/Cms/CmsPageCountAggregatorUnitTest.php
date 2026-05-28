@@ -31,7 +31,9 @@ final class CmsPageCountAggregatorUnitTest extends TestCase
         $updateMetricService = $this->createMock(UpdateMetricService::class);
         $updateMetricService->expects($this->once())->method('update')->willReturn(true);
 
-        $searchResultInterface = $this->getMockBuilder(PageSearchResultsInterface::class)->getMockForAbstractClass();
+        $searchResultInterface = $this->getMockBuilder(PageSearchResultsInterface::class)
+            ->onlyMethods(['getTotalCount'])
+            ->getMock();
         $searchResultInterface->expects($this->once())->method('getTotalCount')->willReturn('10');
 
         /** @var PageRepositoryInterface | MockObject $cmsRepository */
