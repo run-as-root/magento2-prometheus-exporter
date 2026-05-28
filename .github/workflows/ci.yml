@@ -15,7 +15,7 @@ jobs:
       matrix: ${{ steps.supported-version.outputs.matrix }}
     steps:
       - uses: actions/checkout@v6
-      - uses: graycoreio/github-actions-magento2/supported-version@main
+      - uses: graycoreio/github-actions-magento2/supported-version@v8.5.0
         id: supported-version
         with:
           include_services: true
@@ -25,7 +25,7 @@ jobs:
   check-extension:
     name: Check extension
     needs: compute_matrix
-    uses: graycoreio/github-actions-magento2/.github/workflows/check-extension.yaml@main
+    uses: graycoreio/github-actions-magento2/.github/workflows/check-extension.yaml@v8.5.0
     with:
       matrix: ${{ needs.compute_matrix.outputs.matrix }}
       fail-fast: false
