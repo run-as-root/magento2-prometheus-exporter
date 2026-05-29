@@ -7,10 +7,14 @@ on:
     branches: [master]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   compute_matrix:
     name: Compute Mage-OS matrix
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.supported-version.outputs.matrix }}
     steps:
