@@ -1,6 +1,6 @@
 # Magento 2 Prometheus Exporter
 
-[![pipeline status](https://gitlab.com/run_as_root/magento2-prometheus-exporter/badges/master/pipeline.svg)](https://gitlab.com/run_as_root/magento2-prometheus-exporter/commits/master)
+[![CI](https://github.com/run-as-root/magento2-prometheus-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/run-as-root/magento2-prometheus-exporter/actions/workflows/ci.yml)
 
 A comprehensive Magento 2 module that exposes essential Magento metrics in Prometheus format, enabling powerful monitoring and observability for your e-commerce platform.
 
