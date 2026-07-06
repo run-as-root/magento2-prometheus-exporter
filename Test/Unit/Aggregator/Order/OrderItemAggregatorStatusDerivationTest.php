@@ -33,10 +33,7 @@ final class OrderItemAggregatorStatusDerivationTest extends TestCase
         $ref = new \ReflectionClass(OrderItemCountAggregator::class);
 
         $this->getStatusId = $ref->getMethod('getStatusId');
-        $this->getStatusId->setAccessible(true);
-
         $this->getChildrenMap = $ref->getMethod('getChildrenQtyBackorderedByParentId');
-        $this->getChildrenMap->setAccessible(true);
 
         $this->aggregatorInstance = $ref->newInstanceWithoutConstructor();
     }
