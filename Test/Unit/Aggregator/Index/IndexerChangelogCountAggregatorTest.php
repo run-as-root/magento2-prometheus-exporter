@@ -84,17 +84,20 @@ class IndexerChangelogCountAggregatorTest extends TestCase
             ->expects($this->exactly(2))
             ->method('update')
             ->willReturnCallback(function (...$args) use (&$updateCallCount, $labels1, $labels2) {
-                $updateCallCount++;
-                if ($updateCallCount === 1) {
+                ++$updateCallCount;
+                if (1 === $updateCallCount) {
                     $expected = [self::METRIC_CODE, '777', $labels1];
-                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, \array_slice($args, 0, \count($expected)));
+
                     return true;
                 }
-                if ($updateCallCount === 2) {
+                if (2 === $updateCallCount) {
                     $expected = [self::METRIC_CODE, '888', $labels2];
-                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, \array_slice($args, 0, \count($expected)));
+
                     return true;
                 }
+
                 return true;
             });
 
@@ -110,16 +113,18 @@ class IndexerChangelogCountAggregatorTest extends TestCase
         $this->logger
             ->expects($this->exactly(2))
             ->method('critical')
-            ->willReturnCallback(function (...$args) use (&$loggerCallCount) {
-                $loggerCallCount++;
-                if ($loggerCallCount === 1) {
+            ->willReturnCallback(function (...$args) use (&$loggerCallCount): void {
+                ++$loggerCallCount;
+                if (1 === $loggerCallCount) {
                     $expected = [self::EXCEPTION_1];
-                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, \array_slice($args, 0, \count($expected)));
+
                     return;
                 }
-                if ($loggerCallCount === 2) {
+                if (2 === $loggerCallCount) {
                     $expected = [self::EXCEPTION_2];
-                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, \array_slice($args, 0, \count($expected)));
+
                     return;
                 }
             });
@@ -129,6 +134,21 @@ class IndexerChangelogCountAggregatorTest extends TestCase
             ->method('update');
 
         $this->sut->aggregate();
+    }
+
+    public function testItSkipsIndexersThatAreNotScheduled(): void
+    {
+        $indexer = $this->createMock(IndexerInterface::class);
+        $indexer->method('isScheduled')->willReturn(false);
+        $indexer->expects($this->never())->method('getView');
+
+        $this->indexerCollection->expects($this->once())->method('getItems')->willReturn([$indexer]);
+        $this->resourceConnection->expects($this->once())->method('getConnection')
+                                 ->willReturn($this->createMock(AdapterInterface::class));
+
+        $this->updateMetricService->expects($this->never())->method('update');
+
+        $this->assertTrue($this->sut->aggregate());
     }
 
     private function setUpSelects(bool $throwException = false): void
@@ -147,7 +167,7 @@ class IndexerChangelogCountAggregatorTest extends TestCase
                    ->willReturnMap(
                        [
                            [self::TABLE_CHANGELOG_1, self::TABLE_CHANGELOG_1],
-                           [self::TABLE_CHANGELOG_2, self::TABLE_CHANGELOG_2]
+                           [self::TABLE_CHANGELOG_2, self::TABLE_CHANGELOG_2],
                        ]
                    );
         $select1 = $this->setUpSelectChangelog($select1, self::TABLE_CHANGELOG_1);
@@ -203,10 +223,12 @@ class IndexerChangelogCountAggregatorTest extends TestCase
         $indexer1->method('isValid')->willReturn(true);
         $indexer1->method('getTitle')->willReturn('indexer_name_1');
         $indexer1->method('getStatus')->willReturn('success');
+        $indexer1->method('isScheduled')->willReturn(true);
 
         $indexer2->method('isValid')->willReturn(true);
         $indexer2->method('getTitle')->willReturn('indexer_name_2');
         $indexer2->method('getStatus')->willReturn('failed');
+        $indexer2->method('isScheduled')->willReturn(true);
 
         $indexer1
             ->expects($this->once())

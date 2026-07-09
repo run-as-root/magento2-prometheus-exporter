@@ -23,12 +23,6 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
     private LoggerInterface $logger;
     private ResourceConnection $resourceConnection;
 
-    /**
-     * @param UpdateMetricService $updateMetricService
-     * @param CollectionFactory $indexerCollectionFactory
-     * @param ResourceConnection $resourceConnection
-     * @param LoggerInterface $logger
-     */
     public function __construct(
         UpdateMetricService $updateMetricService,
         CollectionFactory $indexerCollectionFactory,
@@ -63,6 +57,10 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
         $connection = $this->resourceConnection->getConnection();
 
         foreach ($this->indexerCollectionFactory->create()->getItems() as $index) {
+            if (!$index->isScheduled()) {
+                continue;
+            }
+
             $labels = [
                 'isValid' => $index->isValid(),
                 'title' => $index->getTitle(),
@@ -75,7 +73,7 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
 
             try {
                 $value = $this->getChangelogSize($connection, $changelog);
-                $this->updateMetricService->update(self::METRIC_CODE, (string)$value, $labels);
+                $this->updateMetricService->update(self::METRIC_CODE, (string) $value, $labels);
             } catch (\Zend_Db_Exception $e) {
                 $this->logger->critical($e->getMessage());
                 $result = false;
@@ -89,10 +87,7 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
      * Provide size of changelog table.
      * Avoid service contracts to get the exact data from DB.
      *
-     * @param AdapterInterface $adapter
      * @param Changelog $changelog
-     *
-     * @return int
      */
     private function getChangelogSize(AdapterInterface $adapter, ChangelogInterface $changelog): int
     {
@@ -101,6 +96,6 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
             ->reset(Select::COLUMNS)
             ->columns(['size' => 'count(version_id)']);
 
-        return (int)$adapter->fetchOne($select);
+        return (int) $adapter->fetchOne($select);
     }
 }

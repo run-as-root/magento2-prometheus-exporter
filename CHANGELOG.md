@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.2] - 2026-07-09
+
+### Fixed
+
+- `IndexerBacklogCountAggregator` / `IndexerChangelogCountAggregator`: skip indexers that are not in Update by Schedule mode, since those never have a `*_cl` changelog table and were erroring on every cron run. `IndexerBacklogCountAggregator` also catches `ChangelogTableNotExistsException` per indexer and logs it instead of aborting the whole aggregation, so one missing table can no longer stop the backlog metric from updating for every other indexer.
+
 ## [4.2.1] - 2026-07-09
 
 ### Fixed

@@ -6,12 +6,15 @@ namespace RunAsRoot\PrometheusExporter\Test\Unit\Aggregator\Index;
 
 use Magento\Framework\Indexer\IndexerInterface;
 use Magento\Framework\Mview\View\ChangelogInterface;
+use Magento\Framework\Mview\View\ChangelogTableNotExistsException;
 use Magento\Framework\Mview\ViewInterface;
+use Magento\Framework\Phrase;
 use Magento\Indexer\Model\Indexer\Collection;
 use Magento\Indexer\Model\Indexer\CollectionFactory;
 use Magento\Indexer\Model\Mview\View\State;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RunAsRoot\PrometheusExporter\Aggregator\Index\IndexerBacklogCountAggregator;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
@@ -25,16 +28,22 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
     private IndexerBacklogCountAggregator $sut;
     private MockObject|UpdateMetricServiceInterface $updateMetricService;
     private MockObject|Collection $indexerCollection;
+    private MockObject|LoggerInterface $logger;
 
     protected function setUp(): void
     {
         $this->updateMetricService = $this->createMock(UpdateMetricService::class);
         $indexerCollectionFactory = $this->createMock(CollectionFactory::class);
         $this->indexerCollection = $this->createMock(Collection::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $indexerCollectionFactory->method('create')->willReturn($this->indexerCollection);
 
-        $this->sut = new IndexerBacklogCountAggregator($this->updateMetricService, $indexerCollectionFactory);
+        $this->sut = new IndexerBacklogCountAggregator(
+            $this->updateMetricService,
+            $indexerCollectionFactory,
+            $this->logger
+        );
     }
 
     public function testItAggregatesIndexersChangelogCount(): void
@@ -57,6 +66,8 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
 
         $indexer1->method('getTitle')->willReturn(self::VIEW_ID_1);
         $indexer2->method('getTitle')->willReturn(self::VIEW_ID_2);
+        $indexer1->method('isScheduled')->willReturn(true);
+        $indexer2->method('isScheduled')->willReturn(true);
 
         $indexer1->expects($this->once())->method('getView')->willReturn($view1);
         $indexer2->expects($this->once())->method('getView')->willReturn($view2);
@@ -77,30 +88,68 @@ final class IndexerBacklogCountAggregatorTest extends TestCase
             ->with($testStateVersion2, $testCurrentVersionId2)
             ->willReturn(range(1, $testPendingCount2));
 
-        $this->indexerCollection->expects($this->once())->method('getItems')->willReturn([ $indexer1, $indexer2 ]);
+        $this->indexerCollection->expects($this->once())->method('getItems')->willReturn([$indexer1, $indexer2]);
 
-        $lables1 = [ 'title' => self::VIEW_ID_1 ];
-        $lables2 = [ 'title' => self::VIEW_ID_2 ];
+        $lables1 = ['title' => self::VIEW_ID_1];
+        $lables2 = ['title' => self::VIEW_ID_2];
 
         $callCount = 0;
         $this->updateMetricService
             ->expects($this->exactly(2))
             ->method('update')
             ->willReturnCallback(function (...$args) use (&$callCount, $lables1, $lables2) {
-                $callCount++;
-                if ($callCount === 1) {
+                ++$callCount;
+                if (1 === $callCount) {
                     $expected = [self::METRIC_CODE, '11', $lables1];
-                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, \array_slice($args, 0, \count($expected)));
+
                     return true;
                 }
-                if ($callCount === 2) {
+                if (2 === $callCount) {
                     $expected = [self::METRIC_CODE, '22', $lables2];
-                    $this->assertEquals($expected, array_slice($args, 0, count($expected)));
+                    $this->assertEquals($expected, \array_slice($args, 0, \count($expected)));
+
                     return true;
                 }
+
                 return true;
             });
 
         $this->sut->aggregate();
+    }
+
+    public function testItSkipsIndexersThatAreNotScheduled(): void
+    {
+        $indexer = $this->createMock(IndexerInterface::class);
+        $indexer->method('isScheduled')->willReturn(false);
+        $indexer->expects($this->never())->method('getView');
+
+        $this->indexerCollection->expects($this->once())->method('getItems')->willReturn([$indexer]);
+
+        $this->updateMetricService->expects($this->never())->method('update');
+
+        $this->assertTrue($this->sut->aggregate());
+    }
+
+    public function testItLogsAndContinuesWhenChangelogTableIsMissing(): void
+    {
+        $indexer = $this->createMock(IndexerInterface::class);
+        $view = $this->createMock(ViewInterface::class);
+        $changelog = $this->createMock(ChangelogInterface::class);
+
+        $indexer->method('isScheduled')->willReturn(true);
+        $indexer->method('getTitle')->willReturn(self::VIEW_ID_1);
+        $indexer->expects($this->once())->method('getView')->willReturn($view);
+        $view->expects($this->once())->method('getChangelog')->willReturn($changelog);
+        $changelog->method('getVersion')->willThrowException(
+            new ChangelogTableNotExistsException(new Phrase('Table cataloginventory_stock_cl does not exist'))
+        );
+
+        $this->indexerCollection->expects($this->once())->method('getItems')->willReturn([$indexer]);
+
+        $this->logger->expects($this->once())->method('error');
+        $this->updateMetricService->expects($this->never())->method('update');
+
+        $this->assertTrue($this->sut->aggregate());
     }
 }
