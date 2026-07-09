@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `OrderItemCountAggregator` / `OrderItemAmountAggregator`: replaced the per-order N+1 collection loading (full `sales_order` scan plus one order-item collection load per order, every cron minute) with a single streamed query over `sales_order_item`. Item status is derived from the qty columns mirroring `Magento\Sales\Model\Order\Item::getStatusId()`, including children-inherited backorder; emitted series and labels are unchanged. The aggregators no longer unserialize `product_options`, so a corrupt row cannot abort the whole metric anymore.
+
 ## [4.1.0] - 2026-05-28
 
 ### Changed
