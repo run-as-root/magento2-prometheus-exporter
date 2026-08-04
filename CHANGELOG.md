@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `OrderAmountAggregator`, `OrderItemAmountAggregator`, `OrderItemCountAggregator`: these still run an unbounded full-table scan on every cron tick even after the N+1 fix in 4.2.1, and were the largest contributors to the DB load reported in #69. They now implement a new `IntervalAwareMetricAggregatorInterface` so `AggregateMetricsCron` throttles them to once every 5 minutes instead of every minute, while every other (cheap) aggregator keeps its existing per-minute schedule.
+- `AggregateMetricsCron`: a cache-backend exception while checking/marking an interval-throttled aggregator's last run no longer aborts the rest of that cron tick's aggregator loop, and an aggregator whose `aggregate()` returns `false` (a soft failure) is no longer falsely marked as a successful run - it retries on the next tick instead of being suppressed for 5 minutes.
+
 ## [4.2.2] - 2026-07-09
 
 ### Fixed
