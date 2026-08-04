@@ -6,12 +6,21 @@ namespace RunAsRoot\PrometheusExporter\Aggregator\Order;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Sales\Model\Order\Item;
+use RunAsRoot\PrometheusExporter\Api\IntervalAwareMetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricService;
 
-class OrderItemCountAggregator implements MetricAggregatorInterface
+class OrderItemCountAggregator implements MetricAggregatorInterface, IntervalAwareMetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_orders_items_count_total';
+
+    /**
+     * This is a single streamed query, but still an unbounded full scan over sales_order_item,
+     * so it is throttled independently of the shared cron schedule.
+     *
+     * @see https://github.com/run-as-root/magento2-prometheus-exporter/issues/69
+     */
+    private const MIN_INTERVAL_IN_SECONDS = 300;
 
     private UpdateMetricService $updateMetricService;
     private ResourceConnection $resourceConnection;
@@ -37,6 +46,11 @@ class OrderItemCountAggregator implements MetricAggregatorInterface
     public function getType(): string
     {
         return 'gauge';
+    }
+
+    public function getMinIntervalInSeconds(): int
+    {
+        return self::MIN_INTERVAL_IN_SECONDS;
     }
 
     public function aggregate(): bool
