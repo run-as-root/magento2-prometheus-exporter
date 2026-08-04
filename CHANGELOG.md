@@ -5,12 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.3.0] - 2026-08-04
+
+### Added
+
+- `IntervalAwareMetricAggregatorInterface`: an optional interface an aggregator can implement to declare a minimum number of seconds between runs. `AggregateMetricsCron` skips such an aggregator until that interval has passed, using the Magento cache to remember the last successful run. Aggregators that do not implement it keep their existing per-cron-tick behaviour, so this is additive for third-party aggregators.
 
 ### Fixed
 
-- `OrderAmountAggregator`, `OrderItemAmountAggregator`, `OrderItemCountAggregator`: these still run an unbounded full-table scan on every cron tick even after the N+1 fix in 4.2.1, and were the largest contributors to the DB load reported in #69. They now implement a new `IntervalAwareMetricAggregatorInterface` so `AggregateMetricsCron` throttles them to once every 5 minutes instead of every minute, while every other (cheap) aggregator keeps its existing per-minute schedule.
+- `OrderAmountAggregator`, `OrderCountAggregator`, `OrderItemAmountAggregator`, `OrderItemCountAggregator`: all four still run an unbounded full-table scan over `sales_order` / `sales_order_item` on every cron tick even after the N+1 fix in 4.2.1, and are the largest contributors to the DB load reported in #69. They now implement `IntervalAwareMetricAggregatorInterface` and are throttled to once every 5 minutes instead of every minute, while every other (cheap) aggregator keeps its existing per-minute schedule.
 - `AggregateMetricsCron`: a cache-backend exception while checking/marking an interval-throttled aggregator's last run no longer aborts the rest of that cron tick's aggregator loop, and an aggregator whose `aggregate()` returns `false` (a soft failure) is no longer falsely marked as a successful run - it retries on the next tick instead of being suppressed for 5 minutes.
+
+### Upgrade notes
+
+- `AggregateMetricsCron` gained a `Magento\Framework\App\CacheInterface` constructor argument and is injected as a proxy in `src/etc/di.xml`, so run `bin/magento setup:di:compile` after updating.
+- The throttle marker is stored in the Magento cache without tags. `bin/magento cache:clean` does not clear it; `bin/magento cache:flush` does. To force a throttled metric to recompute immediately, use `bin/magento run_as_root:metric:collect --only=<metric_code>`, which ignores the throttle by design.
 
 ## [4.2.2] - 2026-07-09
 
