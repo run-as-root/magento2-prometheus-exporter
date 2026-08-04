@@ -13,6 +13,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RunAsRoot\PrometheusExporter\Aggregator\Order\OrderAmountAggregator;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
+use RunAsRoot\PrometheusExporter\Api\IntervalAwareMetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 
@@ -77,6 +78,7 @@ final class OrderAmountAggregatorTest extends TestCase
 
     public function test_it_throttles_to_five_minutes(): void
     {
+        self::assertInstanceOf(IntervalAwareMetricAggregatorInterface::class, $this->subject);
         self::assertSame(300, $this->subject->getMinIntervalInSeconds());
     }
 
