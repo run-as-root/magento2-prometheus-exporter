@@ -8,14 +8,24 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\NoSuchEntityException;
 use RunAsRoot\PrometheusExporter\Api\Data\MetricInterface;
+use RunAsRoot\PrometheusExporter\Api\IntervalAwareMetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Api\MetricAggregatorInterface;
 use RunAsRoot\PrometheusExporter\Repository\MetricRepository;
 use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 use function array_key_exists;
 
-class OrderAmountAggregator implements MetricAggregatorInterface
+class OrderAmountAggregator implements MetricAggregatorInterface, IntervalAwareMetricAggregatorInterface
 {
     private const METRIC_CODE = 'magento_orders_amount_total';
+
+    /**
+     * This aggregator runs a full, unbounded GROUP BY scan over the entire sales_order table
+     * (no WHERE/LIMIT). On large stores that is too expensive to run on every one-minute cron
+     * tick, so it is throttled independently of the shared cron schedule.
+     *
+     * @see https://github.com/run-as-root/magento2-prometheus-exporter/issues/69
+     */
+    private const MIN_INTERVAL_IN_SECONDS = 300;
 
     private MetricRepository $metricRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
@@ -47,6 +57,11 @@ class OrderAmountAggregator implements MetricAggregatorInterface
     public function getType(): string
     {
         return 'gauge';
+    }
+
+    public function getMinIntervalInSeconds(): int
+    {
+        return self::MIN_INTERVAL_IN_SECONDS;
     }
 
     public function aggregate(): bool

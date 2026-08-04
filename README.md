@@ -66,6 +66,10 @@ Navigate to **Stores → Configuration → Prometheus → Metric Configuration**
 
 The module automatically registers a cron job that runs every minute to aggregate metrics. The job uses a dedicated cron group: `run_as_root_prometheus_metrics_aggregator`.
 
+The four order aggregators (`magento_orders_amount_total`, `magento_orders_count_total`, `magento_orders_items_amount_total`, `magento_orders_items_count_total`) each run a full scan of `sales_order` / `sales_order_item`, which is too expensive to repeat every minute on a large store. They are therefore throttled to once every 5 minutes. Their values stay constant between runs, which is correct for a gauge. All other aggregators still run on every cron tick.
+
+The throttle remembers the last successful run in the Magento cache without a cache tag, so `bin/magento cache:clean` leaves it in place and only `bin/magento cache:flush` clears it. To force one metric to recompute right away, use `bin/magento run_as_root:metric:collect --only=<metric_code>`, which ignores the throttle.
+
 ## 🎯 Prometheus Setup
 
 ### Basic Configuration
