@@ -16,15 +16,28 @@ jobs:
     permissions:
       contents: read
     outputs:
-      matrix: ${{ steps.supported-version.outputs.matrix }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v6
       - uses: graycoreio/github-actions-magento2/supported-version@v8.5.0
         id: supported-version
         with:
           include_services: true
+      # Composer 2.9+ refuses to install packages that have a security advisory. Magento 2.4.7 requires
+      # league/flysystem ^2.4, and every 2.x release is affected (PKSA-w9tt-7782-78jx). With the Composer version the
+      # matrix asks for, Magento 2.4.7 itself can therefore no longer be installed, and its jobs fail before the
+      # extension is even added. The reusable workflow has no switch for audit.block-insecure, so the 2.4.7 leg runs
+      # on the last Composer release without that blocking. Remove this step once 2.4.7 has left the matrix.
+      - name: Pin Composer 2.8 for Magento 2.4.7
+        id: matrix
+        env:
+          MATRIX: ${{ steps.supported-version.outputs.matrix }}
+        run: |
+          echo "matrix=$(jq -c '.include |= map(if (.magento | test(":2\\.4\\.7(-|$)")) then .composer = "2.8.12" else . end)' <<< "$MATRIX")" >> "$GITHUB_OUTPUT"
       - name: Echo matrix
-        run: echo "${{ steps.supported-version.outputs.matrix }}"
+        env:
+          MATRIX: ${{ steps.matrix.outputs.matrix }}
+        run: echo "$MATRIX"
 
   check-extension:
     name: Check extension
