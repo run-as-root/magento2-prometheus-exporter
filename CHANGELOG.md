@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-11-25
+
+### Security
+
+- `/metrics` no longer answers anonymous requests by default (CWE-1188, insecure default). Token authorization (`metric_configuration/security/enable_token`) was opt-in and had no default, so a freshly installed module served every metric - revenue and order figures per store and order state, customer and admin user counts, cron and indexer state - to anybody who could reach the storefront. It now defaults to enabled in `src/etc/config.xml`. Thanks to Łukasz Bajsarowicz for the report.
+- A stored "Enable token authorization: No" is removed once during `setup:upgrade`, in every scope (`ResetDisabledTokenAuthorizationDataPatch`). The old configuration form did not say that "No" makes the metrics public, and saving the section for any other reason stored that "No" as well, so without the reset those installations would have stayed open after the update.
+- The endpoint fails closed while no token is saved. "Token authorization enabled, token empty" used to compare the `Authorization` header with `Bearer ` followed by an empty string, which matches if the web server passes a trailing space on to PHP. Now every request is rejected until a token has been generated.
+- The token is compared with `hash_equals()` (constant time) instead of `!==`.
+- `Controller\Adminhtml\Prometheus\GenerateToken`, the action behind the "Generate" button in the configuration, now extends `Magento\Backend\App\Action` and requires the `RunAsRoot_PrometheusExporter::config_runasroot_prometheusexporter` ACL resource. As a plain framework action it was not covered by Magento's admin authentication and returned a random token string to requests without an admin session. Nothing was stored or disclosed by that, but an admin route must not be reachable without a login.
+
+### Changed
+
+- Admin configuration: "Enable token authorization" has a "Use system value" checkbox and explains what switching it off means; the token field states that `/metrics` rejects every request until a token is saved.
+- README: the Security section described creating an access token under System → Integrations, which the module has never read. It now documents the module's own token, the opt-out and the upgrade path, and the scrape configuration examples use the token and `scheme: https`.
+
+### Upgrade notes
+
+- **Action required unless Prometheus already scrapes with a token:** after the update `/metrics` answers `401 You are not allowed to see these metrics.` on every installation. Generate a token under Stores → Configuration → run_as_root → Prometheus Metric Configuration → Security Settings and add it to your scrape configuration as `authorization.credentials`. From the command line: `bin/magento config:set metric_configuration/security/token "$(openssl rand -hex 32)"`.
+- If you had switched token authorization off on purpose, because `/metrics` is restricted by a firewall or web server allow-list: `setup:upgrade` removes that stored "No" once and logs it as a warning in `var/log/system.log`. Set "Enable token authorization" to "No" again after the update. That choice is kept from then on.
+- The reset only covers values stored in the database. Values pinned in `app/etc/config.php`, `app/etc/env.php` or a `CONFIG__` environment variable stay as they are. Verify with `curl -i https://your-magento-store.com/metrics` on every store domain: without a token it has to answer `401`.
+- `GenerateToken` now takes a `Magento\Backend\App\Action\Context`, so run `bin/magento setup:di:compile` after updating.
+
 ## [4.3.0] - 2026-08-04
 
 ### Added
