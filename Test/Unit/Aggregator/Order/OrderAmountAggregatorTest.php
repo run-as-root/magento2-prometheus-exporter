@@ -88,7 +88,7 @@ final class OrderAmountAggregatorTest extends TestCase
 
         $connection = $this->createMock(AdapterInterface::class);
         $this->resourceConnection->method('getConnection')->willReturn($connection);
-        $connection->method('getTableName')->willReturnArgument(0);
+        $this->resourceConnection->method('getTableName')->willReturnArgument(0);
 
         $rows = [
             ['GRAND_TOTAL' => '199.90', 'ORDER_STATE' => 'complete', 'STORE_CODE' => 'default'],
@@ -119,7 +119,7 @@ final class OrderAmountAggregatorTest extends TestCase
 
         $connection = $this->createMock(AdapterInterface::class);
         $this->resourceConnection->method('getConnection')->willReturn($connection);
-        $connection->method('getTableName')->willReturnArgument(0);
+        $this->resourceConnection->method('getTableName')->willReturnArgument(0);
         $connection->expects($this->once())->method('fetchAll')->willReturn([]);
 
         $this->updateMetricService->expects($this->never())->method('update');
@@ -133,7 +133,7 @@ final class OrderAmountAggregatorTest extends TestCase
 
         $connection = $this->createMock(AdapterInterface::class);
         $this->resourceConnection->method('getConnection')->willReturn($connection);
-        $connection->method('getTableName')->willReturnCallback(
+        $this->resourceConnection->method('getTableName')->willReturnCallback(
             static fn (string $table): string => 'pfx_' . $table
         );
 

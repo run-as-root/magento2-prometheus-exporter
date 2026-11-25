@@ -269,9 +269,11 @@ final class CategoryCountAggregatorTest extends TestCase
         $connection = $this->createMock(AdapterInterface::class);
         $statisticData = $this->getStatisticData();
         $this->resourceConnection->expects($this->once())->method('getConnection')->willReturn($connection);
-        $connection->expects($this->exactly(10))
-                   ->method('getTableName')
-                   ->willReturnMap($this->getTableNamesMap());
+        $tableNames = array_column($this->getTableNamesMap(), 1, 0);
+        $this->resourceConnection->expects($this->exactly(10))
+                                 ->method('getTableName')
+                                 ->willReturnCallback(static fn (string $table): string => $tableNames[$table]);
+        $connection->expects($this->never())->method('getTableName');
         $entityMetadata = $this->createMock(EntityMetadataInterface::class);
         $entityMetadata->expects($this->once())->method('getLinkField')->willReturn(self::LINK_FIELD);
         $this->metadataPool->expects($this->once())->method('getMetadata')

@@ -117,7 +117,7 @@ final class ProductByTypeCountAggregatorTest extends TestCase
             ->willReturn($connection);
 
         $connection->expects($this->once())->method('select')->willReturn($select);
-        $connection->method('getTableName')
+        $this->resourceConnection->method('getTableName')
             ->with('catalog_product_entity')
             ->willReturn(self::TABLE_PRODUCT);
         $connection->expects($this->once())->method('fetchAll')->with($select)->willReturn($statisticData);

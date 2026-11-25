@@ -57,9 +57,9 @@ class OrderItemCountAggregator implements MetricAggregatorInterface, IntervalAwa
     {
         $connection = $this->resourceConnection->getConnection();
 
-        $orderItemTable = $connection->getTableName('sales_order_item');
-        $salesOrderTable = $connection->getTableName('sales_order');
-        $storeTable = $connection->getTableName('store');
+        $orderItemTable = $this->resourceConnection->getTableName('sales_order_item');
+        $salesOrderTable = $this->resourceConnection->getTableName('sales_order');
+        $storeTable = $this->resourceConnection->getTableName('store');
 
         $select = 'SELECT ' . $orderItemTable . '.item_id, ' . $orderItemTable . '.order_id, ' .
             $orderItemTable . '.parent_item_id, ' . $orderItemTable . '.qty_backordered, ' .

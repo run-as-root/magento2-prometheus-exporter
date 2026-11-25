@@ -47,7 +47,7 @@ class ComplexProductVariationsAboveRecommendedLevelAggregator implements MetricA
             SELECT COUNT(*) as count
             FROM (
                 SELECT parent_id
-                FROM {$connection->getTableName('catalog_product_super_link')}
+                FROM {$this->connection->getTableName('catalog_product_super_link')}
                 GROUP BY parent_id
                 HAVING COUNT(product_id) > ?
             ) as configurables_above_limit

@@ -66,13 +66,13 @@ class ShipmentCountAggregator implements MetricAggregatorInterface
     {
         $select = $connection->select();
 
-        $select->from(['ss' => $connection->getTableName('sales_shipment')])
+        $select->from(['ss' => $this->resourceConnection->getTableName('sales_shipment')])
                ->joinInner(
-                   ['iss' => $connection->getTableName('inventory_shipment_source')],
+                   ['iss' => $this->resourceConnection->getTableName('inventory_shipment_source')],
                    'ss.entity_id = iss.shipment_id',
                    ['source_code']
                )->joinInner(
-                   ['s' => $connection->getTableName('store')],
+                   ['s' => $this->resourceConnection->getTableName('store')],
                    'ss.store_id = s.store_id',
                    ['code']
                )->reset(Select::COLUMNS)->columns(

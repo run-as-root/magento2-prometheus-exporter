@@ -90,7 +90,7 @@ class ProductByTypeCountAggregator implements MetricAggregatorInterface
     {
         $select = $connection->select();
 
-        $select->from(['p' => $connection->getTableName('catalog_product_entity')])
+        $select->from(['p' => $this->resourceConnection->getTableName('catalog_product_entity')])
             ->reset(Select::COLUMNS)->columns(
                 [
                     'PRODUCT_COUNT' => 'COUNT(*)',

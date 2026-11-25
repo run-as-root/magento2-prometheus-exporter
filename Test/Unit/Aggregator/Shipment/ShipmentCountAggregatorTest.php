@@ -116,15 +116,15 @@ final class ShipmentCountAggregatorTest extends TestCase
                                  ->willReturn($connection);
         $connection->expects($this->once())->method('select')->willReturn($select);
         $connection->expects($this->once())->method('fetchAll')->with($select)->willReturn($statisticData);
-        $connection->expects($this->exactly(3))
-                   ->method('getTableName')
-                   ->willReturnMap(
-                       [
-                           ['sales_shipment', self::TABLE_SHIP],
-                           ['inventory_shipment_source', self::TABLE_INV_SHIP],
-                           ['store', self::TABLE_STORE]
-                       ]
-                   );
+        $tableNames = [
+            'sales_shipment' => self::TABLE_SHIP,
+            'inventory_shipment_source' => self::TABLE_INV_SHIP,
+            'store' => self::TABLE_STORE,
+        ];
+        $this->resourceConnection->expects($this->exactly(3))
+                                 ->method('getTableName')
+                                 ->willReturnCallback(static fn (string $table): string => $tableNames[$table]);
+        $connection->expects($this->never())->method('getTableName');
 
         $params = [];
         foreach ($statisticData as $datum) {

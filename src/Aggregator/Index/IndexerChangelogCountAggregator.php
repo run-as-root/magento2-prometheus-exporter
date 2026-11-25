@@ -92,7 +92,7 @@ class IndexerChangelogCountAggregator implements MetricAggregatorInterface
     private function getChangelogSize(AdapterInterface $adapter, ChangelogInterface $changelog): int
     {
         $select = $adapter->select();
-        $select->from($adapter->getTableName($changelog->getName()))
+        $select->from($this->resourceConnection->getTableName($changelog->getName()))
             ->reset(Select::COLUMNS)
             ->columns(['size' => 'count(version_id)']);
 

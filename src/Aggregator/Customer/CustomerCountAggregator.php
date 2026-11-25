@@ -39,9 +39,9 @@ class CustomerCountAggregator implements MetricAggregatorInterface
     public function aggregate(): bool
     {
         $connection = $this->resourceConnection->getConnection();
-        $customerEntityTable = $connection->getTableName('customer_entity');
+        $customerEntityTable = $this->resourceConnection->getTableName('customer_entity');
         
-        $storeTable = $connection->getTableName('store');
+        $storeTable = $this->resourceConnection->getTableName('store');
 
         $query = 'SELECT COUNT(*) AS CUSTOMER_COUNT, STORE.`code` AS STORE_CODE' .
             ' FROM ' . $customerEntityTable . ' AS CUSTOMERS' .

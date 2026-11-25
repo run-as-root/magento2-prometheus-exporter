@@ -70,8 +70,8 @@ class OrderAmountAggregator implements MetricAggregatorInterface, IntervalAwareM
 
         $connection = $this->resourceConnection->getConnection();
 
-        $salesOrderTable = $connection->getTableName('sales_order');
-        $storeTable = $connection->getTableName('store');
+        $salesOrderTable = $this->resourceConnection->getTableName('sales_order');
+        $storeTable = $this->resourceConnection->getTableName('store');
 
         $query = 'SELECT SUM(ORDER.grand_total) AS GRAND_TOTAL, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
             ' FROM ' . $salesOrderTable . ' AS `ORDER`' .

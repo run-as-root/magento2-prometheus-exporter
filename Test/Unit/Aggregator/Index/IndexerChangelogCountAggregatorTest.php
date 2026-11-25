@@ -21,6 +21,7 @@ use RunAsRoot\PrometheusExporter\Service\UpdateMetricServiceInterface;
 
 class IndexerChangelogCountAggregatorTest extends TestCase
 {
+    private const TABLE_PREFIX = 'm2_';
     private const TABLE_CHANGELOG_1 = 'table_name_cl';
     private const TABLE_CHANGELOG_2 = 'table_name_2_cl';
     private const METRIC_CODE = 'magento_indexer_changelog_count_total';
@@ -162,16 +163,12 @@ class IndexerChangelogCountAggregatorTest extends TestCase
         $connection->expects($this->exactly(2))
                    ->method('select')
                    ->willReturnOnConsecutiveCalls($select1, $select2);
-        $connection->expects($this->exactly(2))
-                   ->method('getTableName')
-                   ->willReturnMap(
-                       [
-                           [self::TABLE_CHANGELOG_1, self::TABLE_CHANGELOG_1],
-                           [self::TABLE_CHANGELOG_2, self::TABLE_CHANGELOG_2],
-                       ]
-                   );
-        $select1 = $this->setUpSelectChangelog($select1, self::TABLE_CHANGELOG_1);
-        $select2 = $this->setUpSelectChangelog($select2, self::TABLE_CHANGELOG_2);
+        $this->resourceConnection->expects($this->exactly(2))
+                                 ->method('getTableName')
+                                 ->willReturnCallback(static fn (string $table): string => self::TABLE_PREFIX . $table);
+        $connection->expects($this->never())->method('getTableName');
+        $select1 = $this->setUpSelectChangelog($select1, self::TABLE_PREFIX . self::TABLE_CHANGELOG_1);
+        $select2 = $this->setUpSelectChangelog($select2, self::TABLE_PREFIX . self::TABLE_CHANGELOG_2);
 
         if (!$throwException) {
             $connection->expects($this->exactly(2))

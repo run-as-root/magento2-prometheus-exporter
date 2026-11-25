@@ -48,8 +48,8 @@ class AttributeOptionsAboveRecommendedLevelAggregator implements MetricAggregato
             SELECT COUNT(*) as count
             FROM (
                 SELECT eao.attribute_id
-                FROM {$connection->getTableName('eav_attribute_option')} eao
-                INNER JOIN {$connection->getTableName('eav_attribute')} ea ON eao.attribute_id = ea.attribute_id
+                FROM {$this->connection->getTableName('eav_attribute_option')} eao
+                INNER JOIN {$this->connection->getTableName('eav_attribute')} ea ON eao.attribute_id = ea.attribute_id
                 GROUP BY eao.attribute_id
                 HAVING COUNT(eao.option_id) > ?
             ) as attributes_above_limit

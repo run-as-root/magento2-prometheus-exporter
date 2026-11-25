@@ -22,7 +22,7 @@ class IndexerLastCallSecondsCountTest extends TestCase
 {
     private const VIEW_ID_1 = 'some_name';
     private const VIEW_ID_2 = 'some_name_another_name';
-    private const TABLE_MVIEW_STATE = 'mview_state';
+    private const TABLE_MVIEW_STATE = 'm2_mview_state';
     private const METRIC_CODE = 'magento_indexer_last_call_seconds_count';
 
     private IndexerLastCallSecondsCount $sut;
@@ -140,10 +140,11 @@ class IndexerLastCallSecondsCountTest extends TestCase
         $connection->expects($this->exactly(2))
                    ->method('select')
                    ->willReturnOnConsecutiveCalls($select1, $select2);
-        $connection->expects($this->exactly(2))
-                   ->method('getTableName')
-                    ->with(self::TABLE_MVIEW_STATE)
-                    ->willReturn(self::TABLE_MVIEW_STATE);
+        $this->resourceConnection->expects($this->exactly(2))
+                                 ->method('getTableName')
+                                 ->with('mview_state')
+                                 ->willReturn(self::TABLE_MVIEW_STATE);
+        $connection->expects($this->never())->method('getTableName');
         $select1 = $this->setUpSelectMviewState($select1, self::VIEW_ID_1);
         $select2 = $this->setUpSelectMviewState($select2, self::VIEW_ID_2);
 

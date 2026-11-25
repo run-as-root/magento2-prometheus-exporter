@@ -66,7 +66,7 @@ final class AttributeCountAggregatorTest extends TestCase
             ->method('getConnection')
             ->willReturn($adapter);
 
-        $adapter->method('getTableName')->willReturnArgument(0);
+        $this->resourceConnection->method('getTableName')->willReturnArgument(0);
 
         $adapter
             ->expects($this->once())

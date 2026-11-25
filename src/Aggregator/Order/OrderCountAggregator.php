@@ -70,8 +70,8 @@ class OrderCountAggregator implements MetricAggregatorInterface, IntervalAwareMe
 
         $connection = $this->resourceConnection->getConnection();
 
-        $salesOrderTable = $connection->getTableName('sales_order');
-        $storeTable = $connection->getTableName('store');
+        $salesOrderTable = $this->resourceConnection->getTableName('sales_order');
+        $storeTable = $this->resourceConnection->getTableName('store');
 
         $query = 'SELECT COUNT(*) AS ORDER_COUNT, ORDER.state AS ORDER_STATE, STORE.code AS STORE_CODE' .
             ' FROM ' . $salesOrderTable . ' AS `ORDER`' .

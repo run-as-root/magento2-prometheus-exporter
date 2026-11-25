@@ -132,30 +132,30 @@ class CategoryCountAggregator implements MetricAggregatorInterface
 
         $select = $connection->select();
 
-        $select->from(['sg' => $connection->getTableName('store_group')])
+        $select->from(['sg' => $this->resourceConnection->getTableName('store_group')])
                ->joinInner(
-                   ['s' => $connection->getTableName('store')],
+                   ['s' => $this->resourceConnection->getTableName('store')],
                    'sg.group_id = s.group_id'
                )->joinInner(
-                   ['cce1' => $connection->getTableName('catalog_category_entity')],
+                   ['cce1' => $this->resourceConnection->getTableName('catalog_category_entity')],
                    'sg.root_category_id = cce1.entity_id'
                )->joinInner(
-                   ['cce2' => $connection->getTableName('catalog_category_entity')],
+                   ['cce2' => $this->resourceConnection->getTableName('catalog_category_entity')],
                    "cce2.path like CONCAT(cce1.path, '%')"
                )->joinLeft(
-                    ['ccei1' => $connection->getTableName('catalog_category_entity_int')],
+                    ['ccei1' => $this->resourceConnection->getTableName('catalog_category_entity_int')],
                     "cce2.$linkField = ccei1.$linkField AND " .
                     "ccei1.attribute_id = $isActive AND ccei1.store_id = s.store_id"
                 )->joinLeft(
-                    ['ccei2' => $connection->getTableName('catalog_category_entity_int')],
+                    ['ccei2' => $this->resourceConnection->getTableName('catalog_category_entity_int')],
                     "cce2.$linkField = ccei2.$linkField AND " .
                     "ccei2.attribute_id = $isActive AND ccei2.store_id = 0"
                 )->joinLeft(
-                    ['ccei3' => $connection->getTableName('catalog_category_entity_int')],
+                    ['ccei3' => $this->resourceConnection->getTableName('catalog_category_entity_int')],
                     "cce2.$linkField = ccei3.$linkField AND " .
                     "ccei3.attribute_id = $isInMenu AND ccei3.store_id = s.store_id"
                 )->joinLeft(
-                    ['ccei4' => $connection->getTableName('catalog_category_entity_int')],
+                    ['ccei4' => $this->resourceConnection->getTableName('catalog_category_entity_int')],
                     "cce2.$linkField = ccei4.$linkField AND " .
                     "ccei4.attribute_id = $isInMenu AND ccei4.store_id = 0"
                 )->reset(Select::COLUMNS)->columns(
@@ -185,7 +185,7 @@ class CategoryCountAggregator implements MetricAggregatorInterface
     {
         $select = $connection->select();
 
-        $select->from($connection->getTableName('eav_attribute'))
+        $select->from($this->resourceConnection->getTableName('eav_attribute'))
                ->where('entity_type_id = ?', self::CATEGORY_ENTITY_ID)
                ->where('attribute_code = ?', $code)
                ->reset(Select::COLUMNS)

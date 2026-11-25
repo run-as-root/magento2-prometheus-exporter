@@ -63,9 +63,9 @@ class QuotesOverItemLimitCountAggregator implements MetricAggregatorInterface
     private function buildSelect(AdapterInterface $connection): Select
     {
         return $connection->select()
-            ->from(['q' => $connection->getTableName('quote')])
+            ->from(['q' => $this->resourceConnection->getTableName('quote')])
             ->joinInner(
-                ['s' => $connection->getTableName('store')],
+                ['s' => $this->resourceConnection->getTableName('store')],
                 's.store_id = q.store_id',
                 []
             )

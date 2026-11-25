@@ -41,7 +41,7 @@ class AdminUserCountAggregator implements MetricAggregatorInterface
 
     public function aggregate(): bool
     {
-        $tableName = $this->connection->getConnection()->getTableName('admin_user'); 
+        $tableName = $this->connection->getTableName('admin_user'); 
         $select = 'SELECT COUNT(user_id) FROM ' . $tableName . ' WHERE is_active = 1';
         $productCount = $this->connection->getConnection()->fetchOne($select);
 

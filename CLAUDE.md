@@ -60,6 +60,7 @@ Per `~/.claude/CLAUDE.md`: unit tests must be `final` and use `snake_case` metho
 ## When editing
 
 - **New metric** → new Aggregator class under the right `src/Aggregator/<Domain>/`, plus an `<item>` entry in `src/etc/di.xml` under `MetricAggregatorPool`. Both are required.
+- **Table names in queries** → always `$this->resourceConnection->getTableName('…')` (`Magento\Framework\App\ResourceConnection`). The adapter's own `getTableName()` (`$connection->getTableName('…')`) only shortens over-long names and does **not** apply the DB table prefix, so the query fails on prefixed installs. In unit tests stub `getTableName` on the `ResourceConnection` mock, never on the adapter mock - a prefixing adapter mock makes a broken aggregator look fixed.
 - **New DI preference or type config** → `src/etc/di.xml`. Adminhtml config goes in `src/etc/adminhtml/system.xml`; ACL in `src/etc/acl.xml`.
 - **Schema change** → edit `src/etc/db_schema.xml` and regenerate `db_schema_whitelist.json` in a real Magento install (`bin/magento setup:db-declaration:generate-whitelist`), not here.
 - **Release** → bump `composer.json` `version`, update `CHANGELOG.md`, tag. The `version` field in composer.json is intentional for this module.

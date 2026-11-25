@@ -42,7 +42,7 @@ final class ProductCountAggregatorTest extends TestCase
             ->method('getConnection')
             ->willReturn($adapter);
 
-        $adapter->method('getTableName')->willReturnArgument(0);
+        $this->resourceConnection->method('getTableName')->willReturnArgument(0);
 
         $select = 'SELECT COUNT(entity_id) as ProductCount FROM catalog_product_entity';
 

@@ -73,9 +73,9 @@ class ProductsWithBadReviewsCountAggregator implements MetricAggregatorInterface
     private function buildSelect(AdapterInterface $connection): Select
     {
         return $connection->select()
-            ->from(['res' => $connection->getTableName('review_entity_summary')])
+            ->from(['res' => $this->resourceConnection->getTableName('review_entity_summary')])
             ->joinInner(
-                ['s' => $connection->getTableName('store')],
+                ['s' => $this->resourceConnection->getTableName('store')],
                 's.store_id = res.store_id',
                 []
             )

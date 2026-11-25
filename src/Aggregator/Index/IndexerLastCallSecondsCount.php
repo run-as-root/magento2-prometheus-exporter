@@ -94,7 +94,7 @@ class IndexerLastCallSecondsCount implements MetricAggregatorInterface
     private function getStateLastCall(AdapterInterface $adapter, ViewInterface $view): int
     {
         $select = $adapter->select();
-        $select->from($adapter->getTableName('mview_state'))->where('view_id = ?', $view->getId())
+        $select->from($this->resourceConnection->getTableName('mview_state'))->where('view_id = ?', $view->getId())
                ->reset(Select::COLUMNS)
                ->columns(['seconds' => 'TIME_TO_SEC(timediff(now(), updated))']);
 

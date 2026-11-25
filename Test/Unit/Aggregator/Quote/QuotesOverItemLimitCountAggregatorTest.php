@@ -50,10 +50,14 @@ final class QuotesOverItemLimitCountAggregatorTest extends TestCase
             ->method('getConnection')
             ->willReturn($adapter);
 
-        $adapter->method('getTableName')->willReturnArgument(0);
+        // Only ResourceConnection::getTableName() applies the table prefix, the adapter's method does not.
+        $this->resourceConnection->method('getTableName')->willReturnCallback(
+            static fn (string $table): string => 'pfx_' . $table
+        );
+        $adapter->expects($this->never())->method('getTableName');
         $adapter->method('select')->willReturn($select);
-        $select->method('from')->willReturnSelf();
-        $select->method('joinInner')->willReturnSelf();
+        $select->expects($this->once())->method('from')->with(['q' => 'pfx_quote'])->willReturnSelf();
+        $select->expects($this->once())->method('joinInner')->with(['s' => 'pfx_store'])->willReturnSelf();
         $select->method('where')->willReturnSelf();
         $select->method('reset')->willReturnSelf();
         $select->method('columns')->willReturnSelf();
