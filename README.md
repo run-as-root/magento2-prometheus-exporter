@@ -8,7 +8,7 @@ A comprehensive Magento 2 module that exposes essential Magento metrics in Prome
 
 - **📊 Rich Metrics Collection**: Monitors orders, products, customers, CMS content, cron jobs, indexers, and more
 - **🔧 Configurable Metrics**: Enable/disable specific metrics through Magento admin interface
-- **🔐 Secure Access**: Bearer token authentication support to protect your metrics endpoint
+- **🔐 Secure by Default**: The metrics endpoint requires a Bearer token unless you explicitly opt out
 - **⚡ Performance Optimized**: Efficient cron-based data aggregation to minimize performance impact
 - **🎯 Prometheus Ready**: Native Prometheus format output for seamless integration
 - **🔌 Extensible Architecture**: Easy to add custom metrics with clean interfaces
@@ -51,11 +51,13 @@ After installation, your metrics endpoint will be available at:
 https://your-magento-store.com/metrics
 ```
 
+It answers `401 You are not allowed to see these metrics.` until you have generated a token, see [Security](#-security).
+
 ## ⚙️ Configuration
 
 ### Admin Configuration
 
-Navigate to **Stores → Configuration → Prometheus → Metric Configuration** to:
+Navigate to **Stores → Configuration → run_as_root → Prometheus Metric Configuration** to:
 
 - Enable/disable specific metric collectors
 - Configure authentication settings
@@ -74,7 +76,7 @@ The throttle remembers the last successful run in the Magento cache without a ca
 
 ### Basic Configuration
 
-Add the following scrape configuration to your `prometheus.yml`:
+Token authorization is enabled by default, so the scrape configuration in your `prometheus.yml` needs the token you generated in the module configuration (see [Security](#-security)):
 
 ```yaml
 scrape_configs:
@@ -82,14 +84,18 @@ scrape_configs:
     scrape_interval: 5m
     scrape_timeout: 60s
     metrics_path: /metrics
+    scheme: https
+    authorization:
+      type: 'Bearer'
+      credentials: 'your-bearer-token-here'
     static_configs:
       - targets: 
           - 'your-magento-store.com'
 ```
 
-### With Authentication
+### Without Authentication
 
-For production environments, secure your metrics endpoint:
+Only if you have switched token authorization off on purpose and restricted access to `/metrics` by other means (see [Disabling Token Authorization](#disabling-token-authorization)):
 
 ```yaml
 scrape_configs:
@@ -97,9 +103,7 @@ scrape_configs:
     scrape_interval: 5m
     scrape_timeout: 60s
     metrics_path: /metrics
-    authorization:
-      type: 'Bearer'
-      credentials: 'your-bearer-token-here'
+    scheme: https
     static_configs:
       - targets: 
           - 'your-magento-store.com'
@@ -113,6 +117,7 @@ scrape_configs:
     scrape_interval: 5m
     scrape_timeout: 60s
     metrics_path: /metrics
+    scheme: https
     authorization:
       type: 'Bearer'
       credentials: 'your-bearer-token-here'
@@ -177,11 +182,61 @@ scrape_configs:
 
 ## 🔐 Security
 
+`/metrics` is a storefront route, so it is reachable by everybody who can reach your shop. It exposes business figures (revenue and order counts per store and order state, customer and admin user counts) as well as operational details (cron, indexer and module state). Treat it like any other internal API.
+
 ### Authentication Setup
 
-1. **Generate Bearer Token**: Navigate to Magento Admin → System → Integrations
-2. **Create New Integration**: Set up API access with appropriate permissions
-3. **Configure Token**: Use the generated access token in your Prometheus configuration
+Token authorization is enabled by default: `/metrics` rejects every request with `401` until a token has been saved, and afterwards answers only requests that carry it.
+
+1. **Open the Module Configuration**: Navigate to Magento Admin → Stores → Configuration → run_as_root → Prometheus Metric Configuration → Security Settings for the Prometheus Scrape Config
+2. **Generate a Token**: Leave "Enable token authorization" on "Yes", click **Generate** and save the configuration
+3. **Configure Prometheus**: Use the token as `authorization.credentials` in your scrape configuration
+
+The token is the one from the module configuration. An access token from System → Integrations does not work.
+
+To set the token from the command line instead, e.g. in a deployment:
+
+```bash
+bin/magento config:set metric_configuration/security/token "$(openssl rand -hex 32)"
+```
+
+Verify the result:
+
+```bash
+curl -i https://your-magento-store.com/metrics                                      # 401
+curl -i -H 'Authorization: Bearer <token>' https://your-magento-store.com/metrics  # 200
+```
+
+### Disabling Token Authorization
+
+Setting "Enable token authorization" to "No" makes `/metrics` readable for everybody who can reach your storefront. Only do this if access is restricted elsewhere, for example with the IP allow-list below.
+
+### Upgrading from 4.3.0 or Older
+
+Up to 4.3.0 the endpoint was open unless token authorization had been switched on. Version 4.4.0 closes it on every installation, so **Prometheus receives `401` after the update until it sends a token**.
+
+What the update does:
+
+- Token authorization is enabled by default.
+- `bin/magento setup:upgrade` removes every stored "Enable token authorization: No", in all scopes, exactly once. The old configuration form did not say that "No" makes the metrics public, and saving the section for any other reason stored that "No" as well, so a stored value could not be taken as a decision. The removal is logged as a warning in `var/log/system.log`.
+- A stored "Yes" and an existing token are kept. If you already scrape with a token, nothing changes for you.
+
+What you have to do:
+
+- Generate a token as described in [Authentication Setup](#authentication-setup) and add it to your scrape configuration.
+- Or, if access to `/metrics` is restricted by other means and you want it to stay anonymous, set "Enable token authorization" to "No" again after the update. That choice is kept from then on, later updates do not touch it.
+
+Then check every store domain. Without a token the endpoint has to answer `401`:
+
+```bash
+curl -i https://your-magento-store.com/metrics
+```
+
+The reset only covers values stored in the database. A value pinned in `app/etc/config.php` or `app/etc/env.php`, or set through a `CONFIG__` environment variable, is a deployment decision and stays as it is. If the check answers `200` although you did not opt out, look there. The following command prints `0` when token authorization is switched off for the default scope, no matter where that value comes from, and an empty line when the default applies. Add `--scope` and `--scope-code` to check a website or store view:
+
+```bash
+bin/magento config:show metric_configuration/security/enable_token
+```
 
 ### Best Practices
 
@@ -363,6 +418,9 @@ php bin/magento run_as_root:metrics:collect
 # Check system logs
 tail -f var/log/system.log | grep prometheus
 ```
+
+#### 401 on /metrics
+Token authorization is enabled by default. `/metrics` answers `401 You are not allowed to see these metrics.` until a token has been generated, and whenever a request does not carry it as `Authorization: Bearer <token>`. See [Security](#-security).
 
 #### Permission Denied on /metrics
 - Verify web server has read access to Magento files

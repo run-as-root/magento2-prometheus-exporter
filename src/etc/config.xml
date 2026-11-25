@@ -2,6 +2,11 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
+        <metric_configuration>
+            <security>
+                <enable_token>1</enable_token>
+            </security>
+        </metric_configuration>
         <newrelic_configuration>
             <metric>
                 <api_url>https://metric-api.newrelic.com/metric</api_url>

@@ -31,20 +31,31 @@ class Index extends Action
 
     public function execute(): ResultInterface
     {
-        if ($this->config->getTokenValidationEnabled()) {
-            $token = sprintf('Bearer %s', $this->config->getToken());
-            $authorizationHeader = $this->getRequest()->getHeader('Authorization');
+        if ($this->config->getTokenValidationEnabled() && !$this->isAuthorized()) {
+            /** @var \Magento\Framework\Controller\Result\Raw $result */
+            $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
+            $result->setHttpResponseCode(Http::STATUS_CODE_401);
+            $result->setContents('You are not allowed to see these metrics.');
 
-            if ($token !== $authorizationHeader) {
-                /** @var \Magento\Framework\Controller\Result\Raw $result */
-                $result = $this->resultFactory->create(ResultFactory::TYPE_RAW);
-                $result->setHttpResponseCode(Http::STATUS_CODE_401);
-                $result->setContents('You are not allowed to see these metrics.');
-
-                return $result;
-            }
+            return $result;
         }
 
         return $this->prometheusResultFactory->create();
+    }
+
+    private function isAuthorized(): bool
+    {
+        $token = $this->config->getToken();
+
+        // Fail closed: token authorization is on by default, so until a token has been generated
+        // nobody may read the metrics - an empty token must never match a "Bearer " header.
+        if (trim($token) === '') {
+            return false;
+        }
+
+        $authorizationHeader = $this->getRequest()->getHeader('Authorization');
+
+        return is_string($authorizationHeader)
+            && hash_equals(sprintf('Bearer %s', $token), $authorizationHeader);
     }
 }
