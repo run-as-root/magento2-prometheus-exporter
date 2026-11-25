@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace RunAsRoot\PrometheusExporter\Controller\Adminhtml\Prometheus;
 
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\Action\Context;
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Oauth\Helper\Oauth;
 
+/**
+ * Extends the backend action on purpose: admin authentication and the ACL check are only applied to
+ * descendants of \Magento\Backend\App\AbstractAction, not to every controller that sits in the adminhtml area.
+ */
 class GenerateToken extends Action
 {
+    /**
+     * Same resource as the configuration section that renders the "Generate" button.
+     */
+    public const ADMIN_RESOURCE = 'RunAsRoot_PrometheusExporter::config_runasroot_prometheusexporter';
+
     private $oauthHelper;
 
     public function __construct(Context $context, Oauth $oauthHelper)
