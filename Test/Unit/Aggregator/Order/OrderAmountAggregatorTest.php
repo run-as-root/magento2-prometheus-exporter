@@ -126,4 +126,27 @@ final class OrderAmountAggregatorTest extends TestCase
 
         self::assertTrue($this->subject->aggregate());
     }
+
+    public function test_it_queries_prefixed_table_names(): void
+    {
+        $this->mockResetMetrics();
+
+        $connection = $this->createMock(AdapterInterface::class);
+        $this->resourceConnection->method('getConnection')->willReturn($connection);
+        $connection->method('getTableName')->willReturnCallback(
+            static fn (string $table): string => 'pfx_' . $table
+        );
+
+        $connection->expects($this->once())
+            ->method('fetchAll')
+            ->with($this->callback(static function (string $query): bool {
+                return str_contains($query, 'FROM pfx_sales_order AS')
+                    && str_contains($query, 'JOIN pfx_store AS')
+                    && !str_contains($query, '`sales_order`')
+                    && !str_contains($query, '`store`');
+            }))
+            ->willReturn([]);
+
+        self::assertTrue($this->subject->aggregate());
+    }
 }
