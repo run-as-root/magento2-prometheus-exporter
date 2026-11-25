@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.2] - 2026-11-25
+
+### Fixed
+
+- Installations with a database table prefix (#48): 19 aggregators asked the DB adapter for their table names (`$connection->getTableName()`). The adapter only shortens over-long names; the table prefix is applied by `Magento\Framework\App\ResourceConnection::getTableName()` alone. With a prefix their queries failed with "Base table or view not found" on every run, and these metrics were missing from `/metrics`: admin users, categories, customers (count, addresses, groups), EAV attributes and attribute options, orders and order items (count and amount), products (count, by type, complex variations), products with bad reviews, quotes over the item limit, shipments, indexer changelog size and indexer last call. All of them now resolve table names through `ResourceConnection`.
+- This covers the order count and order amount metrics from #71 as well. That change replaced the hard-coded `sales_order` and `store` table names, but still took the names from the adapter, so both metrics kept failing with a prefix. Thanks to Łukasz Bajsarowicz for bringing the problem up.
+
+### Upgrade notes
+
+- Nothing to do. Without a table prefix the queries address the same tables as before.
+- There is no installable 4.4.1. That tag exists on GitHub, but its `composer.json` still declares version 4.4.0, so Packagist does not offer it. 4.4.2 contains its changes.
+
 ## [4.4.0] - 2026-11-25
 
 ### Security
